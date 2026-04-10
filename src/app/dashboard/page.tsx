@@ -1,0 +1,140 @@
+
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { 
+  Trophy, 
+  Clock, 
+  Target, 
+  Flame, 
+  ChevronRight, 
+  PlayCircle,
+  TrendingUp,
+  BrainCircuit
+} from "lucide-react"
+import Link from "next/link"
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-headline font-black tracking-tight">Привет, Студент 01! 👋</h1>
+          <p className="text-muted-foreground text-lg mt-2">Ваша текущая цель: Подготовка к IMO 2024</p>
+        </div>
+        <div className="flex gap-4">
+          <Button className="bg-primary hover:bg-primary/90" asChild>
+            <Link href="/strategy">
+              <BrainCircuit className="mr-2 h-4 w-4" />
+              Обновить стратегию ИИ
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard icon={<Flame className="text-orange-500" />} label="Дни подряд" value="14" sub="Рекорд: 28" />
+        <StatCard icon={<Target className="text-primary" />} label="Решено задач" value="128" sub="+12 за неделю" />
+        <StatCard icon={<Trophy className="text-yellow-500" />} label="Ранг" value="#42" sub="Топ 5% региона" />
+        <StatCard icon={<Clock className="text-accent" />} label="Время обучения" value="12ч 45м" sub="На этой неделе" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-2 overflow-hidden border-border/40 shadow-xl bg-card/50 backdrop-blur">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div>
+              <CardTitle className="text-xl">Ваш прогресс по предметам</CardTitle>
+              <CardDescription>Освоение олимпиадных тем</CardDescription>
+            </div>
+            <TrendingUp className="h-5 w-5 text-primary" />
+          </CardHeader>
+          <CardContent className="space-y-6 pt-4">
+            <ProgressItem label="Математика (Геометрия)" value={75} color="bg-primary" />
+            <ProgressItem label="Физика (Механика)" value={45} color="bg-accent" />
+            <ProgressItem label="Информатика (Алгоритмы)" value={90} color="bg-emerald-500" />
+            <ProgressItem label="Химия (Органика)" value={30} color="bg-yellow-500" />
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/40 shadow-xl bg-card/50 backdrop-blur">
+          <CardHeader>
+            <CardTitle className="text-xl">Рекомендуемые уроки</CardTitle>
+            <CardDescription>На основе вашей ИИ стратегии</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <LessonItem title="Векторный метод в геометрии" time="45 мин" category="Математика" />
+            <LessonItem title="Динамическое программирование" time="60 мин" category="Информатика" />
+            <LessonItem title="Законы Кирхгофа" time="35 мин" category="Физика" />
+            <Button variant="ghost" className="w-full text-primary hover:text-primary/80 hover:bg-primary/5 mt-2" asChild>
+              <Link href="/courses">Все уроки <ChevronRight className="ml-2 h-4 w-4" /></Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="p-8 rounded-3xl bg-gradient-to-br from-primary/20 via-background to-accent/20 border border-primary/20 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-110 transition-transform duration-500">
+          <BrainCircuit className="w-48 h-48 text-primary" />
+        </div>
+        <div className="relative z-10 max-w-2xl space-y-4">
+          <Badge className="bg-primary text-white border-none mb-2">AI Strategy</Badge>
+          <h2 className="text-3xl font-black font-headline tracking-tight">Ваша персональная стратегия готова к обновлению</h2>
+          <p className="text-muted-foreground text-lg">
+            Мы проанализировали ваши последние тесты по Физике. Рекомендуем уделить больше внимания разделу Термодинамики на следующей неделе.
+          </p>
+          <Button size="lg" className="bg-primary hover:bg-primary/90 mt-4 rounded-full" asChild>
+            <Link href="/strategy">Посмотреть план <ChevronRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StatCard({ icon, label, value, sub }: { icon: React.ReactNode, label: string, value: string, sub: string }) {
+  return (
+    <Card className="bg-card/50 border-border/40 shadow-lg hover:shadow-primary/5 transition-all">
+      <CardContent className="pt-6">
+        <div className="flex items-center gap-4 mb-3">
+          <div className="p-2 rounded-xl bg-secondary">{icon}</div>
+          <span className="text-sm font-medium text-muted-foreground">{label}</span>
+        </div>
+        <div className="space-y-1">
+          <p className="text-3xl font-black font-headline">{value}</p>
+          <p className="text-xs text-muted-foreground">{sub}</p>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function ProgressItem({ label, value, color }: { label: string, value: number, color: string }) {
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between text-sm">
+        <span className="font-medium">{label}</span>
+        <span className="text-muted-foreground">{value}%</span>
+      </div>
+      <Progress value={value} className="h-2" />
+    </div>
+  )
+}
+
+function LessonItem({ title, time, category }: { title: string, time: string, category: string }) {
+  return (
+    <div className="flex items-center gap-4 p-3 rounded-xl hover:bg-secondary/50 transition-colors group cursor-pointer">
+      <div className="relative flex-shrink-0">
+        <PlayCircle className="h-10 w-10 text-muted-foreground group-hover:text-primary transition-colors" />
+      </div>
+      <div className="flex flex-col min-w-0">
+        <span className="text-sm font-bold truncate group-hover:text-primary transition-colors">{title}</span>
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground uppercase tracking-widest font-semibold mt-1">
+          <span>{category}</span>
+          <span>•</span>
+          <span>{time}</span>
+        </div>
+      </div>
+    </div>
+  )
+}

@@ -1,0 +1,41 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "math-hero",
+      "description": "Abstract mathematical formulas and geometric shapes",
+      "imageUrl": "https://picsum.photos/seed/math1/800/400",
+      "imageHint": "mathematics geometry"
+    },
+    {
+      "id": "physics-hero",
+      "description": "Quantum physics visualization or celestial mechanics",
+      "imageUrl": "https://picsum.photos/seed/phys1/800/400",
+      "imageHint": "physics space"
+    },
+    {
+      "id": "biology-hero",
+      "description": "DNA structure or microscopic cell view",
+      "imageUrl": "https://picsum.photos/seed/bio1/800/400",
+      "imageHint": "biology science"
+    },
+    {
+      "id": "chemistry-hero",
+      "description": "Molecular structures and chemical reactions",
+      "imageUrl": "https://picsum.photos/seed/chem1/800/400",
+      "imageHint": "chemistry laboratory"
+    },
+    {
+      "id": "informatics-hero",
+      "description": "Digital code and network connections",
+      "imageUrl": "https://picsum.photos/seed/info1/800/400",
+      "imageHint": "coding technology"
+    },
+    {
+      "id": "student-profile",
+      "description": "Professional student avatar placeholder",
+      "imageUrl": "https://picsum.photos/seed/user1/200/200",
+      "imageHint": "student person"
+    }
+  ]
+}
