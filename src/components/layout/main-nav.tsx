@@ -7,7 +7,6 @@ import { usePathname } from "next/navigation"
 import { 
   LayoutDashboard, 
   BookOpen, 
-  BrainCircuit, 
   Trophy, 
   BarChart3, 
   Info, 
@@ -34,7 +33,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 const navItems = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
   { name: "Курсы", href: "/courses", icon: BookOpen },
-  { name: "ИИ Стратегия", href: "/strategy", icon: BrainCircuit },
   { name: "Практика", href: "/practice", icon: Trophy },
   { name: "Рейтинг", href: "/leaderboard", icon: BarChart3 },
   { name: "Олимпиады", href: "/olympiads", icon: Info },

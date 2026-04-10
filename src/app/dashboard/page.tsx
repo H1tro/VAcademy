@@ -11,7 +11,7 @@ import {
   ChevronRight, 
   PlayCircle,
   TrendingUp,
-  BrainCircuit
+  BookOpen
 } from "lucide-react"
 import Link from "next/link"
 
@@ -21,13 +21,13 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="text-4xl font-headline font-black tracking-tight">Привет, Студент 01! 👋</h1>
-          <p className="text-muted-foreground text-lg mt-2">Ваша текущая цель: Подготовка к IMO 2024</p>
+          <p className="text-muted-foreground text-lg mt-2">Ваша текущая цель: Подготовка к олимпиадам 2024</p>
         </div>
         <div className="flex gap-4">
           <Button className="bg-primary hover:bg-primary/90" asChild>
-            <Link href="/strategy">
-              <BrainCircuit className="mr-2 h-4 w-4" />
-              Обновить стратегию ИИ
+            <Link href="/courses">
+              <BookOpen className="mr-2 h-4 w-4" />
+              Перейти к курсам
             </Link>
           </Button>
         </div>
@@ -45,7 +45,7 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
               <CardTitle className="text-xl">Ваш прогресс по предметам</CardTitle>
-              <CardDescription>Освоение олимпиадных тем</CardDescription>
+              <CardDescription>Освоение учебных тем</CardDescription>
             </div>
             <TrendingUp className="h-5 w-5 text-primary" />
           </CardHeader>
@@ -59,8 +59,8 @@ export default function DashboardPage() {
 
         <Card className="border-border/40 shadow-xl bg-card/50 backdrop-blur">
           <CardHeader>
-            <CardTitle className="text-xl">Рекомендуемые уроки</CardTitle>
-            <CardDescription>На основе вашей ИИ стратегии</CardDescription>
+            <CardTitle className="text-xl">Популярные уроки</CardTitle>
+            <CardDescription>Что сейчас изучают другие</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <LessonItem title="Векторный метод в геометрии" time="45 мин" category="Математика" />
@@ -73,18 +73,14 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="p-8 rounded-3xl bg-gradient-to-br from-primary/20 via-background to-accent/20 border border-primary/20 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:scale-110 transition-transform duration-500">
-          <BrainCircuit className="w-48 h-48 text-primary" />
-        </div>
+      <div className="p-8 rounded-3xl bg-gradient-to-br from-primary/10 via-background to-accent/10 border border-border/20 relative overflow-hidden">
         <div className="relative z-10 max-w-2xl space-y-4">
-          <Badge className="bg-primary text-white border-none mb-2">AI Strategy</Badge>
-          <h2 className="text-3xl font-black font-headline tracking-tight">Ваша персональная стратегия готова к обновлению</h2>
+          <h2 className="text-3xl font-black font-headline tracking-tight">Библиотека материалов</h2>
           <p className="text-muted-foreground text-lg">
-            Мы проанализировали ваши последние тесты по Физике. Рекомендуем уделить больше внимания разделу Термодинамики на следующей неделе.
+            Вам доступно более 500 видеоуроков и задач по всем STEM предметам. Начните с разделов, которые вызывают наибольшие трудности.
           </p>
           <Button size="lg" className="bg-primary hover:bg-primary/90 mt-4 rounded-full" asChild>
-            <Link href="/strategy">Посмотреть план <ChevronRight className="ml-2 h-4 w-4" /></Link>
+            <Link href="/courses">Каталог курсов <ChevronRight className="ml-2 h-4 w-4" /></Link>
           </Button>
         </div>
       </div>

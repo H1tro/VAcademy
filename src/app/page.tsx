@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Atom, BrainCircuit, BookOpen, Trophy } from 'lucide-react';
+import { Atom, BookOpen, Trophy, Users } from 'lucide-react';
 
 export default function LandingPage() {
   return (
@@ -26,36 +26,36 @@ export default function LandingPage() {
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center space-y-12">
         <div className="space-y-6 max-w-4xl">
           <h1 className="text-5xl md:text-7xl font-headline font-black tracking-tighter leading-tight">
-            Подготовка к олимпиадам с <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#26A3E5] to-[#6B6BFF]">Искусственным Интеллектом</span>
+            Единая платформа для подготовки к <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#26A3E5] to-[#6B6BFF]">STEM олимпиадам</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Персонализированные стратегии обучения, интерактивные STEM курсы и сообщество сильнейших учеников на одной платформе.
+            Интерактивные курсы, база данных олимпиад и сообщество сильнейших учеников в одном месте.
           </p>
           <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Button size="lg" className="h-14 px-10 text-lg bg-[#26A3E5] hover:bg-[#26A3E5]/90 rounded-full" asChild>
-              <Link href="/dashboard">Начать бесплатно</Link>
+              <Link href="/dashboard">Начать сейчас</Link>
             </Button>
             <Button size="lg" variant="outline" className="h-14 px-10 text-lg rounded-full border-border/20 hover:bg-white/5">
-              Узнать больше
+              Посмотреть курсы
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full pt-20">
           <FeatureCard 
-            icon={<BrainCircuit className="h-8 w-8 text-[#6B6BFF]" />}
-            title="ИИ Стратегия"
-            description="Индивидуальный план подготовки, подстраивающийся под ваши знания и цели."
-          />
-          <FeatureCard 
             icon={<BookOpen className="h-8 w-8 text-[#26A3E5]" />}
-            title="STEM Курсы"
+            title="Библиотека Курсов"
             description="Качественные видеоуроки и разборы задач от лучших преподавателей и победителей олимпиад."
           />
           <FeatureCard 
             icon={<Trophy className="h-8 w-8 text-[#FACC15]" />}
+            title="Олимпиадный Хаб"
+            description="Актуальное расписание и информация о ведущих региональных и мировых соревнованиях."
+          />
+          <FeatureCard 
+            icon={<Users className="h-8 w-8 text-[#6B6BFF]" />}
             title="Рейтинги"
-            description="Соревнуйтесь с другими учениками, зарабатывайте достижения и отслеживайте прогресс."
+            description="Сравнивайте свои успехи с другими учениками и отслеживайте прогресс обучения."
           />
         </div>
       </main>
