@@ -4,8 +4,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Learnova | AI STEM Olympiad Preparation',
-  description: 'Personalized AI-driven learning platform for STEM subjects and Olympiad preparation.',
+  title: 'Learnova | Подготовка к STEM олимпиадам',
+  description: 'Образовательная платформа для изучения STEM предметов и подготовки к олимпиадам.',
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="ru" className="dark">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Atom, BookOpen, Trophy, Users } from 'lucide-react';
+import { Atom, BookOpen, Trophy, Users, GraduationCap } from 'lucide-react';
 
 export default function LandingPage() {
   return (
@@ -29,14 +29,14 @@ export default function LandingPage() {
             Единая платформа для подготовки к <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#26A3E5] to-[#6B6BFF]">STEM олимпиадам</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Интерактивные курсы, база данных олимпиад и сообщество сильнейших учеников в одном месте.
+            Интерактивные курсы, база данных олимпиад и библиотека материалов для успешного участия в соревнованиях.
           </p>
           <div className="flex flex-wrap justify-center gap-4 pt-4">
             <Button size="lg" className="h-14 px-10 text-lg bg-[#26A3E5] hover:bg-[#26A3E5]/90 rounded-full" asChild>
               <Link href="/dashboard">Начать сейчас</Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-14 px-10 text-lg rounded-full border-border/20 hover:bg-white/5">
-              Посмотреть курсы
+            <Button size="lg" variant="outline" className="h-14 px-10 text-lg rounded-full border-border/20 hover:bg-white/5" asChild>
+              <Link href="/courses">Посмотреть курсы</Link>
             </Button>
           </div>
         </div>
@@ -48,14 +48,14 @@ export default function LandingPage() {
             description="Качественные видеоуроки и разборы задач от лучших преподавателей и победителей олимпиад."
           />
           <FeatureCard 
-            icon={<Trophy className="h-8 w-8 text-[#FACC15]" />}
-            title="Олимпиадный Хаб"
-            description="Актуальное расписание и информация о ведущих региональных и мировых соревнованиях."
+            icon={<GraduationCap className="h-8 w-8 text-[#FACC15]" />}
+            title="Методические материалы"
+            description="Глубокие теоретические материалы и практические руководства по всем STEM дисциплинам."
           />
           <FeatureCard 
-            icon={<Users className="h-8 w-8 text-[#6B6BFF]" />}
-            title="Рейтинги"
-            description="Сравнивайте свои успехи с другими учениками и отслеживайте прогресс обучения."
+            icon={<Trophy className="h-8 w-8 text-[#6B6BFF]" />}
+            title="Олимпиадный Хаб"
+            description="Актуальное расписание и информация о ведущих региональных и мировых соревнованиях."
           />
         </div>
       </main>

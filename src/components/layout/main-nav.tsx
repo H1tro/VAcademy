@@ -12,7 +12,7 @@ import {
   Info, 
   Settings,
   Atom,
-  ChevronRight
+  GraduationCap
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -33,7 +33,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 const navItems = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
   { name: "Курсы", href: "/courses", icon: BookOpen },
-  { name: "Практика", href: "/practice", icon: Trophy },
+  { name: "Материалы", href: "/strategy", icon: GraduationCap },
   { name: "Рейтинг", href: "/leaderboard", icon: BarChart3 },
   { name: "Олимпиады", href: "/olympiads", icon: Info },
 ]
