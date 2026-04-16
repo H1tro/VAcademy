@@ -11,14 +11,14 @@ export default function LandingPage() {
           <div className="w-10 h-10 rounded-xl bg-[#26A3E5] flex items-center justify-center">
             <Atom className="text-white h-6 w-6" />
           </div>
-          <span className="text-2xl font-headline font-bold tracking-tight text-[#26A3E5]">Learnova</span>
+          <span className="text-2xl font-headline font-bold tracking-tight text-[#26A3E5]">VAcademi</span>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" asChild>
-            <Link href="/dashboard">Войти</Link>
+            <Link href="/login">Войти</Link>
           </Button>
           <Button className="bg-[#26A3E5] hover:bg-[#26A3E5]/90" asChild>
-            <Link href="/dashboard">Начать обучение</Link>
+            <Link href="/register">Регистрация</Link>
           </Button>
         </div>
       </nav>
@@ -61,7 +61,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="p-8 border-t border-border/10 text-center text-muted-foreground text-sm">
-        &copy; {new Date().getFullYear()} Learnova Platform. Все права защищены.
+        &copy; {new Date().getFullYear()} VAcademi Platform. Все права защищены.
       </footer>
     </div>
   );

@@ -1,4 +1,11 @@
 
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth, db } from "@/lib/firebase"
+import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -15,15 +22,120 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+type SubjectProgress = {
+  mathematics: number
+  physics: number
+  informatics: number
+  chemistry: number
+  biology: number
+}
+
+type UserStats = {
+  streakDays: number
+  maxStreakDays: number
+  tasksSolved: number
+  studyTimeMinutes: number
+  subjectProgress: SubjectProgress
+}
+
 export default function DashboardPage() {
+  const [displayName, setDisplayName] = useState("Гость")
+  const [stats, setStats] = useState<UserStats>({
+    streakDays: 0,
+    maxStreakDays: 0,
+    tasksSolved: 0,
+    studyTimeMinutes: 0,
+    subjectProgress: {
+      mathematics: 0,
+      physics: 0,
+      informatics: 0,
+      chemistry: 0,
+      biology: 0,
+    },
+  })
+  const [rank, setRank] = useState<number | null>(null)
+  const [usersCount, setUsersCount] = useState(0)
+  const router = useRouter()
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const name = user?.displayName || user?.email?.split("@")[0] || "Гость"
+      setDisplayName(name)
+
+      if (!user) {
+        setStats({
+          streakDays: 0,
+          maxStreakDays: 0,
+          tasksSolved: 0,
+          studyTimeMinutes: 0,
+          subjectProgress: {
+            mathematics: 0,
+            physics: 0,
+            informatics: 0,
+            chemistry: 0,
+            biology: 0,
+          },
+        })
+        setRank(null)
+        setUsersCount(0)
+        return
+      }
+
+      const loadUserStats = async () => {
+        const profileDoc = await getDoc(doc(db, "users", user.uid))
+        if (profileDoc.exists()) {
+          const profileData = profileDoc.data()
+          setStats({
+            streakDays: Number(profileData.streakDays ?? 0),
+            maxStreakDays: Number(profileData.maxStreakDays ?? 0),
+            tasksSolved: Number(profileData.tasksSolved ?? 0),
+            studyTimeMinutes: Number(profileData.studyTimeMinutes ?? 0),
+            subjectProgress: {
+              mathematics: Number((profileData.subjectProgress as any)?.mathematics ?? 0),
+              physics: Number((profileData.subjectProgress as any)?.physics ?? 0),
+              informatics: Number((profileData.subjectProgress as any)?.informatics ?? 0),
+              chemistry: Number((profileData.subjectProgress as any)?.chemistry ?? 0),
+              biology: Number((profileData.subjectProgress as any)?.biology ?? 0),
+            },
+          })
+        }
+
+        const usersQuery = query(collection(db, "users"), orderBy("tasksSolved", "desc"))
+        const usersSnapshot = await getDocs(usersQuery)
+        const docs = usersSnapshot.docs
+        setUsersCount(docs.length)
+        const position = docs.findIndex((doc) => doc.id === user.uid)
+        setRank(position === -1 ? null : position + 1)
+      }
+
+      void loadUserStats()
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  const formatStudyTime = (minutes: number) => {
+    const hours = Math.floor(minutes / 60)
+    const remainingMinutes = minutes % 60
+    return `${hours}ч ${remainingMinutes}м`
+  }
+
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-headline font-black tracking-tight">Привет, Студент 01! 👋</h1>
+        <div className="space-y-2">
+          <h1 className="text-4xl font-headline font-black tracking-tight">Привет, {displayName}! 👋</h1>
           <p className="text-muted-foreground text-lg mt-2">Ваша текущая цель: Подготовка к олимпиадам 2024</p>
+          {displayName !== "Гость" ? (
+            <Link href="/profile/edit" className="text-sm font-medium text-primary hover:underline">
+              Редактировать профиль
+            </Link>
+          ) : null}
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap">
+          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+            Назад
+          </Button>
           <Button className="bg-primary hover:bg-primary/90" asChild>
             <Link href="/courses">
               <BookOpen className="mr-2 h-4 w-4" />
@@ -34,10 +146,10 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard icon={<Flame className="text-orange-500" />} label="Дни подряд" value="14" sub="Рекорд: 28" />
-        <StatCard icon={<Target className="text-primary" />} label="Решено задач" value="128" sub="+12 за неделю" />
-        <StatCard icon={<Trophy className="text-yellow-500" />} label="Ранг" value="#42" sub="Топ 5% региона" />
-        <StatCard icon={<Clock className="text-accent" />} label="Время обучения" value="12ч 45м" sub="На этой неделе" />
+        <StatCard icon={<Flame className="text-orange-500" />} label="Дни подряд" value={`${stats.streakDays}`} sub={`Рекорд: ${stats.maxStreakDays}`} />
+        <StatCard icon={<Target className="text-primary" />} label="Решено задач" value={`${stats.tasksSolved}`} sub="Всего решено" />
+        <StatCard icon={<Trophy className="text-yellow-500" />} label="Ранг" value={rank ? `#${rank}` : "—"} sub={rank ? `Место ${rank} из ${usersCount}` : "Нет данных"} />
+        <StatCard icon={<Clock className="text-accent" />} label="Время обучения" value={formatStudyTime(stats.studyTimeMinutes)} sub="Всего минут" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -50,10 +162,11 @@ export default function DashboardPage() {
             <TrendingUp className="h-5 w-5 text-primary" />
           </CardHeader>
           <CardContent className="space-y-6 pt-4">
-            <ProgressItem label="Математика (Геометрия)" value={75} color="bg-primary" />
-            <ProgressItem label="Физика (Механика)" value={45} color="bg-accent" />
-            <ProgressItem label="Информатика (Алгоритмы)" value={90} color="bg-emerald-500" />
-            <ProgressItem label="Химия (Органика)" value={30} color="bg-yellow-500" />
+            <ProgressItem label="Математика" value={stats.subjectProgress.mathematics} color="bg-primary" />
+            <ProgressItem label="Физика" value={stats.subjectProgress.physics} color="bg-accent" />
+            <ProgressItem label="Информатика" value={stats.subjectProgress.informatics} color="bg-emerald-500" />
+            <ProgressItem label="Химия" value={stats.subjectProgress.chemistry} color="bg-yellow-500" />
+            <ProgressItem label="Биология" value={stats.subjectProgress.biology} color="bg-fuchsia-500" />
           </CardContent>
         </Card>
 

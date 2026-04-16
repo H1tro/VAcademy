@@ -1,14 +1,16 @@
 
 "use client"
 
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookOpen, GraduationCap, ArrowRight } from "lucide-react"
 import Link from "next/link"
 
 export default function MaterialsPage() {
+  const router = useRouter()
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
       <div className="text-center space-y-3">
         <div className="w-20 h-20 rounded-3xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
           <GraduationCap className="h-10 w-10 text-primary" />
@@ -17,6 +19,9 @@ export default function MaterialsPage() {
         <p className="text-muted-foreground text-lg max-w-lg mx-auto">
           Здесь будут отображаться ваши сохраненные курсы, задачи и прогресс обучения.
         </p>
+        <Button variant="outline" className="mx-auto h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+          Назад
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">

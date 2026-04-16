@@ -1,4 +1,7 @@
 
+"use client"
+
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -44,17 +47,24 @@ const olympiads = [
 ]
 
 export default function OlympiadsHub() {
+  const router = useRouter()
+
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-headline font-black tracking-tight">Olympiad Hub</h1>
           <p className="text-muted-foreground text-lg">Ваш навигатор в мире олимпиад и интеллектуальных соревнований.</p>
         </div>
-        <Button variant="outline" className="h-12 border-primary/30 text-primary hover:bg-primary/5 rounded-full">
-          <Bell className="mr-2 h-4 w-4" />
-          Уведомлять о новых
-        </Button>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+            Назад
+          </Button>
+          <Button variant="outline" className="h-12 border-primary/30 text-primary hover:bg-primary/5 rounded-full">
+            <Bell className="mr-2 h-4 w-4" />
+            Уведомлять о новых
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

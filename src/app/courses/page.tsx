@@ -1,11 +1,13 @@
 
 "use client"
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useRouter } from "next/navigation"
+import { useMemo, useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Filter, PlayCircle, Star, Users, Clock } from "lucide-react"
+import { Search, Filter, PlayCircle, Star, Users, Clock, X } from "lucide-react"
 
 const courses = [
   {
@@ -77,26 +79,116 @@ const courses = [
 ]
 
 export default function CoursesPage() {
+  const router = useRouter()
+  const [search, setSearch] = useState("")
+  const [showFilters, setShowFilters] = useState(false)
+  const [selectedSubject, setSelectedSubject] = useState<string | null>(null)
+  const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
+
+  const subjects = useMemo(() => Array.from(new Set(courses.map((course) => course.subject))), [])
+  const levels = useMemo(() => Array.from(new Set(courses.map((course) => course.level))), [])
+
+  const filteredCourses = useMemo(() => {
+    const query = search.trim().toLowerCase()
+
+    return courses.filter((course) => {
+      const matchesText =
+        !query ||
+        [course.title, course.instructor, course.subject, course.level].some((value) =>
+          value.toLowerCase().includes(query)
+        )
+      const matchesSubject = !selectedSubject || course.subject === selectedSubject
+      const matchesLevel = !selectedLevel || course.level === selectedLevel
+      return matchesText && matchesSubject && matchesLevel
+    })
+  }, [search, selectedSubject, selectedLevel])
+
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="space-y-2">
-        <h1 className="text-4xl font-headline font-black tracking-tight">Интерактивные Курсы</h1>
-        <p className="text-muted-foreground text-lg">Выбирайте направление и начинайте путь к победе.</p>
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-headline font-black tracking-tight">Интерактивные Курсы</h1>
+          <p className="text-muted-foreground text-lg">Выбирайте направление и начинайте путь к победе.</p>
+        </div>
+        <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+          Назад
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input 
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Поиск по курсам, темам или авторам..." 
             className="pl-11 h-12 bg-secondary/50 border-border/40 focus:border-primary/50"
           />
         </div>
-        <Button variant="outline" className="h-12 px-6 rounded-xl border-border/40 hover:bg-secondary">
+        <Button
+          variant="outline"
+          className="h-12 px-6 rounded-xl border-border/40 hover:bg-secondary"
+          onClick={() => setShowFilters((prev) => !prev)}
+        >
           <Filter className="mr-2 h-4 w-4" />
-          Фильтры
+          {showFilters ? "Скрыть" : "Фильтры"}
         </Button>
       </div>
+      {showFilters && (
+        <div className="rounded-3xl border border-border/40 bg-card/50 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold">Фильтрация курсов</h2>
+              <p className="text-sm text-muted-foreground">Выберите предмет и уровень, чтобы сузить результаты.</p>
+            </div>
+            <Button
+              variant="ghost"
+              className="text-sm text-muted-foreground hover:text-primary"
+              onClick={() => {
+                setSelectedSubject(null)
+                setSelectedLevel(null)
+                setSearch("")
+              }}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Сбросить
+            </Button>
+          </div>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Предмет</p>
+              <div className="flex flex-wrap gap-2">
+                {subjects.map((subject) => (
+                  <Button
+                    key={subject}
+                    variant={selectedSubject === subject ? "secondary" : "outline"}
+                    className="h-10 rounded-full px-4"
+                    onClick={() => setSelectedSubject(selectedSubject === subject ? null : subject)}
+                  >
+                    {subject}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Уровень</p>
+              <div className="flex flex-wrap gap-2">
+                {levels.map((level) => (
+                  <Button
+                    key={level}
+                    variant={selectedLevel === level ? "secondary" : "outline"}
+                    className="h-10 rounded-full px-4"
+                    onClick={() => setSelectedLevel(selectedLevel === level ? null : level)}
+                  >
+                    {level}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map((course) => (

@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'Learnova | Подготовка к STEM олимпиадам',
+  title: 'VAcademi | Подготовка к STEM олимпиадам',
   description: 'Образовательная платформа для изучения STEM предметов и подготовки к олимпиадам.',
 };
 

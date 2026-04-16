@@ -1,4 +1,4 @@
-# **App Name**: Learnova
+# **App Name**: VAcademi
 
 ## Core Features:
 
