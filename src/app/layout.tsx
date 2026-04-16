@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 export const metadata: Metadata = {
   title: 'VAcademi | Подготовка к STEM олимпиадам',
   description: 'Образовательная платформа для изучения STEM предметов и подготовки к олимпиадам.',
+  viewport: 'width=device-width, initial-scale=1',
 };
 
 export default function RootLayout({
