@@ -57,6 +57,7 @@ export default function RegisterPage() {
         photoURL: photoURL || "",
         school,
         about,
+        goal: "Подготовка к олимпиадам",
         streakDays: 0,
         maxStreakDays: 0,
         tasksSolved: 0,

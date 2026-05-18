@@ -46,7 +46,7 @@ const subjects = [
   { name: "Физика", icon: "Φ" },
   { name: "Информатика", icon: "{" },
   { name: "Химия", icon: "H₂" },
-  { name: "Биология", icon: "DNA" },
+  { name: "Биология", icon: "DNA", href: "/biology" },
 ]
 
 export function MainNav() {
@@ -120,14 +120,27 @@ export function MainNav() {
             <SidebarMenu className="px-2">
               {subjects.map((subject) => (
                 <SidebarMenuItem key={subject.name}>
-                  <SidebarMenuButton 
-                    className="hover:bg-accent/10 text-sidebar-foreground/80 hover:text-accent transition-colors duration-200"
-                  >
-                    <div className="w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-md bg-secondary border border-border">
-                      {subject.icon}
-                    </div>
-                    <span>{subject.name}</span>
-                  </SidebarMenuButton>
+                  {subject.href ? (
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname === subject.href}
+                      className="hover:bg-accent/10 text-sidebar-foreground/80 hover:text-accent transition-colors duration-200"
+                    >
+                      <Link href={subject.href} className="flex items-center gap-2">
+                        <div className="w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-md bg-secondary border border-border">
+                          {subject.icon}
+                        </div>
+                        <span>{subject.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  ) : (
+                    <SidebarMenuButton className="hover:bg-accent/10 text-sidebar-foreground/80 hover:text-accent transition-colors duration-200">
+                      <div className="w-5 h-5 flex items-center justify-center text-[10px] font-bold rounded-md bg-secondary border border-border">
+                        {subject.icon}
+                      </div>
+                      <span>{subject.name}</span>
+                    </SidebarMenuButton>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

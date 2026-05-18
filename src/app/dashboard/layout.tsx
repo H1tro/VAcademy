@@ -15,7 +15,7 @@ export default function DashboardLayout({
           <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/50 bg-background/80 backdrop-blur-md px-6">
             <SidebarTrigger className="md:hidden" />
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">OlimpLearn</span>
+              <span className="text-sm font-medium text-muted-foreground">Vacademi</span>
               <span className="text-xs text-muted-foreground/50">/</span>
               <span className="text-sm font-semibold">Личный кабинет</span>
             </div>

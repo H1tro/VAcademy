@@ -40,6 +40,7 @@ type UserStats = {
 
 export default function DashboardPage() {
   const [displayName, setDisplayName] = useState("Гость")
+  const [goal, setGoal] = useState("Подготовка к олимпиадам")
   const [stats, setStats] = useState<UserStats>({
     streakDays: 0,
     maxStreakDays: 0,
@@ -85,6 +86,7 @@ export default function DashboardPage() {
         const profileDoc = await getDoc(doc(db, "users", user.uid))
         if (profileDoc.exists()) {
           const profileData = profileDoc.data()
+          setGoal(profileData.goal || "Подготовка к олимпиадам")
           setStats({
             streakDays: Number(profileData.streakDays ?? 0),
             maxStreakDays: Number(profileData.maxStreakDays ?? 0),
@@ -125,7 +127,7 @@ export default function DashboardPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
           <h1 className="text-4xl font-headline font-black tracking-tight">Привет, {displayName}! 👋</h1>
-          <p className="text-muted-foreground text-lg mt-2">Ваша текущая цель: Подготовка к олимпиадам 2024</p>
+          <p className="text-muted-foreground text-lg mt-2">Ваша текущая цель: {goal}</p>
           {displayName !== "Гость" ? (
             <Link href="/profile/edit" className="text-sm font-medium text-primary hover:underline">
               Редактировать профиль
@@ -133,7 +135,7 @@ export default function DashboardPage() {
           ) : null}
         </div>
         <div className="flex gap-4 flex-wrap">
-          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.push('/dashboard')}>
             Назад
           </Button>
           <Button className="bg-primary hover:bg-primary/90" asChild>

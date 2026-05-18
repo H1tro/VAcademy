@@ -110,7 +110,7 @@ export default function CoursesPage() {
           <h1 className="text-4xl font-headline font-black tracking-tight">Интерактивные Курсы</h1>
           <p className="text-muted-foreground text-lg">Выбирайте направление и начинайте путь к победе.</p>
         </div>
-        <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+        <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.push('/dashboard')}>
           Назад
         </Button>
       </div>

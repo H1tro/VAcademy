@@ -57,7 +57,7 @@ export default function OlympiadsHub() {
           <p className="text-muted-foreground text-lg">Ваш навигатор в мире олимпиад и интеллектуальных соревнований.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.push('/dashboard')}>
             Назад
           </Button>
           <Button variant="outline" className="h-12 border-primary/30 text-primary hover:bg-primary/5 rounded-full">

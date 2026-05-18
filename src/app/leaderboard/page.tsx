@@ -65,7 +65,7 @@ export default function LeaderboardPage() {
           <h1 className="text-4xl font-headline font-black tracking-tight">Рейтинг Учеников</h1>
           <p className="text-muted-foreground text-lg">Соревнуйтесь с лучшими умами региона и отслеживайте свой путь к вершине.</p>
         </div>
-        <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.back()}>
+        <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" onClick={() => router.push('/dashboard')}>
           Назад
         </Button>
       </div>
