@@ -35,6 +35,7 @@ import { onAuthStateChanged, signOut, type User } from "firebase/auth"
 
 const navItems = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
+  { name: "AI", href: "/ai", icon: Atom },
   { name: "Курсы", href: "/courses", icon: BookOpen },
   { name: "Материалы", href: "/strategy", icon: GraduationCap },
   { name: "Рейтинг", href: "/leaderboard", icon: BarChart3 },

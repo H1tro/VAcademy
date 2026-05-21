@@ -24,3 +24,12 @@
 - `src/app`: Страницы и лейауты (Next.js App Router).
 - `src/components`: UI компоненты (ShadCN).
 - `src/lib`: Утилиты и данные.
+
+## Настройка Groq AI
+1. Скопируйте ключ из https://console.groq.com/keys.
+2. Создайте файл `.env` рядом с `package.json`.
+3. Добавьте в него:
+   ```env
+   GROQ_API_KEY=ваш_ключ
+   ```
+4. Перезапустите приложение.

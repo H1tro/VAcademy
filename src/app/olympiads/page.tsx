@@ -1,10 +1,12 @@
 
 "use client"
 
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { Calendar, MapPin, Globe, ExternalLink, Info, Bell } from "lucide-react"
 
 const olympiads = [
@@ -48,6 +50,45 @@ const olympiads = [
 
 export default function OlympiadsHub() {
   const router = useRouter()
+  const [question, setQuestion] = useState("")
+  const [answer, setAnswer] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  const askAssistant = async () => {
+    setError(null)
+    setAnswer(null)
+    const text = question.trim()
+
+    if (!text) {
+      setError("Пожалуйста, задайте вопрос.")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      const res = await fetch("/api/ai/olympiad", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ question: text })
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data?.error || "Ошибка сервера. Попробуйте позже.")
+      } else {
+        setAnswer(data.answer || "К сожалению, ответ не получен.")
+      }
+    } catch (err) {
+      setError("Не удалось получить ответ. Проверьте подключение и ключ Groq.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
@@ -112,6 +153,44 @@ export default function OlympiadsHub() {
           </Card>
         ))}
       </div>
+
+      <Card className="bg-secondary/10 border-border/40">
+        <CardHeader>
+          <div className="space-y-3">
+            <h2 className="text-3xl font-headline font-black tracking-tight">AI-ассистент по олимпиадам</h2>
+            <p className="text-muted-foreground max-w-3xl text-base">
+              Задавайте вопросы по подготовке, стратегиям, расписанию этапов и выбору предметов. Ответ генерируется с помощью Groq API.
+            </p>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <div className="grid gap-4">
+            <Textarea
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="Например: Как лучше подготовиться к олимпиаде по информатике?"
+              rows={5}
+            />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Button onClick={askAssistant} disabled={isLoading}>
+                {isLoading ? "Жду ответа..." : "Спросить AI"}
+              </Button>
+              <Button variant="outline" onClick={() => { setQuestion(""); setAnswer(null); setError(null) }}>
+                Очистить
+              </Button>
+            </div>
+            {error ? (
+              <p className="text-sm text-destructive">{error}</p>
+            ) : null}
+            {answer ? (
+              <div className="rounded-3xl border border-border/30 bg-background p-6">
+                <h3 className="text-xl font-semibold">Ответ AI</h3>
+                <p className="mt-4 whitespace-pre-line text-sm leading-7 text-muted-foreground">{answer}</p>
+              </div>
+            ) : null}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="p-10 rounded-3xl bg-secondary/20 border border-border/20 text-center space-y-6">
         <Info className="h-12 w-12 text-primary mx-auto" />
