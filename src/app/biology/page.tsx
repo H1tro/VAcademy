@@ -1,22 +1,20 @@
-import fs from "fs"
-import path from "path"
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import curriculum from "@/lib/biology-curriculum"
+import { getBiologyFilesList } from "@/lib/biology-blob"
 
-function findMaterials() {
+async function findMaterials() {
   try {
-    const dir = path.join(process.cwd(), "src", "lib", "Biology")
-    const files = fs.readdirSync(dir)
+    const files = await getBiologyFilesList()
     return files
   } catch (e) {
     return []
   }
 }
 
-export default function BiologyPage() {
-  const materials = findMaterials()
+export default async function BiologyPage() {
+  const materials = await findMaterials()
 
   const findFor = (topic) => {
     const matches = materials.filter((f) => topic.keywords.some((rx) => rx.test(f)))
