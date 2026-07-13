@@ -43,10 +43,10 @@ const navItems = [
 ]
 
 const subjects = [
-  { name: "Математика", icon: "Σ" },
-  { name: "Физика", icon: "Φ" },
-  { name: "Информатика", icon: "{" },
-  { name: "Химия", icon: "H₂" },
+  { name: "Математика", icon: "Σ", href: "/matematika" },
+  { name: "Физика", icon: "Φ", href: "/fizika" },
+  { name: "Информатика", icon: "{", href: "/informatika" },
+  { name: "Химия", icon: "H₂", href: "/himiya" },
   { name: "Биология", icon: "DNA", href: "/biology" },
 ]
 

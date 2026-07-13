@@ -1,8 +1,28 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Trophy, ExternalLink, FileText } from "lucide-react"
 import curriculum from "@/lib/biology-curriculum"
 import { getBiologyFilesList } from "@/lib/biology-blob"
+
+const BIOLOGY_OLYMPIAD = [
+  {
+    name: "Официальный архив IBO (International Biology Olympiad) — задания, тесты и ключи",
+    url: "https://www.ibo-info.org/",
+  },
+  {
+    name: "Biolympiads — крупнейший архив задач IBO, USABO, BBO и др.",
+    url: "https://biolympiads.com/",
+  },
+  {
+    name: "Архив Всероссийской олимпиады (ВсОШ) на Olimpiada.ru",
+    url: "https://olimpiada.ru/",
+  },
+  {
+    name: "Всероссийский Биотурнир — разборы теоретических и практических туров",
+    url: "https://bioturnir.ru/",
+  },
+]
 
 async function findMaterials() {
   try {
@@ -60,8 +80,11 @@ export default async function BiologyPage() {
                 <div className="flex flex-col gap-2">
                   {findFor(topic).length === 0 && <div className="text-sm text-muted-foreground">Материалы не найдены в папке Biology.</div>}
                   {findFor(topic).map((file) => (
-                    <div key={file} className="flex items-center justify-between gap-4">
-                      <span className="truncate text-sm">{file}</span>
+                      <div key={file} className="flex items-center justify-between gap-4">
+                        <span className="truncate text-sm flex items-center gap-2">
+                          <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                          {file}
+                        </span>
                       <div className="flex gap-2">
                         <Link href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank">
                           <Button variant="outline" className="h-9">Скачать</Button>
@@ -77,6 +100,33 @@ export default async function BiologyPage() {
             </CardContent>
           </Card>
         ))}
+
+        <Card className="bg-card/40 border-border/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Trophy className="h-5 w-5 text-accent" />
+              Олимпиадные задачи
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {BIOLOGY_OLYMPIAD.map((m) => {
+              const Icon = /олимпиад/i.test(m.name) ? Trophy : ExternalLink
+              return (
+                <a
+                  key={m.name}
+                  href={m.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{m.name}</span>
+                </a>
+              )
+            })}
+          </CardContent>
+        </Card>
+
       </div>
     </div>
   )
