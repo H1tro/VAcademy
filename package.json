@@ -9,7 +9,8 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "upload:blob": "node scripts/upload-to-blob.js",
-    "upload:biology": "node scripts/upload-biology-to-blob.js"
+    "upload:biology": "node scripts/upload-biology-to-blob.js",
+    "upload:informatika": "node scripts/upload-informatika-to-blob.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",

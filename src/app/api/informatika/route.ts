@@ -24,7 +24,8 @@ export async function GET(req: Request) {
 
     const headers = new Headers()
     headers.set("Content-Type", "application/pdf")
-    headers.set("Content-Disposition", `inline; filename="${file.replace(/\"/g, "")}"`)
+    const asciiName = file.replace(/[^\x20-\x7E]/g, "_")
+    headers.set("Content-Disposition", `inline; filename="${asciiName}"`)
 
     return new NextResponse(buffer, { status: 200, headers })
   } catch (e) {

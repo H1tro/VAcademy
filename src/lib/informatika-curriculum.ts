@@ -1,71 +1,160 @@
 export const curriculum = [
   {
     id: 1,
-    title: "Основы программирования",
+    title: "Синтаксис и базовые структуры C++",
+    section: "Junior (База C++, STL и Начальная математика)",
     sections: [
-      { level: "Basic", items: [
-        "Переменные и типы данных",
-        "Условия и циклы",
-        "Функции"
-      ]},
-      { level: "Intermediate", items: [
-        "Структуры данных",
-        "Рекурсия"
+      { level: "Основы", items: [
+        "Быстрый ввод-вывод (ios_base::sync_with_stdio, cin.tie)",
+        "Векторы (std::vector) — динамический массив",
+        "Строки (std::string) — текстовый контейнер",
+        "Сортировка и компараторы — пользовательские правила порядка"
       ]}
     ],
-    keywords: [/basic|основ|программир|цикл|функц/i]
+    materials: [
+      { name: "W3Schools C++: синтаксис", url: "https://www.w3schools.com/cpp/" },
+      { name: "LeetCode: Array 101", url: "https://leetcode.com/explore/learn/card/fun-with-arrays/" },
+    ],
+    keywords: [/c\+\+|синтакс|вектор|string|сортиров|начало/i]
   },
   {
     id: 2,
-    title: "Алгоритмы и структуры данных",
+    title: "Встроенные контейнеры STL",
+    section: "Junior (База C++, STL и Начальная математика)",
     sections: [
-      { level: "Intermediate", items: [
-        "Сортировки",
-        "Поиск",
-        "Графы и деревья"
-      ]},
-      { level: "Advanced", items: [
-        "Динамическое программирование",
-        "Жадные алгоритмы"
+      { level: "Основы", items: [
+        "Оценка сложности алгоритмов (Big O / О-большое)",
+        "Упорядоченные контейнеры (std::set, std::map) — O(log N)",
+        "Хеш-таблицы (std::unordered_set, std::unordered_map) — O(1)",
+        "Служебные структуры (std::pair, std::tuple)"
       ]}
     ],
-    keywords: [/algorith|алгоритм|структура|сортир|граф|дерев/i]
+    materials: [
+      { name: "W3Schools: STL контейнеры", url: "https://www.w3schools.com/cpp/cpp_STL.asp" },
+      { name: "LeetCode: Big O Cheatsheet", url: "https://leetcode.com/explore/learn/card/recursion-i/256/principle-of-recursion/" },
+    ],
+    keywords: [/stl|big o|set|map|unordered|хеш|контейнер|начало/i]
   },
   {
     id: 3,
-    title: "Теория чисел",
+    title: "Базовая математика олимпиадника",
+    section: "Junior (База C++, STL и Начальная математика)",
     sections: [
-      { level: "Intermediate", items: [
-        "Делимость",
-        "Остатки",
-        "Решето Эратосфена"
+      { level: "Основы", items: [
+        "Теория чисел (НОД, НОК, Решето Эратосфена)",
+        "Модульная арифметика (сложение, умножение, возведение по модулю)",
+        "Побитовые операции (AND, OR, XOR, сдвиги)"
       ]}
     ],
-    keywords: [/number|чисел|теори|делимост|эратосфен/i]
+    materials: [
+      { name: "LeetCode: Битовые операции", url: "https://leetcode.com/explore/learn/card/bit-manipulation/" },
+      { name: "Codeforces: Теория чисел", url: "https://codeforces.com/problemset?tags=number+theory" },
+    ],
+    keywords: [/теория чисел|нод|нок|модульн|побит|решето|начало/i]
   },
   {
     id: 4,
-    title: "Комбинаторика и теория игр",
+    title: "Указатели, Поиск и Сканирование",
+    section: "Middle (Алгоритмические оптимизации, DP и Графы)",
     sections: [
-      { level: "Intermediate", items: [
-        "Перестановки и сочетания",
-        "Принцип Дирихле",
-        "Игры с полной информацией"
+      { level: "Алгоритмы", items: [
+        "Метод двух указателей и скользящее окно",
+        "Префиксные суммы — O(1) на отрезке",
+        "Бинарный поиск — деление пополам",
+        "Метод сканирующей прямой (line sweep)"
       ]}
     ],
-    keywords: [/combinator|комбинат|дирихле|игра|перестанов/i]
+    materials: [
+      { name: "LeetCode: Two Pointers", url: "https://leetcode.com/explore/learn/card/array-and-string/" },
+      { name: "Codeforces: Бинарный поиск", url: "https://codeforces.com/problemset?tags=binary+search" },
+    ],
+    keywords: [/указател|префиксн|бинарн|скользящ|two pointer|середин/i]
   },
   {
     id: 5,
-    title: "Графы",
+    title: "Динамическое программирование (DP)",
+    section: "Middle (Алгоритмические оптимизации, DP и Графы)",
     sections: [
-      { level: "Advanced", items: [
-        "Обход графов",
-        "Кратчайшие пути",
-        "Минимальное остовное дерево"
+      { level: "DP", items: [
+        "Суть DP и Мемоизация — сохраняем подзадачи",
+        "Классика DP (Рюкзак, НВП, НОП)",
+        "Восстановление ответа — проход в обратном направлении"
       ]}
     ],
-    keywords: [/graph|граф|остовн|пути|обход/i]
+    materials: [
+      { name: "LeetCode: DP", url: "https://leetcode.com/explore/learn/card/dynamic-programming/" },
+      { name: "Codeforces: DP", url: "https://codeforces.com/problemset?tags=dp" },
+    ],
+    keywords: [/динамическ|dp|мемоизац|рюкзак|нвп|ноп|середин/i]
+  },
+  {
+    id: 6,
+    title: "Структуры данных и Базовые Графы",
+    section: "Middle (Алгоритмические оптимизации, DP и Графы)",
+    sections: [
+      { level: "Структуры", items: [
+        "Стеки и Очереди (FILO / FIFO)",
+        "СНМ (DSU / Union-Find)",
+        "Графы — матрицы и списки смежности",
+        "Обходы графов (DFS и BFS)"
+      ]}
+    ],
+    materials: [
+      { name: "LeetCode: Graph", url: "https://leetcode.com/explore/learn/card/graph/" },
+      { name: "Codeforces: Графы", url: "https://codeforces.com/problemset?tags=graphs" },
+    ],
+    keywords: [/стек|очеред|снм|dsu|граф|dfs|bfs|середин/i]
+  },
+  {
+    id: 7,
+    title: "Взвешенные графы и Деревья",
+    section: "Senior (Продвинутый уровень — Высшая лига)",
+    sections: [
+      { level: "Продвинутые графы", items: [
+        "Кратчайшие пути (Дейкстра, Беллман-Форд, Флойд-Уоршелл)",
+        "Минимальный остов (MST — алгоритмы Крускала и Прима)",
+        "Специфика деревьев (LCA, Эйлеров обход)"
+      ]}
+    ],
+    materials: [
+      { name: "Codeforces: Shortest Paths", url: "https://codeforces.com/problemset?tags=shortest+paths" },
+      { name: "LeetCode: Graph Advanced", url: "https://leetcode.com/explore/learn/card/graph/" },
+    ],
+    keywords: [/дейкстр|беллман|флойд|остов|mst|lca|эйлер|конец/i]
+  },
+  {
+    id: 8,
+    title: "Запросы на отрезках (Range Queries)",
+    section: "Senior (Продвинутый уровень — Высшая лига)",
+    sections: [
+      { level: "Структуры для запросов", items: [
+        "Разреженная таблица (Sparse Table) — O(1) на статике",
+        "Дерево Фенвика (Fenwick Tree / BIT)",
+        "Дерево отрезков (Segment Tree) — O(log N)"
+      ]}
+    ],
+    materials: [
+      { name: "Codeforces: Segment Tree", url: "https://codeforces.com/problemset?tags=segment+tree" },
+      { name: "LeetCode: Range Queries", url: "https://leetcode.com/explore/learn/" },
+    ],
+    keywords: [/отрезк|sparse|фенвик|segment tree|range quer|конец/i]
+  },
+  {
+    id: 9,
+    title: "Строковые алгоритмы и Вычислительная геометрия",
+    section: "Senior (Продвинутый уровень — Высшая лига)",
+    sections: [
+      { level: "Продвинутые темы", items: [
+        "Полиномиальное хеширование строк (rolling hash)",
+        "Бор (Trie) — цифровое дерево префиксов",
+        "Вычислительная геометрия (вектора, пересечения, выпуклая оболочка)"
+      ]}
+    ],
+    materials: [
+      { name: "LeetCode: Trie", url: "https://leetcode.com/explore/learn/card/trie/" },
+      { name: "Codeforces: Geometry", url: "https://codeforces.com/problemset?tags=geometry" },
+    ],
+    keywords: [/строк|хеширован|trie|бор|геометри|выпукл|конец/i]
   },
 ]
 

@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { GraduationCap, ExternalLink, Trophy, Youtube, BookOpen, Download, FileText } from "lucide-react"
+import { GraduationCap, ExternalLink, Trophy, Youtube, BookOpen, Download, FileText, Code2, Globe, Sparkles } from "lucide-react"
 import { SubjectSelector, SUBJECTS, type SubjectId } from "@/components/strategy/subject-selector"
 import fizikaCurriculum from "@/lib/fizika-curriculum"
 import { curriculum as biologyCurriculum } from "@/lib/biology-curriculum"
+import informatikaCurriculum from "@/lib/informatika-curriculum"
 
-const PLACEHOLDER_SUBJECTS: SubjectId[] = ["matematika", "informatika", "himiya"]
+const PLACEHOLDER_SUBJECTS: SubjectId[] = ["matematika", "himiya"]
 
 const BIOLOGY_OLYMPIAD: { name: string; url: string }[] = [
   {
@@ -226,6 +227,138 @@ function BiologyContent() {
   )
 }
 
+function InformatikaContent() {
+  const [files, setFiles] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    fetch("/api/informatika")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return
+        setFiles(data?.files || [])
+      })
+      .catch(() => setFiles([]))
+    return () => { mounted = false }
+  }, [])
+
+  const findFor = (topic: (typeof informatikaCurriculum)[number]) => {
+    if (!files) return []
+    return files.filter((f) => topic.keywords.some((rx) => rx.test(f)))
+  }
+
+  if (files === null)
+    return <div className="text-sm text-muted-foreground">Загрузка материалов...</div>
+
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {informatikaCurriculum.map((topic) => (
+          <Card key={topic.id} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-2xl font-headline font-bold">{topic.id}. {topic.title}</CardTitle>
+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-1">{topic.section}</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                {topic.sections.map((sec, i) => (
+                  <div key={i} className="mb-3">
+                    <h3 className="font-semibold">{sec.level}</h3>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {sec.items.map((it, j) => (
+                        <li key={j}>{it}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-4 border-t border-border/20">
+                <h4 className="font-semibold mb-2">Онлайн-ресурсы</h4>
+                <div className="flex flex-col gap-2">
+                  {topic.materials.map((m, i) => (
+                    <a
+                      key={i}
+                      href={m.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-4 w-4 shrink-0" />
+                      <span>{m.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+              {findFor(topic).length > 0 && (
+                <div className="pt-4 border-t border-border/20">
+                  <h4 className="font-semibold mb-2">PDF-ресурсы</h4>
+                  {findFor(topic).map((file) => (
+                    <div key={file} className="flex items-center justify-between gap-4 mb-2">
+                      <span className="truncate text-sm flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        {file}
+                      </span>
+                      <div className="flex gap-2 shrink-0">
+                        <Link href={`/api/informatika?file=${encodeURIComponent(file)}`} target="_blank">
+                          <Button variant="outline" className="h-9">
+                            <Download className="mr-2 h-4 w-4" /> Скачать
+                          </Button>
+                        </Link>
+                        <Link href={`/api/informatika?file=${encodeURIComponent(file)}`} target="_blank">
+                          <Button className="h-9">Открыть</Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <Card className="bg-card/40 border-border/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5 text-accent" />
+            Онлайн-платформы
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          <a href="https://www.w3schools.com/cpp/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <BookOpen className="h-4 w-4 shrink-0" /> W3Schools C++ — интерактивная шпаргалка
+          </a>
+          <a href="https://leetcode.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <Code2 className="h-4 w-4 shrink-0" /> LeetCode — тематический тренажёр
+          </a>
+          <a href="https://codeforces.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <Trophy className="h-4 w-4 shrink-0" /> Codeforces — олимпийский стадион
+          </a>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-card/40 border-border/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-accent" />
+            Олимпиадные ресурсы
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-2">
+          <a href="https://codeforces.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <Trophy className="h-4 w-4 shrink-0" /> Codeforces — рейтинговые раунды
+          </a>
+          <a href="https://leetcode.com/problemset/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+            <Code2 className="h-4 w-4 shrink-0" /> LeetCode — задачи по темам
+          </a>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+
 export default function StrategyPage() {
   const router = useRouter()
   const [active, setActive] = useState<SubjectId>("biology")
@@ -255,6 +388,7 @@ export default function StrategyPage() {
 
         {active === "biology" && <BiologyContent />}
         {active === "fizika" && <FizikaContent />}
+        {active === "informatika" && <InformatikaContent />}
         {PLACEHOLDER_SUBJECTS.includes(active) && (
           <div className="flex items-center justify-center rounded-xl border border-border/40 bg-card/30 py-20">
             <span className="text-lg text-muted-foreground">Coming soon</span>

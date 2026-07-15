@@ -1,41 +1,39 @@
-// Utility for managing informatika files from Vercel Blob
-const BLOB_BASE_URL = 'https://zovqflkgqlje1zvz.public.blob.vercel-storage.com/informatika';
+import fs from "fs"
+import path from "path"
+
+const LOCAL_DIR = path.join(process.cwd(), "public", "informatika")
 
 export const INFORMATIKA_FILES: string[] = [
-  // Добавьте файлы позже
-];
+  'Азы программирования (Начало).pdf',
+  'Система и сети (Середина).pdf',
+  'Парадигмы(Конец).pdf',
+]
 
 export function getInformatikaFileUrl(filename: string): string {
-  // Validate filename to prevent directory traversal
   if (filename.includes('..') || filename.includes('/')) {
-    return '';
+    return ''
   }
-
-  return `${BLOB_BASE_URL}/${encodeURIComponent(filename)}`;
+  return `/informatika/${encodeURIComponent(filename)}`
 }
 
 export async function getInformatikaFilesList(): Promise<string[]> {
-  return INFORMATIKA_FILES;
+  return INFORMATIKA_FILES
 }
 
 export async function getInformatikaFileBlob(filename: string): Promise<Buffer | null> {
   try {
-    // Validate filename
     if (filename.includes('..') || filename.includes('/')) {
-      return null;
+      return null
     }
 
-    const url = getInformatikaFileUrl(filename);
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      return null;
+    const filePath = path.join(LOCAL_DIR, filename)
+    if (!fs.existsSync(filePath)) {
+      return null
     }
 
-    const arrayBuffer = await response.arrayBuffer();
-    return Buffer.from(arrayBuffer);
+    return fs.readFileSync(filePath)
   } catch (error) {
-    console.error('Error fetching informatika file:', error);
-    return null;
+    console.error('Error reading informatika file:', error)
+    return null
   }
 }
