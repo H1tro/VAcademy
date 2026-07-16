@@ -61,6 +61,7 @@ export default function RegisterPage() {
         streakDays: 0,
         maxStreakDays: 0,
         tasksSolved: 0,
+        solvedProblems: [],
         studyTimeMinutes: 0,
         subjectProgress: {
           mathematics: 0,

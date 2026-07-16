@@ -13,7 +13,8 @@ import {
   Info, 
   Settings,
   Atom,
-  GraduationCap
+  GraduationCap,
+  ListChecks
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -38,6 +39,7 @@ const navItems = [
   { name: "AI", href: "/ai", icon: Atom },
   { name: "Курсы", href: "/courses", icon: BookOpen },
   { name: "Материалы", href: "/strategy", icon: GraduationCap },
+  { name: "Задачи", href: "/problems", icon: ListChecks },
   { name: "Рейтинг", href: "/leaderboard", icon: BarChart3 },
   { name: "Олимпиады", href: "/olympiads", icon: Info },
 ]

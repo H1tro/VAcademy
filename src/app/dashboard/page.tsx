@@ -83,7 +83,7 @@ export default function DashboardPage() {
       }
 
       const loadUserStats = async () => {
-        const profileDoc = await getDoc(doc(db, "users", user.uid))
+        const profileDoc = await getDoc(doc(db, "users", user.uid), { source: "server" })
         if (profileDoc.exists()) {
           const profileData = profileDoc.data()
           setGoal(profileData.goal || "Подготовка к олимпиадам")
