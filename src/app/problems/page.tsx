@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -23,7 +23,7 @@ const allSubjects: { value: ProblemSubject | "all"; label: string }[] = [
   { value: "biology", label: "Биология" },
 ]
 
-export default function ProblemsPage() {
+function ProblemsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const subjectParam = searchParams.get("subject") as ProblemSubject | null
@@ -185,5 +185,21 @@ export default function ProblemsPage() {
         onSolved={handleSolved}
       />
     </div>
+  )
+}
+
+export default function ProblemsPage() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-8 px-6 py-10 md:px-10 lg:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 rounded-xl bg-card/40" />
+          ))}
+        </div>
+      </div>
+    }>
+      <ProblemsPageContent />
+    </Suspense>
   )
 }
