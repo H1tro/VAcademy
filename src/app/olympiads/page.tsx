@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar, MapPin, CircleDollarSign, ExternalLink, Info, Bell, Check, Loader2, Send, ArrowLeft, MessageSquare } from "lucide-react"
+import { Calendar, MapPin, CircleDollarSign, ExternalLink, Info, Bell, MessageCircle } from "lucide-react"
 
 type Olympiad = {
   title: string
@@ -387,68 +387,7 @@ export default function OlympiadsHub() {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  // Feedback form state
-  const [fbStep, setFbStep] = useState(0)
-  const [fbSubject, setFbSubject] = useState("")
-  const [fbCategory, setFbCategory] = useState("")
-  const [fbMessage, setFbMessage] = useState("")
-  const [fbLoading, setFbLoading] = useState(false)
-  const [fbResult, setFbResult] = useState<{ success: boolean; department?: string; error?: string } | null>(null)
 
-  const SUBJECTS = [
-    { id: "biology", label: "🧬 Биология" },
-    { id: "physics", label: "⚛️ Физика" },
-    { id: "chemistry", label: "🧪 Химия" },
-    { id: "math", label: "➗ Математика" },
-    { id: "cs", label: "💻 Информатика" },
-  ]
-
-  const CATEGORIES = [
-    { id: "materials", label: "📚 Учебные материалы" },
-    { id: "documents", label: "📄 Документы" },
-    { id: "homework", label: "📝 Домашнее задание" },
-    { id: "olympiads", label: "🎓 Олимпиады" },
-    { id: "teacher", label: "👨‍🏫 Преподаватель" },
-    { id: "technical", label: "⚙️ Техническая проблема" },
-    { id: "other", label: "❓ Другое" },
-  ]
-
-  const handleSubmitFeedback = async () => {
-    if (!fbMessage.trim()) return
-    setFbLoading(true)
-    setFbResult(null)
-    try {
-      const res = await fetch("/api/feedback", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          subject: fbSubject,
-          category: fbCategory,
-          message: fbMessage,
-          userName: "Гость",
-        }),
-      })
-      const data = await res.json()
-      if (res.ok) {
-        setFbResult({ success: true, department: data.department })
-        setFbStep(4)
-      } else {
-        setFbResult({ success: false, error: data.error || "Ошибка отправки" })
-      }
-    } catch {
-      setFbResult({ success: false, error: "Не удалось отправить обращение" })
-    } finally {
-      setFbLoading(false)
-    }
-  }
-
-  const resetFeedback = () => {
-    setFbStep(0)
-    setFbSubject("")
-    setFbCategory("")
-    setFbMessage("")
-    setFbResult(null)
-  }
 
   const grouped: Record<string, Record<number, Olympiad[]>> = {}
   for (const o of olympiads) {
@@ -647,115 +586,26 @@ export default function OlympiadsHub() {
         </CardContent>
       </Card>
 
-      {/* ---------- Feedback Form ---------- */}
       <Card className="bg-secondary/10 border-border/40">
         <CardHeader>
           <div className="space-y-3">
             <h2 className="text-3xl font-headline font-black tracking-tight">Обратная связь</h2>
             <p className="text-muted-foreground max-w-3xl text-base">
-              Есть вопрос или проблема? Оставьте обращение — мы передадим его в нужный департамент.
+              По всем вопросам обращайтесь к нашему Telegram-боту.
             </p>
           </div>
         </CardHeader>
         <CardContent>
-          {fbStep === 0 && (
-            <div className="space-y-6">
-              <p className="text-sm font-medium text-muted-foreground">Шаг 1 из 3 — Выберите предмет</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                {SUBJECTS.map((s) => (
-                  <Button
-                    key={s.id}
-                    variant="outline"
-                    className="h-14 justify-start text-base border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                    onClick={() => { setFbSubject(s.id); setFbStep(1) }}
-                  >
-                    {s.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {fbStep === 1 && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => setFbStep(0)}>
-                  <ArrowLeft className="h-4 w-4 mr-1" /> Назад
-                </Button>
-                <span className="text-xs">Предмет: {SUBJECTS.find(s => s.id === fbSubject)?.label}</span>
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">Шаг 2 из 3 — Выберите категорию</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {CATEGORIES.map((c) => (
-                  <Button
-                    key={c.id}
-                    variant="outline"
-                    className="h-12 justify-start text-sm border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all"
-                    onClick={() => { setFbCategory(c.id); setFbStep(2) }}
-                  >
-                    {c.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {fbStep === 2 && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => setFbStep(1)}>
-                  <ArrowLeft className="h-4 w-4 mr-1" /> Назад
-                </Button>
-                <span className="text-xs">
-                  {SUBJECTS.find(s => s.id === fbSubject)?.label} → {CATEGORIES.find(c => c.id === fbCategory)?.label}
-                </span>
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">Шаг 3 из 3 — Опишите проблему</p>
-              <Textarea
-                value={fbMessage}
-                onChange={(e) => setFbMessage(e.target.value)}
-                placeholder="Подробно опишите ваш вопрос или проблему..."
-                rows={6}
-              />
-              <p className="text-xs text-muted-foreground">
-                При необходимости вы можете прикрепить файлы через Telegram-бота: @VAcademi_Support_Bot
-              </p>
-              <div className="flex gap-3">
-                <Button
-                  onClick={handleSubmitFeedback}
-                  disabled={fbLoading || !fbMessage.trim()}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  {fbLoading ? (
-                    <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Отправка...</>
-                  ) : (
-                    <><Send className="mr-2 h-4 w-4" /> Отправить</>
-                  )}
-                </Button>
-              </div>
-              {fbResult && !fbResult.success && (
-                <p className="text-sm text-destructive">{fbResult.error}</p>
-              )}
-            </div>
-          )}
-
-          {fbStep === 4 && fbResult?.success && (
-            <div className="text-center space-y-6 py-8">
-              <div className="mx-auto w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                <Check className="h-8 w-8 text-emerald-500" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-bold">✅ Ваше обращение успешно отправлено</h3>
-                <p className="text-muted-foreground">
-                  Департамент <strong>{fbResult.department}</strong> получил вашу заявку.
-                </p>
-                <p className="text-muted-foreground">Мы свяжемся с вами как можно скорее.</p>
-              </div>
-              <Button variant="outline" onClick={resetFeedback} className="mt-4">
-                <MessageSquare className="mr-2 h-4 w-4" /> Создать новую заявку
-              </Button>
-            </div>
-          )}
+          <a
+            href="https://t.me/VAcademi_Support_Bot"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button size="lg" className="bg-primary hover:bg-primary/90">
+              <MessageCircle className="mr-2 h-5 w-5" />
+              @VAcademi_Support_Bot
+            </Button>
+          </a>
         </CardContent>
       </Card>
     </div>

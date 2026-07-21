@@ -1,10 +1,3 @@
-import type { OpenNextConfig } from "@opennextjs/cloudflare/types/open-next.js";
+import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
-const config: OpenNextConfig = {
-  default: {
-    wrapper: "cloudflare-node",
-    converter: "edge",
-  },
-};
-
-export default config;
+export default defineCloudflareConfig({});
