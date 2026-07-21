@@ -10,8 +10,10 @@ import { SubjectSelector, SUBJECTS, type SubjectId } from "@/components/strategy
 import fizikaCurriculum from "@/lib/fizika-curriculum"
 import { curriculum as biologyCurriculum } from "@/lib/biology-curriculum"
 import informatikaCurriculum from "@/lib/informatika-curriculum"
+import matematikaCurriculum from "@/lib/matematika-curriculum"
+import himiyaCurriculum from "@/lib/himiya-curriculum"
 
-const PLACEHOLDER_SUBJECTS: SubjectId[] = ["matematika", "himiya"]
+const PLACEHOLDER_SUBJECTS: SubjectId[] = []
 
 const BIOLOGY_OLYMPIAD: { name: string; url: string }[] = [
   {
@@ -359,6 +361,117 @@ function InformatikaContent() {
   )
 }
 
+function MatematikaContent() {
+  const [files, setFiles] = useState<string[] | null>(null)
+
+  useEffect(() => {
+    let mounted = true
+    fetch("/api/matematika")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!mounted) return
+        setFiles(data?.files || [])
+      })
+      .catch(() => setFiles([]))
+    return () => { mounted = false }
+  }, [])
+
+  const findFor = (topic: (typeof matematikaCurriculum)[number]) => {
+    if (!files) return []
+    return files.filter((f) => topic.keywords.some((rx) => rx.test(f)))
+  }
+
+  if (files === null)
+    return <div className="text-sm text-muted-foreground">Загрузка материалов...</div>
+
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {matematikaCurriculum.map((topic) => (
+          <Card key={topic.id} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-2xl font-headline font-bold">{topic.id}. {topic.title}</CardTitle>
+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-1">{topic.section}</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                {topic.sections.map((sec, i) => (
+                  <div key={i} className="mb-3">
+                    <h3 className="font-semibold">{sec.level}</h3>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {sec.items.map((it, j) => (
+                        <li key={j}>{it}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              {findFor(topic).length > 0 && (
+                <div className="pt-4 border-t border-border/20">
+                  <h4 className="font-semibold mb-2">PDF-ресурсы</h4>
+                  {findFor(topic).map((file) => (
+                    <div key={file} className="flex items-center justify-between gap-4 mb-2">
+                      <span className="truncate text-sm flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                        {file.split('/').pop() || file}
+                      </span>
+                      <div className="flex gap-2 shrink-0">
+                        <Link href={`/api/matematika?file=${encodeURIComponent(file)}`} target="_blank">
+                          <Button variant="outline" className="h-9">
+                            <Download className="mr-2 h-4 w-4" /> Скачать
+                          </Button>
+                        </Link>
+                        <Link href={`/api/matematika?file=${encodeURIComponent(file)}`} target="_blank">
+                          <Button className="h-9">Открыть</Button>
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function HimiyaContent() {
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {himiyaCurriculum.map((topic) => (
+          <Card key={topic.id} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
+            <CardHeader>
+              <div className="flex items-start justify-between">
+                <CardTitle className="text-2xl font-headline font-bold">{topic.id}. {topic.title}</CardTitle>
+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-1">{topic.section}</span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-4">
+                {topic.sections.map((sec, i) => (
+                  <div key={i} className="mb-3">
+                    <h3 className="font-semibold">{sec.level}</h3>
+                    <ul className="list-disc list-inside text-sm text-muted-foreground">
+                      {sec.items.map((it, j) => (
+                        <li key={j}>{it}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 export default function StrategyPage() {
   const router = useRouter()
   const [active, setActive] = useState<SubjectId>("biology")
@@ -389,6 +502,8 @@ export default function StrategyPage() {
         {active === "biology" && <BiologyContent />}
         {active === "fizika" && <FizikaContent />}
         {active === "informatika" && <InformatikaContent />}
+        {active === "matematika" && <MatematikaContent />}
+        {active === "himiya" && <HimiyaContent />}
         {PLACEHOLDER_SUBJECTS.includes(active) && (
           <div className="flex items-center justify-center rounded-xl border border-border/40 bg-card/30 py-20">
             <span className="text-lg text-muted-foreground">Coming soon</span>

@@ -16,15 +16,16 @@ export async function GET(req: Request) {
       }
     }
 
-    if (file.includes("..") || file.includes("/")) return new NextResponse("Invalid filename", { status: 400 })
+    if (file.includes("..") || file.includes("\\")) return new NextResponse("Invalid filename", { status: 400 })
 
     const buffer = await getMatematikaFileBlob(file)
 
     if (!buffer) return new NextResponse("Not found", { status: 404 })
 
+    const displayName = file.split('/').pop() || file
     const headers = new Headers()
     headers.set("Content-Type", "application/pdf")
-    headers.set("Content-Disposition", `inline; filename="${file.replace(/\"/g, "")}"`)
+    headers.set("Content-Disposition", `inline; filename="${displayName.replace(/\"/g, "")}"`)
 
     return new NextResponse(buffer, { status: 200, headers })
   } catch (e) {
