@@ -33,6 +33,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# opennext / cloudflare
+.open-next/
+
 # ide / misc artifacts
 .idx/
 .modified
