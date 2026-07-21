@@ -1,4 +1,12 @@
-const BLOB_BASE_URL = 'https://zovqflkgqlje1zvz.public.blob.vercel-storage.com/matematika';
+import fs from 'fs'
+import path from 'path'
+
+const LOCAL_DIR = path.join(process.cwd(), 'public', 'matematika')
+const BLOB_BASE_URL = 'https://zovqflkgqlje1zvz.public.blob.vercel-storage.com/matematika'
+
+function isEdgeRuntime(): boolean {
+  return typeof process === 'undefined' || !process.cwd
+}
 
 export const MATEMATIKA_FILES: string[] = [
   // Секция 1 — Комбинаторика
@@ -59,9 +67,7 @@ export function getMatematikaFileUrl(filename: string): string {
   if (filename.includes('..') || filename.includes('\\')) {
     return ''
   }
-
-  const parts = filename.split('/').map((p) => encodeURIComponent(p))
-  return `${BLOB_BASE_URL}/${parts.join('/')}`
+  return `/matematika/${filename}`
 }
 
 export async function getMatematikaFilesList(): Promise<string[]> {
@@ -74,8 +80,17 @@ export async function getMatematikaFileBlob(filename: string): Promise<Buffer | 
       return null
     }
 
-    const url = getMatematikaFileUrl(filename)
-    const response = await fetch(url)
+    // Local filesystem (Node.js runtime)
+    if (!isEdgeRuntime()) {
+      const filePath = path.join(LOCAL_DIR, filename)
+      if (fs.existsSync(filePath)) {
+        return fs.readFileSync(filePath)
+      }
+    }
+
+    // Fallback to Vercel Blob
+    const blobUrl = `${BLOB_BASE_URL}/${filename.split('/').map(encodeURIComponent).join('/')}`
+    const response = await fetch(blobUrl)
 
     if (!response.ok) {
       return null
@@ -84,7 +99,7 @@ export async function getMatematikaFileBlob(filename: string): Promise<Buffer | 
     const arrayBuffer = await response.arrayBuffer()
     return Buffer.from(arrayBuffer)
   } catch (error) {
-    console.error('Error fetching matematika file:', error)
+    console.error('Error reading matematika file:', error)
     return null
   }
 }

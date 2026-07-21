@@ -5,10 +5,10 @@ const path = require('path');
 const { put } = require('@vercel/blob');
 
 const SECTIONS = [
-  { dir: path.join(__dirname, '../../Desktop/Раздел 1'), prefix: 'section1' },
-  { dir: path.join(__dirname, '../../Desktop/Раздел 2'), prefix: 'section2' },
-  { dir: path.join(__dirname, '../../Desktop/Раздел 3'), prefix: 'section3' },
-  { dir: path.join(__dirname, '../../Desktop/Раздел 4'), prefix: 'section4' },
+  { dir: path.join(__dirname, '../public/matematika/section1'), prefix: 'section1' },
+  { dir: path.join(__dirname, '../public/matematika/section2'), prefix: 'section2' },
+  { dir: path.join(__dirname, '../public/matematika/section3'), prefix: 'section3' },
+  { dir: path.join(__dirname, '../public/matematika/section4'), prefix: 'section4' },
 ];
 
 async function uploadMatematikaFiles() {
