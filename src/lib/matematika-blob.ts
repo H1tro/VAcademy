@@ -10,6 +10,7 @@ function isEdgeRuntime(): boolean {
 
 export const MATEMATIKA_FILES: string[] = [
   // Секция 1 — Комбинаторика
+  'section1/А.Ковальджи-Как решают нестандартные задачи.pdf',
   'section1/Ленинградские математические кружки.pdf',
   'section1/kurs_matematika_10.pdf',
   'section1/Techniques in Combinatorics 3.1.1 (1) — копия.pdf',
@@ -21,6 +22,7 @@ export const MATEMATIKA_FILES: string[] = [
   'section2/Алфутова-Алгебра и теория чисел.pdf',
   'section2/Делимость и простые числа.pdf',
   'section2/Ленинградские математические кружки.pdf',
+  'section2/Alfutova_18-18.pdf',
   'section2/Elementary Number Theory.pdf',
   'section2/kurs_matematika.pdf',
   'section2/Sedrakyan-Inequalities.pdf',
@@ -39,6 +41,9 @@ export const MATEMATIKA_FILES: string[] = [
   'section3/Elementary Number Theory.pdf',
   'section3/euclidean-geometry-in-mathematical-olympiads.pdf',
   'section3/Functions.pdf',
+  'section3/Geometry in the Complex Plane.pdf',
+  'section3/Inequalities.pdf',
+  'section3/Inversion.pdf',
   'section3/Sedrakyan-Inequalities.pdf',
   'section3/Techniques in Combinatorics.pdf',
   'section3/The Very Basic Note in Algebra.pdf',
