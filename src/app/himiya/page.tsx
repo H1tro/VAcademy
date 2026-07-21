@@ -24,7 +24,7 @@ export default function HimiyaPage() {
           <Card key={topic.id} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
             <CardHeader>
               <div className="flex items-start justify-between">
-                <CardTitle className="text-2xl font-headline font-bold">{topic.id}. {topic.title}</CardTitle>
+                <CardTitle className="text-2xl font-headline font-bold">{topic.id <= 13 ? `Раздел ${topic.id}. ${topic.title}` : topic.title}</CardTitle>
                 <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-1">{topic.section}</span>
               </div>
             </CardHeader>
