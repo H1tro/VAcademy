@@ -31,12 +31,19 @@ const CATEGORIES = [
   { id: "other", label: "\u2753 Другое" },
 ]
 
-const SUBJECT_DEPARTMENTS: Record<string, string> = {
-  biology: "департамент биологии",
-  physics: "департамент физики",
-  chemistry: "департамент химии",
-  math: "департамент математики",
-  cs: "департамент информатики",
+const adminChats = new Map<string, number>()
+
+async function getDeptAdminChatId(department: string): Promise<number | null> {
+  if (adminChats.has(department)) return adminChats.get(department)!
+  try {
+    const snap = await getDoc(doc(db, "admin_config", department))
+    if (snap.exists()) {
+      const id = snap.data().chatId as number
+      adminChats.set(department, id)
+      return id
+    }
+  } catch {}
+  return null
 }
 
 // ---------- helpers ----------
@@ -68,16 +75,6 @@ async function tgEdit(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chat_id: chatId, message_id: messageId, text, ...opts }),
   })
-}
-
-async function getAdminChatId(): Promise<number | null> {
-  try {
-    const snap = await getDoc(doc(db, "admin_config", "primary"))
-    if (snap.exists()) return snap.data().chatId as number
-  } catch {
-    /* ignore */
-  }
-  return null
 }
 
 async function getSession(telegramId: number) {
@@ -135,6 +132,17 @@ async function handleCallback(query: any) {
   const telegramId: number = from.id
 
   await tgAnswer(callbackId)
+
+  // register department
+  if (data.startsWith("dept:")) {
+    const dept = data.slice(5)
+    const subject = SUBJECTS.find((s) => s.id === dept)
+    if (!subject) return
+    adminChats.set(dept, chatId)
+    await setDoc(doc(db, "admin_config", dept), { chatId, department: dept, updatedAt: serverTimestamp() }, { merge: true })
+    await tgEdit(chatId, messageId, `✅ Вы зарегистрированы как **${subject.label}**.\n\nВсе заявки по этому предмету будут приходить сюда.`, { parse_mode: "Markdown" })
+    return
+  }
 
   // new ticket — reset
   if (data === "new_ticket") {
@@ -222,15 +230,7 @@ async function handleMessage(msg: any) {
 
   // ---- /register ----
   if (text === "/register") {
-    await setDoc(
-      doc(db, "admin_config", "primary"),
-      { chatId, updatedAt: serverTimestamp() },
-      { merge: true }
-    )
-    await tgSend(
-      chatId,
-      "✅ Этот чат зарегистрирован как чат администратора. Все заявки будут приходить сюда."
-    )
+    await tgSend(chatId, "Выберите ваш департамент:", { reply_markup: { inline_keyboard: SUBJECTS.map((s) => [{ text: s.label, callback_data: `dept:${s.id}` }]) } })
     return
   }
 
@@ -280,12 +280,16 @@ async function handleMessage(msg: any) {
     if (msg.video) fileIds.push(msg.video.file_id)
 
     // create ticket
+    const subjectId = session.subject
+    const subjectLabel = session.subjectLabel || subjectId
     const ticket = {
       source: "telegram",
       telegramId,
       userName,
       username,
-      subject: session.subjectLabel || session.subject,
+      subject: subjectId,
+      subjectLabel,
+      department: subjectId,
       category: session.categoryLabel || session.category,
       message: text || "(без текста, только файлы)",
       fileIds,
@@ -295,13 +299,13 @@ async function handleMessage(msg: any) {
 
     const ticketRef = await addDoc(collection(db, "tickets"), ticket)
 
-    // forward to admin
-    const adminChatId = await getAdminChatId()
+    // forward to correct department
+    const adminChatId = await getDeptAdminChatId(subjectId)
     if (adminChatId) {
       const header = [
         `📩 Новая заявка #${ticketRef.id}`,
         `👤 ${userName} (@${username}, ID: ${telegramId})`,
-        `📖 Предмет: ${session.subjectLabel || session.subject}`,
+        `📖 Предмет: ${subjectLabel}`,
         `📂 Категория: ${session.categoryLabel || session.category}`,
         `💬 ${text || "(без текста, только файлы)"}`,
       ].join("\n")
@@ -325,9 +329,7 @@ async function handleMessage(msg: any) {
       }
     }
 
-    // confirm
-    const departmentName =
-      SUBJECT_DEPARTMENTS[session.subject] || session.subjectLabel || session.subject
+    const departmentName = subjectLabel
     await tgSend(
       chatId,
       `✅ Ваше обращение успешно отправлено.\n\nДепартамент ${departmentName} получил вашу заявку.\n\nМы свяжемся с вами как можно скорее.`,
