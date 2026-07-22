@@ -49,19 +49,14 @@ const CATEGORIES = [
   { id: "other", label: "\u2753 Другое" },
 ]
 
-const SUBJECT_DEPARTMENTS = {
-  biology: "департамент биологии",
-  physics: "департамент физики",
-  chemistry: "департамент химии",
-  math: "департамент математики",
-  cs: "департамент информатики",
-}
-
 // ---------- Bot setup ----------
 const bot = new TelegramBot(BOT_TOKEN, { polling: true })
 
-// adminMessageId -> { studentChatId, studentName, ticketId }
+// adminMessageId -> { studentChatId, studentName, ticketId, department }
 const ticketMessages = new Map()
+
+// Cache: department -> adminChatId
+const adminChats = new Map()
 
 console.log("🤖 STEM Support Bot is running (polling mode)...")
 console.log("Send /start to @VAcademi_Support_Bot to test")
@@ -87,12 +82,27 @@ async function saveSession(telegramId, data) {
   }
 }
 
-async function getAdminChatId() {
+async function getDeptAdminChatId(department) {
+  // Check cache first
+  if (adminChats.has(department)) return adminChats.get(department)
   try {
-    const snap = await getDoc(doc(db, "admin_config", "primary"))
-    if (snap.exists()) return snap.data().chatId
+    const snap = await getDoc(doc(db, "admin_config", department))
+    if (snap.exists()) {
+      const id = snap.data().chatId
+      adminChats.set(department, id)
+      return id
+    }
   } catch {}
   return null
+}
+
+async function setDeptAdminChatId(department, chatId) {
+  try {
+    await setDoc(doc(db, "admin_config", department), { chatId, department, updatedAt: serverTimestamp() }, { merge: true })
+    adminChats.set(department, chatId)
+  } catch (e) {
+    console.error("setDeptAdminChatId error:", e.message)
+  }
 }
 
 async function saveTicket(ticket) {
@@ -107,13 +117,12 @@ async function saveTicket(ticket) {
 
 async function addMessageToTicket(ticketId, role, text, fileIds) {
   try {
-    const msg = {
+    await addDoc(collection(db, "tickets", ticketId, "messages"), {
       role,
       text: text || "(файл)",
       fileIds: fileIds || [],
       createdAt: serverTimestamp(),
-    }
-    await addDoc(collection(db, "tickets", ticketId, "messages"), msg)
+    })
   } catch (e) {
     console.error("Add message error:", e.message)
   }
@@ -172,6 +181,14 @@ function closeDialogKeyboard(ticketId) {
   }
 }
 
+function deptKeyboard() {
+  return {
+    inline_keyboard: SUBJECTS.map((s) => [
+      { text: s.label, callback_data: `dept:${s.id}` },
+    ]),
+  }
+}
+
 // ---------- Handlers ----------
 
 bot.onText(/\/start/, async (msg) => {
@@ -196,15 +213,8 @@ bot.onText(/\/start/, async (msg) => {
 
 bot.onText(/\/register/, async (msg) => {
   const chatId = msg.chat.id
-  try {
-    await setDoc(doc(db, "admin_config", "primary"), { chatId, updatedAt: serverTimestamp() }, { merge: true })
-    adminChatIdCached = chatId
-    await bot.sendMessage(chatId, "✅ Этот чат зарегистрирован как чат администратора. Все заявки будут приходить сюда.")
-    console.log(`Admin chat registered: ${chatId}`)
-  } catch (e) {
-    await bot.sendMessage(chatId, "❌ Ошибка регистрации. Попробуйте позже.")
-    console.error("Register error:", e.message)
-  }
+  await bot.sendMessage(chatId, "Выберите ваш департамент:", { reply_markup: deptKeyboard() })
+  await saveSession(msg.from.id, { step: "choose_dept" })
 })
 
 bot.on("callback_query", async (query) => {
@@ -214,6 +224,21 @@ bot.on("callback_query", async (query) => {
   const telegramId = from.id
 
   await bot.answerCallbackQuery(callbackId)
+
+  // === REGISTER department ===
+  if (data.startsWith("dept:")) {
+    const dept = data.slice(5)
+    const subject = SUBJECTS.find((s) => s.id === dept)
+    if (!subject) return
+
+    await setDeptAdminChatId(dept, chatId)
+    await bot.editMessageText(
+      `✅ Вы зарегистрированы как **${subject.label}**.\n\nВсе заявки по этому предмету будут приходить сюда.`,
+      { chat_id: chatId, message_id: messageId, parse_mode: "Markdown" }
+    )
+    console.log(`Admin registered: ${dept} -> ${chatId}`)
+    return
+  }
 
   if (data === "new_ticket") {
     await saveSession(telegramId, { step: STEPS.SUBJECT })
@@ -293,7 +318,7 @@ bot.on("callback_query", async (query) => {
     })
 
     await bot.editMessageText(
-      `\u2709\uFE0F Напишите ответ для заявки #${ticketId}\n\n(отправьте текст или файл. После ответа диалог продолжится — ученик сможет отвечать)`,
+      `\u2709\uFE0F Напишите ответ для заявки #${ticketId}\n\n(отправьте текст или файл)`,
       { chat_id: chatId, message_id: messageId }
     )
     return
@@ -304,7 +329,6 @@ bot.on("callback_query", async (query) => {
     const ticketId = data.includes("close_dialog:") ? data.slice(14) : data.slice(6)
     await updateTicketStatus(ticketId, "closed")
 
-    // Notify the student that the dialog is closed
     const ticketInfo = findTicketByStudent(ticketId)
     if (ticketInfo) {
       try {
@@ -334,12 +358,19 @@ bot.on("message", async (msg) => {
   if (text && (text.startsWith("/start") || text.startsWith("/register"))) return
 
   // === ADMIN: Replying directly to a ticket message in admin chat ===
-  if (reply_to_message && adminChatIdCached === chatId) {
+  if (reply_to_message && isAdminChat(chatId)) {
     const repliedMsgId = reply_to_message.message_id
     const ticketInfo = ticketMessages.get(repliedMsgId)
     if (ticketInfo) {
-      await forwardToStudent(msg, ticketInfo)
-      return
+      // Check if this admin is from the correct department
+      const adminDept = await getAdminDepartment(chatId)
+      if (adminDept && adminDept === ticketInfo.department) {
+        await forwardToStudent(msg, ticketInfo)
+        return
+      } else if (adminDept) {
+        await bot.sendMessage(chat.id, "Эта заявка не из вашего департамента.")
+        return
+      }
     }
   }
 
@@ -353,7 +384,6 @@ bot.on("message", async (msg) => {
 
   // === STUDENT: In active dialog? ===
   if (session?.activeTicketId && session?.step === "in_dialog") {
-    // Forward student's message to admin as continuation of the dialog
     await forwardStudentReply(msg, session.activeTicketId, session)
     return
   }
@@ -382,13 +412,34 @@ bot.on("message", async (msg) => {
 
 // ==================== LOGIC ====================
 
-let adminChatIdCached = null
-
-// ---- Find ticket by student (in-memory fallback) ----
 function findTicketByStudent(ticketId) {
   for (const [_, info] of ticketMessages) {
     if (info.ticketId === ticketId) return info
   }
+  return null
+}
+
+function isAdminChat(chatId) {
+  for (const [_, cachedId] of adminChats) {
+    if (cachedId === chatId) return true
+  }
+  return false
+}
+
+async function getAdminDepartment(chatId) {
+  for (const [dept, cachedId] of adminChats) {
+    if (cachedId === chatId) return dept
+  }
+  // Fallback: check Firestore
+  try {
+    for (const subj of SUBJECTS) {
+      const snap = await getDoc(doc(db, "admin_config", subj.id))
+      if (snap.exists() && snap.data().chatId === chatId) {
+        adminChats.set(subj.id, chatId)
+        return subj.id
+      }
+    }
+  } catch {}
   return null
 }
 
@@ -414,31 +465,20 @@ async function handleAdminReply(msg, session) {
     await bot.sendMessage(studentChatId, header)
 
     if (msg.document) {
-      await bot.sendDocument(studentChatId, msg.document.file_id, {
-        caption: `Файл от ${adminName}`,
-      })
+      await bot.sendDocument(studentChatId, msg.document.file_id, { caption: `Файл от ${adminName}` })
     }
     if (msg.photo) {
-      await bot.sendPhoto(studentChatId, msg.photo[msg.photo.length - 1].file_id, {
-        caption: `Фото от ${adminName}`,
-      })
+      await bot.sendPhoto(studentChatId, msg.photo[msg.photo.length - 1].file_id, { caption: `Фото от ${adminName}` })
     }
 
     // Switch student to dialog mode
-    await saveSession(studentChatId, {
-      step: "in_dialog",
-      activeTicketId: ticketId,
-    })
-
-    // Save message to ticket
+    await saveSession(studentChatId, { step: "in_dialog", activeTicketId: ticketId })
     await addMessageToTicket(ticketId, "admin", replyText || "(файл)", fileIds)
     await updateTicketStatus(ticketId, "in_progress")
 
-    await bot.sendMessage(
-      chat.id,
-      `✅ Ответ отправлен. Теперь ученик может отвечать — все сообщения будут приходить сюда как продолжение диалога.`,
-      { reply_markup: closeDialogKeyboard(ticketId) }
-    )
+    await bot.sendMessage(chat.id, `✅ Ответ отправлен. Диалог продолжается.`, {
+      reply_markup: closeDialogKeyboard(ticketId),
+    })
   } catch (e) {
     await bot.sendMessage(chat.id, `❌ Не удалось отправить ответ. Ученик должен написать /start боту. (${e.message})`)
   }
@@ -457,13 +497,28 @@ async function forwardStudentReply(msg, ticketId, session) {
   if (msg.document) fileIds.push(msg.document.file_id)
   if (msg.voice) fileIds.push(msg.voice.file_id)
 
-  // Save to Firestore
   await addMessageToTicket(ticketId, "student", text || "(файл)", fileIds)
 
-  // Forward to admin
-  if (adminChatIdCached) {
+  // Get the department from the ticket
+  let dept = null
+  try {
+    const snap = await getDoc(doc(db, "tickets", ticketId))
+    if (snap.exists()) dept = snap.data().subject
+  } catch {}
+
+  // Map subject label to department ID
+  let deptId = null
+  for (const s of SUBJECTS) {
+    if (s.label === dept || s.id === dept) {
+      deptId = s.id
+      break
+    }
+  }
+
+  const adminChatId = deptId ? await getDeptAdminChatId(deptId) : null
+  if (adminChatId) {
     const header = `\uD83D\uDCE9 Ответ от ${studentName} (@${username}) по заявке #${ticketId}:\n\n${text || ""}`
-    const sent = await bot.sendMessage(adminChatIdCached, header, {
+    const sent = await bot.sendMessage(adminChatId, header, {
       reply_markup: adminTicketKeyboard(ticketId, chat.id),
     })
 
@@ -471,21 +526,21 @@ async function forwardStudentReply(msg, ticketId, session) {
       studentChatId: chat.id,
       studentName,
       ticketId,
+      department: deptId,
     })
 
     if (msg.document) {
-      await bot.sendDocument(adminChatIdCached, msg.document.file_id, {
+      await bot.sendDocument(adminChatId, msg.document.file_id, {
         caption: `Файл от ${studentName} (@${username})`,
       })
     }
     if (msg.photo) {
-      await bot.sendPhoto(adminChatIdCached, msg.photo[msg.photo.length - 1].file_id, {
+      await bot.sendPhoto(adminChatId, msg.photo[msg.photo.length - 1].file_id, {
         caption: `Фото от ${studentName} (@${username})`,
       })
     }
 
-    // Confirm to student
-    await bot.sendMessage(chat.id, `\u2705 Ваш ответ отправлен в заявку #${ticketId}. Ожидайте ответа от департамента.`)
+    await bot.sendMessage(chat.id, `\u2705 Ваш ответ отправлен в заявку #${ticketId}.`)
   } else {
     await bot.sendMessage(chat.id, "Извините, администратор пока не доступен.")
   }
@@ -512,12 +567,18 @@ async function handleNewTicket(msg, session) {
   if (msg.voice) fileIds.push(msg.voice.file_id)
   if (msg.video) fileIds.push(msg.video.file_id)
 
+  // Map subject label to ID
+  const subjectId = session.subject
+  const subjectLabel = session.subjectLabel
+
   const ticket = {
     source: "telegram",
     telegramId,
     userName,
     username,
-    subject: session.subjectLabel || session.subject,
+    subject: subjectId,
+    subjectLabel,
+    department: subjectId,
     category: session.categoryLabel || session.category,
     message: text || "(без текста, только файлы)",
     fileIds,
@@ -525,22 +586,22 @@ async function handleNewTicket(msg, session) {
     createdAt: serverTimestamp(),
   }
   const ticketId = await saveTicket(ticket)
-
   await addMessageToTicket(ticketId, "student", text || "(без текста, только файлы)", fileIds)
 
-  console.log(`\n📩 Новая заявка #${ticketId} от ${userName} (@${username})`)
+  console.log(`\n📩 Заявка #${ticketId} | ${subjectLabel} | ${userName} (@${username})`)
 
-  if (!adminChatIdCached) adminChatIdCached = await getAdminChatId()
-  if (adminChatIdCached) {
+  // Forward ONLY to the correct department
+  const adminChatId = await getDeptAdminChatId(subjectId)
+  if (adminChatId) {
     const header = [
       `📩 Заявка #${ticketId}`,
       `👤 ${userName} (@${username})`,
-      `📖 ${session.subjectLabel || session.subject}`,
+      `📖 ${subjectLabel}`,
       `📂 ${session.categoryLabel || session.category}`,
       `💬 ${text || "(без текста, только файлы)"}`,
     ].join("\n")
 
-    const sent = await bot.sendMessage(adminChatIdCached, header, {
+    const sent = await bot.sendMessage(adminChatId, header, {
       reply_markup: adminTicketKeyboard(ticketId, chatId),
     })
 
@@ -548,26 +609,33 @@ async function handleNewTicket(msg, session) {
       studentChatId: chatId,
       studentName: userName,
       ticketId,
+      department: subjectId,
     })
 
     if (msg.document) {
-      await bot.sendDocument(adminChatIdCached, msg.document.file_id, {
+      await bot.sendDocument(adminChatId, msg.document.file_id, {
         caption: `Файл от ${userName} (@${username})`,
       })
     }
-  }
 
-  const departmentName = SUBJECT_DEPARTMENTS[session.subject] || session.subjectLabel || session.subject
-  await bot.sendMessage(
-    chatId,
-    `✅ Ваше обращение успешно отправлено.\n\nДепартамент ${departmentName} получил вашу заявку.\n\nМы свяжемся с вами как можно скорее.`,
-    { reply_markup: newTicketKeyboard() }
-  )
+    const departmentName = subjectLabel
+    await bot.sendMessage(
+      chatId,
+      `✅ Ваше обращение успешно отправлено.\n\nДепартамент ${departmentName} получил вашу заявку.\n\nМы свяжемся с вами как можно скорее.`,
+      { reply_markup: newTicketKeyboard() }
+    )
+  } else {
+    await bot.sendMessage(
+      chatId,
+      `✅ Ваше обращение принято. К сожалению, департамент ${subjectLabel} ещё не зарегистрирован в системе. Мы свяжемся с вами позже.`,
+      { reply_markup: newTicketKeyboard() }
+    )
+  }
 
   await saveSession(telegramId, { step: STEPS.DONE })
 }
 
-// ---- Forward admin reply to student (when admin replies directly to a message) ----
+// ---- Forward admin reply to student (when admin replies directly) ----
 async function forwardToStudent(msg, ticketInfo) {
   const { chat, from, text } = msg
   const { studentChatId, studentName, ticketId } = ticketInfo
@@ -589,39 +657,26 @@ async function forwardToStudent(msg, ticketInfo) {
 
   try {
     await bot.sendMessage(studentChatId, header)
+    if (msg.document) await bot.sendDocument(studentChatId, msg.document.file_id, { caption: `Файл от ${adminName}` })
+    if (msg.photo) await bot.sendPhoto(studentChatId, msg.photo[msg.photo.length - 1].file_id, { caption: `Фото от ${adminName}` })
 
-    if (msg.document) {
-      await bot.sendDocument(studentChatId, msg.document.file_id, {
-        caption: `Файл от ${adminName}`,
-      })
-    }
-    if (msg.photo) {
-      await bot.sendPhoto(studentChatId, msg.photo[msg.photo.length - 1].file_id, {
-        caption: `Фото от ${adminName}`,
-      })
-    }
-
-    // Switch student to dialog mode
-    await saveSession(studentChatId, {
-      step: "in_dialog",
-      activeTicketId: ticketId,
-    })
-
+    await saveSession(studentChatId, { step: "in_dialog", activeTicketId: ticketId })
     await addMessageToTicket(ticketId, "admin", replyText || "(файл)", fileIds)
     await updateTicketStatus(ticketId, "in_progress")
 
-    await bot.sendMessage(
-      chat.id,
-      `✅ Ответ отправлен ${studentName}. Теперь ученик может отвечать — сообщения будут приходить сюда.`,
-      { reply_markup: closeDialogKeyboard(ticketId) }
-    )
+    await bot.sendMessage(chat.id, `✅ Ответ отправлен ${studentName}.`, {
+      reply_markup: closeDialogKeyboard(ticketId),
+    })
   } catch (e) {
-    await bot.sendMessage(chat.id, `❌ Не удалось отправить ответ. Ученик должен написать /start боту. (${e.message})`)
+    await bot.sendMessage(chat.id, `❌ Не удалось отправить ответ. (${e.message})`)
   }
 }
 
-// Cache admin chat ID on startup
-getAdminChatId().then((id) => {
-  adminChatIdCached = id
-  if (id) console.log(`Admin chat: ${id}`)
-})
+// Cache admin chats on startup
+async function loadAdminChats() {
+  for (const s of SUBJECTS) {
+    const id = await getDeptAdminChatId(s.id)
+    if (id) console.log(`  ${s.label}: chat ${id}`)
+  }
+}
+loadAdminChats().then(() => console.log("Admin chats loaded"))

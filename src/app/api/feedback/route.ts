@@ -5,17 +5,17 @@ import { addDoc, collection, serverTimestamp, doc, getDoc } from "firebase/fires
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
 
-const SUBJECT_DEPARTMENTS: Record<string, string> = {
-  biology: "департамент биологии",
-  physics: "департамент физики",
-  chemistry: "департамент химии",
-  math: "департамент математики",
-  cs: "департамент информатики",
+const SUBJECT_IDS: Record<string, string> = {
+  biology: "biology",
+  physics: "physics",
+  chemistry: "chemistry",
+  math: "math",
+  cs: "cs",
 }
 
-async function getAdminChatId(): Promise<number | null> {
+async function getDeptAdminChatId(department: string): Promise<number | null> {
   try {
-    const snap = await getDoc(doc(db, "admin_config", "primary"))
+    const snap = await getDoc(doc(db, "admin_config", department))
     if (snap.exists()) return snap.data().chatId as number
   } catch {
     /* ignore */
@@ -38,6 +38,8 @@ export async function POST(req: Request) {
       userName: userName || "Гость",
       username: "",
       subject,
+      subjectLabel: subject,
+      department: SUBJECT_IDS[subject] || subject,
       category,
       message,
       fileIds: [] as string[],
@@ -47,8 +49,9 @@ export async function POST(req: Request) {
 
     const ticketRef = await addDoc(collection(db, "tickets"), ticket)
 
-    // Notify admin via Telegram
-    const adminChatId = await getAdminChatId()
+    // Notify ONLY the correct department
+    const deptId = SUBJECT_IDS[subject]
+    const adminChatId = deptId ? await getDeptAdminChatId(deptId) : null
     if (adminChatId) {
       const header = [
         `📩 Новая заявка #${ticketRef.id}`,
@@ -66,7 +69,7 @@ export async function POST(req: Request) {
       })
     }
 
-    const departmentName = SUBJECT_DEPARTMENTS[subject] || subject
+    const departmentName = subject
     return NextResponse.json({ success: true, ticketId: ticketRef.id, department: departmentName })
   } catch (error) {
     console.error("Feedback error:", error)
