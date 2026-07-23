@@ -362,30 +362,27 @@ function InformatikaContent() {
 }
 
 function MatematikaContent() {
-  const [files, setFiles] = useState<string[] | null>(null)
+  const [driveUrl, setDriveUrl] = useState<string | null>(null)
 
   useEffect(() => {
-    let mounted = true
     fetch("/api/matematika")
       .then((r) => r.json())
-      .then((data) => {
-        if (!mounted) return
-        setFiles(data?.files || [])
-      })
-      .catch(() => setFiles([]))
-    return () => { mounted = false }
+      .then((data) => setDriveUrl(data?.driveUrl || null))
+      .catch(() => setDriveUrl(null))
   }, [])
 
-  const findFor = (topic: (typeof matematikaCurriculum)[number]) => {
-    if (!files) return []
-    return files.filter((f) => topic.keywords.some((rx) => rx.test(f)))
-  }
-
-  if (files === null)
-    return <div className="text-sm text-muted-foreground">Загрузка материалов...</div>
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
+      {driveUrl && (
+        <div className="flex justify-center">
+          <a href={driveUrl} target="_blank" rel="noopener noreferrer">
+            <Button size="lg" className="gap-2">
+              <ExternalLink className="h-5 w-5" />
+              Открыть материалы в Google Drive
+            </Button>
+          </a>
+        </div>
+      )}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {matematikaCurriculum.map((topic) => (
           <Card key={topic.id} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
@@ -408,29 +405,6 @@ function MatematikaContent() {
                   </div>
                 ))}
               </div>
-              {findFor(topic).length > 0 && (
-                <div className="pt-4 border-t border-border/20">
-                  <h4 className="font-semibold mb-2">PDF-ресурсы</h4>
-                  {findFor(topic).map((file) => (
-                    <div key={file} className="flex items-center justify-between gap-4 mb-2">
-                      <span className="truncate text-sm flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                        {file.split('/').pop() || file}
-                      </span>
-                      <div className="flex gap-2 shrink-0">
-                        <Link href={`/api/matematika?file=${encodeURIComponent(file)}`} target="_blank">
-                          <Button variant="outline" className="h-9">
-                            <Download className="mr-2 h-4 w-4" /> Скачать
-                          </Button>
-                        </Link>
-                        <Link href={`/api/matematika?file=${encodeURIComponent(file)}`} target="_blank">
-                          <Button className="h-9">Открыть</Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}

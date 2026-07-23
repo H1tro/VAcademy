@@ -13,7 +13,9 @@
     "cf:preview": "npx opennextjs-cloudflare preview",
     "upload:blob": "node scripts/upload-to-blob.js",
     "upload:biology": "node scripts/upload-biology-to-blob.js",
-    "upload:informatika": "node scripts/upload-informatika-to-blob.js"
+    "upload:informatika": "node scripts/upload-informatika-to-blob.js",
+    "tg:webhook": "node scripts/set-telegram-webhook.js",
+    "tg:polling": "node scripts/bot-polling.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",

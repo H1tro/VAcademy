@@ -5,16 +5,17 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { 
-  LayoutDashboard, 
-  BookOpen, 
-  Trophy, 
-  BarChart3, 
-  Info, 
+import {
+  LayoutDashboard,
+  BookOpen,
+  Trophy,
+  BarChart3,
+  Info,
   Settings,
   Atom,
   GraduationCap,
-  ListChecks
+  ListChecks,
+  ClipboardCheck
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -37,6 +38,7 @@ import { onAuthStateChanged, signOut, type User } from "firebase/auth"
 const navItems = [
   { name: "Обзор", href: "/dashboard", icon: LayoutDashboard },
   { name: "AI", href: "/ai", icon: Atom },
+  { name: "Тесты", href: "/tests", icon: ClipboardCheck },
   { name: "Курсы", href: "/courses", icon: BookOpen },
   { name: "Материалы", href: "/strategy", icon: GraduationCap },
   { name: "Задачи", href: "/problems", icon: ListChecks },

@@ -1,26 +1,12 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FileText, Download } from "lucide-react"
+import { ExternalLink } from "lucide-react"
 import curriculum from "@/lib/matematika-curriculum"
-import { getMatematikaFilesList } from "@/lib/matematika-blob"
-
-async function findMaterials() {
-  try {
-    const files = await getMatematikaFilesList()
-    return files
-  } catch (e) {
-    return []
-  }
-}
+import { getMatematikaDriveUrl } from "@/lib/matematika-blob"
 
 export default async function MatematikaPage() {
-  const materials = await findMaterials()
-
-  const findFor = (topic: (typeof curriculum)[number]) => {
-    if (!materials) return []
-    return materials.filter((f) => topic.keywords.some((rx) => rx.test(f)))
-  }
+  const driveUrl = await getMatematikaDriveUrl()
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
@@ -34,6 +20,15 @@ export default async function MatematikaPage() {
             <Button variant="outline" className="h-10">Назад</Button>
           </Link>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <a href={driveUrl} target="_blank" rel="noopener noreferrer">
+          <Button size="lg" className="gap-2">
+            <ExternalLink className="h-5 w-5" />
+            Открыть материалы в Google Drive
+          </Button>
+        </a>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -55,31 +50,6 @@ export default async function MatematikaPage() {
                         <li key={j}>{it}</li>
                       ))}
                     </ul>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-4 border-t border-border/20">
-                <h4 className="font-semibold mb-2">PDF-ресурсы</h4>
-                {findFor(topic).length === 0 && (
-                  <div className="text-sm text-muted-foreground">Материалы не найдены.</div>
-                )}
-                {findFor(topic).map((file) => (
-                  <div key={file} className="flex items-center justify-between gap-4 mb-2">
-                    <span className="truncate text-sm flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
-                      {file.split('/').pop() || file}
-                    </span>
-                    <div className="flex gap-2">
-                      <Link href={`/api/matematika?file=${encodeURIComponent(file)}`} target="_blank">
-                        <Button variant="outline" className="h-9">
-                          <Download className="mr-2 h-4 w-4" /> Скачать
-                        </Button>
-                      </Link>
-                      <Link href={`/api/matematika?file=${encodeURIComponent(file)}`} target="_blank">
-                        <Button className="h-9">Открыть</Button>
-                      </Link>
-                    </div>
                   </div>
                 ))}
               </div>
