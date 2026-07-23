@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar, MapPin, CircleDollarSign, ExternalLink, Info, Bell, MessageCircle } from "lucide-react"
+import { Calendar, MapPin, CircleDollarSign, ExternalLink, Info, Bell, MessageCircle, Sigma, Dna, Atom, FlaskConical } from "lucide-react"
 
 type Olympiad = {
   title: string
@@ -378,6 +378,13 @@ const groupConfig = [
   { key: 2, label: "Взнос уточняется" },
 ] as const
 
+const subjectIcons: Record<string, React.ReactNode> = {
+  "Математика": <Sigma className="h-5 w-5" />,
+  "Биология": <Dna className="h-5 w-5" />,
+  "Физика": <Atom className="h-5 w-5" />,
+  "Химия": <FlaskConical className="h-5 w-5" />,
+}
+
 const subjects = ["Математика", "Биология"] as const
 
 export default function OlympiadsHub() {
@@ -467,7 +474,8 @@ export default function OlympiadsHub() {
                 <span className="w-full border-t border-border/40" />
               </div>
               <div className="relative flex justify-center">
-                <span className="bg-background px-6 py-1 text-sm font-bold font-headline tracking-[0.2em] text-muted-foreground uppercase">
+                <span className="bg-background px-6 py-1 text-sm font-bold font-headline tracking-[0.2em] text-muted-foreground uppercase flex items-center gap-2">
+                  {subjectIcons[subject]}
                   {subject}
                 </span>
               </div>

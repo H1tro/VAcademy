@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Trophy, ExternalLink, FileText, BookOpen, Code2, Sparkles, Globe } from "lucide-react"
 import curriculum from "@/lib/informatika-curriculum"
 import { getInformatikaFilesList } from "@/lib/informatika-blob"
+import { INFORMATIKA_OLYMPIADS } from "@/lib/informatika-olympiads"
 
 const ONLINE_PLATFORMS = [
   {
@@ -156,13 +157,32 @@ export default async function InformatikaPage() {
             Олимпиадные ресурсы
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <a href="https://codeforces.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <Trophy className="h-4 w-4 shrink-0" /> Codeforces — рейтинговые раунды
-          </a>
-          <a href="https://leetcode.com/problemset/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <Code2 className="h-4 w-4 shrink-0" /> LeetCode — задачи по темам
-          </a>
+        <CardContent className="space-y-6">
+          {INFORMATIKA_OLYMPIADS.map((category) => {
+            const CategoryIcon = category.icon === "trophy" ? Trophy : category.icon === "globe" ? Globe : BookOpen
+            return (
+              <div key={category.title}>
+                <h3 className="flex items-center gap-2 font-semibold text-sm mb-2">
+                  <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+                  {category.title}
+                </h3>
+                <div className="flex flex-col gap-2 pl-6">
+                  {category.items.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                      <span>{item.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </CardContent>
       </Card>
     </div>

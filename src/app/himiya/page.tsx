@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { BookOpen } from "lucide-react"
+import { BookOpen, Trophy, ExternalLink, Globe, Map } from "lucide-react"
 import curriculum from "@/lib/himiya-curriculum"
+import { HIMIYA_OLYMPIADS } from "@/lib/himiya-olympiads"
 
 export default function HimiyaPage() {
   return (
@@ -45,6 +46,42 @@ export default function HimiyaPage() {
           </Card>
         ))}
       </div>
+
+      <Card className="bg-card/40 border-border/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trophy className="h-5 w-5 text-accent" />
+            Олимпиадные задачи
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {HIMIYA_OLYMPIADS.map((category) => {
+            const CategoryIcon = category.icon === "trophy" ? Trophy : category.icon === "globe" ? Globe : category.icon === "book" ? BookOpen : Map
+            return (
+              <div key={category.title}>
+                <h3 className="flex items-center gap-2 font-semibold text-sm mb-2">
+                  <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+                  {category.title}
+                </h3>
+                <div className="flex flex-col gap-2 pl-6">
+                  {category.items.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                      <span>{item.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </CardContent>
+      </Card>
 
       <Card className="bg-card/40 border-border/40">
         <CardHeader>

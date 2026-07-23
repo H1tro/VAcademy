@@ -1,8 +1,9 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, Trophy, Youtube, BookOpen } from "lucide-react"
+import { ExternalLink, Trophy, Youtube, BookOpen, Globe, Award, Map } from "lucide-react"
 import curriculum from "@/lib/fizika-curriculum"
+import { FIZIKA_OLYMPIADS } from "@/lib/fizika-olympiads"
 
 function materialIcon(name: string, url: string) {
   const s = (name + " " + url).toLowerCase()
@@ -79,16 +80,32 @@ export default function FizikaPage() {
             Олимпиадные задачи
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <a href="https://ipho.olimpicos.net/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <Trophy className="h-4 w-4" /> Архивы IPhO (международная физическая олимпиада)
-          </a>
-          <a href="https://www.google.com/search?q=Иродов+Е.И.+задачи+по+физике" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <BookOpen className="h-4 w-4" /> Иродов Е.И. — сборник задач
-          </a>
-          <a href="https://www.google.com/search?q=Кротов+Н.Н.+олимпиадные+задачи+по+физике" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <BookOpen className="h-4 w-4" /> Кротов Н.Н. — олимпиадные задачи
-          </a>
+        <CardContent className="space-y-6">
+          {FIZIKA_OLYMPIADS.map((category) => {
+            const CategoryIcon = category.icon === "trophy" ? Trophy : category.icon === "globe" ? Globe : category.icon === "book" ? BookOpen : Map
+            return (
+              <div key={category.title}>
+                <h3 className="flex items-center gap-2 font-semibold text-sm mb-2">
+                  <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+                  {category.title}
+                </h3>
+                <div className="flex flex-col gap-2 pl-6">
+                  {category.items.map((item) => (
+                    <a
+                      key={item.name}
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                      <span>{item.name}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
         </CardContent>
       </Card>
     </div>

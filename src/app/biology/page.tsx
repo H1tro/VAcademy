@@ -4,25 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Trophy, ExternalLink, FileText } from "lucide-react"
 import curriculum from "@/lib/biology-curriculum"
 import { getBiologyFilesList } from "@/lib/biology-blob"
-
-const BIOLOGY_OLYMPIAD = [
-  {
-    name: "Официальный архив IBO (International Biology Olympiad) — задания, тесты и ключи",
-    url: "https://www.ibo-info.org/",
-  },
-  {
-    name: "Biolympiads — крупнейший архив задач IBO, USABO, BBO и др.",
-    url: "https://biolympiads.com/",
-  },
-  {
-    name: "Архив Всероссийской олимпиады (ВсОШ) на Olimpiada.ru",
-    url: "https://olimpiada.ru/",
-  },
-  {
-    name: "Всероссийский Биотурнир — разборы теоретических и практических туров",
-    url: "https://bioturnir.ru/",
-  },
-]
+import { BIOLOGY_OLYMPIAD } from "@/lib/biology-olympiads"
 
 async function findMaterials() {
   try {
@@ -124,6 +106,23 @@ export default async function BiologyPage() {
                 </a>
               )
             })}
+          </CardContent>
+        </Card>
+
+        <Card className="bg-card/40 border-border/40 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19.13C5.12 19.56 12 19.56 12 19.56s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.43z" /><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" /></svg>
+              YouTube-каналы
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            <a href="https://www.youtube.com/@NinjaNerdOfficial" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+              <span>Ninja Nerd Official — подробные видеоуроки по биологии, анатомии и физиологии</span>
+            </a>
+            <a href="https://www.youtube.com/@edlightbiology7455" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+              <span>EdLight Biology — наглядные лекции по биологии</span>
+            </a>
           </CardContent>
         </Card>
 

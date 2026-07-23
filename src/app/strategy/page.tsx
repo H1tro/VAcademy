@@ -5,34 +5,19 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { GraduationCap, ExternalLink, Trophy, Youtube, BookOpen, Download, FileText, Code2, Globe, Sparkles } from "lucide-react"
+import { GraduationCap, ExternalLink, Trophy, Youtube, BookOpen, Download, FileText, Code2, Globe, Sparkles, Map, FlaskConical, Dna, Sigma, Atom } from "lucide-react"
 import { SubjectSelector, SUBJECTS, type SubjectId } from "@/components/strategy/subject-selector"
 import fizikaCurriculum from "@/lib/fizika-curriculum"
 import { curriculum as biologyCurriculum } from "@/lib/biology-curriculum"
 import informatikaCurriculum from "@/lib/informatika-curriculum"
 import matematikaCurriculum from "@/lib/matematika-curriculum"
 import himiyaCurriculum from "@/lib/himiya-curriculum"
+import { FIZIKA_OLYMPIADS } from "@/lib/fizika-olympiads"
+import { HIMIYA_OLYMPIADS } from "@/lib/himiya-olympiads"
+import { INFORMATIKA_OLYMPIADS } from "@/lib/informatika-olympiads"
+import { BIOLOGY_OLYMPIAD } from "@/lib/biology-olympiads"
 
 const PLACEHOLDER_SUBJECTS: SubjectId[] = []
-
-const BIOLOGY_OLYMPIAD: { name: string; url: string }[] = [
-  {
-    name: "Официальный архив IBO (International Biology Olympiad) — задания, тесты и ключи",
-    url: "https://www.ibo-info.org/",
-  },
-  {
-    name: "Biolympiads — крупнейший архив задач IBO, USABO, BBO и др.",
-    url: "https://biolympiads.com/",
-  },
-  {
-    name: "Архив Всероссийской олимпиады (ВсОШ) на Olimpiada.ru",
-    url: "https://olimpiada.ru/",
-  },
-  {
-    name: "Всероссийский Биотурнир — разборы теоретических и практических туров",
-    url: "https://bioturnir.ru/",
-  },
-]
 
 function materialIcon(name: string, url: string) {
   const s = (name + " " + url).toLowerCase()
@@ -99,26 +84,6 @@ function FizikaContent() {
           </Card>
         ))}
       </div>
-
-      <Card className="bg-card/40 border-border/40">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-accent" />
-            Олимпиадные задачи
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <a href="https://ipho.olimpicos.net/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <Trophy className="h-4 w-4" /> Архивы IPhO (международная физическая олимпиада)
-          </a>
-          <a href="https://www.google.com/search?q=Иродов+Е.И.+задачи+по+физике" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <BookOpen className="h-4 w-4" /> Иродов Е.И. — сборник задач
-          </a>
-          <a href="https://www.google.com/search?q=Кротов+Н.Н.+олимпиадные+задачи+по+физике" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <BookOpen className="h-4 w-4" /> Кротов Н.Н. — олимпиадные задачи
-          </a>
-        </CardContent>
-      </Card>
     </div>
   )
 }
@@ -200,31 +165,6 @@ function BiologyContent() {
         })}
       </div>
 
-      <Card className="bg-card/40 border-border/40">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="h-5 w-5 text-accent" />
-            Олимпиадные задачи
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          {BIOLOGY_OLYMPIAD.map((m) => {
-            const Icon = materialIcon(m.name, m.url)
-            return (
-              <a
-                key={m.name}
-                href={m.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-sm text-primary hover:underline"
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{m.name}</span>
-              </a>
-            )
-          })}
-        </CardContent>
-      </Card>
     </div>
   )
 }
@@ -341,22 +281,6 @@ function InformatikaContent() {
         </CardContent>
       </Card>
 
-      <Card className="bg-card/40 border-border/40">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-accent" />
-            Олимпиадные ресурсы
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <a href="https://codeforces.com/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <Trophy className="h-4 w-4 shrink-0" /> Codeforces — рейтинговые раунды
-          </a>
-          <a href="https://leetcode.com/problemset/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
-            <Code2 className="h-4 w-4 shrink-0" /> LeetCode — задачи по темам
-          </a>
-        </CardContent>
-      </Card>
     </div>
   )
 }
@@ -446,6 +370,80 @@ function HimiyaContent() {
   )
 }
 
+const SUBJECT_OLYMPIADS = {
+  fizika: FIZIKA_OLYMPIADS,
+  himiya: HIMIYA_OLYMPIADS,
+  informatika: INFORMATIKA_OLYMPIADS,
+} as const
+
+const SUBJECT_SIMPLE_OLYMPIADS: Record<string, { name: string; url: string }[]> = {
+  biology: BIOLOGY_OLYMPIAD,
+}
+
+function OlympiadResources({ subject }: { subject: SubjectId }) {
+  const categorized = SUBJECT_OLYMPIADS[subject as keyof typeof SUBJECT_OLYMPIADS]
+  const simple = SUBJECT_SIMPLE_OLYMPIADS[subject]
+
+  if (!categorized && !simple) return null
+
+  return (
+    <Card className="bg-card/40 border-border/40">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Trophy className="h-5 w-5 text-accent" />
+          Олимпиадные задачи
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {categorized && categorized.map((category) => {
+          const CategoryIcon = category.icon === "trophy" ? Trophy : category.icon === "globe" ? Globe : category.icon === "book" ? BookOpen : Map
+          return (
+            <div key={category.title}>
+              <h3 className="flex items-center gap-2 font-semibold text-sm mb-2">
+                <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+                {category.title}
+              </h3>
+              <div className="flex flex-col gap-2 pl-6">
+                {category.items.map((item) => (
+                  <a
+                    key={item.name}
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-primary hover:underline"
+                  >
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                    <span>{item.name}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+        {simple && (
+          <div className="flex flex-col gap-2">
+            {simple.map((item) => {
+              const Icon = /олимпиад/i.test(item.name) ? Trophy : ExternalLink
+              return (
+                <a
+                  key={item.name}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-primary hover:underline"
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span>{item.name}</span>
+                </a>
+              )
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
+
 export default function StrategyPage() {
   const router = useRouter()
   const [active, setActive] = useState<SubjectId>("biology")
@@ -483,6 +481,8 @@ export default function StrategyPage() {
             <span className="text-lg text-muted-foreground">Coming soon</span>
           </div>
         )}
+
+        <OlympiadResources subject={active} />
       </div>
     </div>
   )

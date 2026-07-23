@@ -30,6 +30,12 @@ const testCategories = [
     description: "Тесты по молекулярной биологии, генетике и экологии",
     href: "#",
   },
+  {
+    title: "Campbell Biology — Test Bank",
+    description: "Официальный тест-банк к учебнику Campbell Biology 10-е издание (2155 вопросов, 384 страницы)",
+    href: "/tests/biology/Campbell_Biology_10th_Edition_Test_Bank.pdf",
+    isPdf: true,
+  },
 ]
 
 export default function TestsPage() {
