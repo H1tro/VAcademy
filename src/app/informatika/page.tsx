@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Trophy, ExternalLink, FileText, BookOpen, Code2, Sparkles, Globe } from "lucide-react"
+import { Trophy, ExternalLink, FileText, BookOpen, Code2, Sparkles, Globe, Youtube } from "lucide-react"
 import curriculum from "@/lib/informatika-curriculum"
 import { getInformatikaFilesList } from "@/lib/informatika-blob"
 import { INFORMATIKA_OLYMPIADS } from "@/lib/informatika-olympiads"
@@ -21,6 +21,11 @@ const ONLINE_PLATFORMS = [
     name: "Codeforces — олимпийский стадион",
     url: "https://codeforces.com/",
     icon: Trophy,
+  },
+  {
+    name: "Алгоритмы — видеоурок",
+    url: "https://youtu.be/cpuRbnWEPio?si=lfWk8C74av8jvucE",
+    icon: Youtube,
   },
 ]
 
