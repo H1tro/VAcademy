@@ -1,3 +1,10 @@
+export const HIMIYA_DRIVE_URL =
+  "https://drive.google.com/drive/folders/13geeNS07C9alRpczRQbzedX3dNv7O5JJ?usp=sharing"
+
+export async function getHimiyaDriveUrl(): Promise<string> {
+  return HIMIYA_DRIVE_URL
+}
+
 // Utility for managing himiya files from Vercel Blob
 const BLOB_BASE_URL = 'https://zovqflkgqlje1zvz.public.blob.vercel-storage.com/himiya';
 

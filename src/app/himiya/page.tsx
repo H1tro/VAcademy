@@ -4,8 +4,11 @@ import { Button } from "@/components/ui/button"
 import { BookOpen, Trophy, ExternalLink, Globe, Map } from "lucide-react"
 import curriculum from "@/lib/himiya-curriculum"
 import { HIMIYA_OLYMPIADS } from "@/lib/himiya-olympiads"
+import { getHimiyaDriveUrl } from "@/lib/himiya-blob"
 
-export default function HimiyaPage() {
+export default async function HimiyaPage() {
+  const driveUrl = await getHimiyaDriveUrl()
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
       <div className="flex items-center justify-between">
@@ -18,6 +21,15 @@ export default function HimiyaPage() {
             <Button variant="outline" className="h-10">Назад</Button>
           </Link>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <a href={driveUrl} target="_blank" rel="noopener noreferrer">
+          <Button size="lg" className="gap-2">
+            <ExternalLink className="h-5 w-5" />
+            Открыть материалы в Google Drive
+          </Button>
+        </a>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

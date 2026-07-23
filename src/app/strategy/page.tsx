@@ -16,6 +16,7 @@ import { FIZIKA_OLYMPIADS } from "@/lib/fizika-olympiads"
 import { HIMIYA_OLYMPIADS } from "@/lib/himiya-olympiads"
 import { INFORMATIKA_OLYMPIADS } from "@/lib/informatika-olympiads"
 import { BIOLOGY_OLYMPIAD } from "@/lib/biology-olympiads"
+import { HIMIYA_DRIVE_URL } from "@/lib/himiya-blob"
 
 const PLACEHOLDER_SUBJECTS: SubjectId[] = []
 
@@ -340,6 +341,14 @@ function MatematikaContent() {
 function HimiyaContent() {
   return (
     <div className="space-y-8">
+      <div className="flex justify-center">
+        <a href={HIMIYA_DRIVE_URL} target="_blank" rel="noopener noreferrer">
+          <Button size="lg" className="gap-2">
+            <ExternalLink className="h-5 w-5" />
+            Открыть материалы в Google Drive
+          </Button>
+        </a>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {himiyaCurriculum.map((topic) => (
           <Card key={topic.id} className="bg-card/40 border-border/40 hover:border-primary/30 transition-all">
