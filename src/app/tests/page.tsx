@@ -36,6 +36,12 @@ const testCategories = [
     href: "/tests/biology/Campbell_Biology_10th_Edition_Test_Bank.pdf",
     isPdf: true,
   },
+  {
+    title: "Тесты по дополнительному плану подготовки к физическим олимпиадам",
+    description: "Сборник тестов для подготовки к олимпиадам по физике",
+    href: "/tests/fizika/Тесты_по_дополнительному_плану_подготовки_к_физическим_олимпиадам.pdf",
+    isPdf: true,
+  },
 ]
 
 export default function TestsPage() {
