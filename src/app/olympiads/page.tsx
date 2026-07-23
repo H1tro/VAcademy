@@ -1,16 +1,20 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Calendar, MapPin, CircleDollarSign, ExternalLink, Info, Bell, MessageCircle, Sigma, Dna, Atom, FlaskConical } from "lucide-react"
+import { Calendar, MapPin, CircleDollarSign, ExternalLink, Bell, MessageCircle, Filter, BookCheck, Sigma, Dna, Atom, FlaskConical } from "lucide-react"
+import Link from "next/link"
+
+type OlympiadSubject = "Математика" | "Биология" | "Химия" | "Физика"
 
 type Olympiad = {
   title: string
-  subject: "Математика" | "Биология" | "Химия"
+  subject: OlympiadSubject
   dates: string
   location: string
   description: string
@@ -22,14 +26,13 @@ type Olympiad = {
 
 const olympiads: Olympiad[] = [
   // ========== МАТЕМАТИКА ==========
-  // Бесплатные
   {
     title: "Олимпиада им. Л. Эйлера I тур",
     subject: "Математика",
     dates: "Начало декабря, 2025 год",
     location: "Кыргызстан, официальное участие",
     fee: "Бесплатно",
-    description: "Дистанционный этап. Участие бесплатное, места ограничены. Подробнее об участии будет опубликовано ближе к дате.",
+    description: "Дистанционный этап. Участие бесплатное, места ограничены.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 0,
@@ -40,7 +43,7 @@ const olympiads: Olympiad[] = [
     dates: "Конец января, 2026 год",
     location: "Кыргызстан, официальное участие",
     fee: "Бесплатно",
-    description: "Дистанционный этап. Участие бесплатное, места ограничены. Подробнее об участии будет опубликовано ближе к дате.",
+    description: "Дистанционный этап. Участие бесплатное, места ограничены.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 0,
@@ -51,7 +54,7 @@ const olympiads: Olympiad[] = [
     dates: "I этап: январь 2026 | II этап: февраль 2026 | III этап: март 2026 | IV этап: апрель 2026",
     location: "Кыргызстан",
     fee: "Бесплатно",
-    description: "Главная официальная олимпиада Кыргызстана по математике. Четыре этапа. Участие бесплатное.",
+    description: "Главная официальная олимпиада Кыргызстана по математике. Четыре этапа.",
     status: "Скоро",
     type: "Национальная",
     sortGroup: 0,
@@ -111,7 +114,6 @@ const olympiads: Olympiad[] = [
     type: "Международная",
     sortGroup: 0,
   },
-  // Платные
   {
     title: "AMC 10/12A (American Mathematics Competitions)",
     subject: "Математика",
@@ -178,20 +180,19 @@ const olympiads: Olympiad[] = [
     type: "Международная",
     sortGroup: 1,
   },
-  // Взнос уточняется
   {
     title: "XII Иранская олимпиада по геометрии (IGO)",
     subject: "Математика",
     dates: "I тур: 12 октября, 2025 | II тур: 17 октября, 2025",
     location: "Кыргызстан, официальное участие",
     fee: "Уточняется",
-    description: "Олимпиада имеет международный статус. Задачи очень сложные. Рекомендуется попробовать порешать задачи прошлых лет.",
+    description: "Олимпиада имеет международный статус. Задачи очень сложные.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 2,
   },
   {
-    title: "EMC (Европейский Математический Кубок – European Mathematical Cup)",
+    title: "EMC (Европейский Математический Кубок)",
     subject: "Математика",
     dates: "Конец декабря, 2025 год",
     location: "Кыргызстан, официальное участие",
@@ -213,7 +214,7 @@ const olympiads: Olympiad[] = [
     sortGroup: 2,
   },
   {
-    title: "Caucasus Mathematical Olympiad (Кавказская математическая олимпиада)",
+    title: "Caucasus Mathematical Olympiad",
     subject: "Математика",
     dates: "Март, 2026 год",
     location: "РФ, официальное участие",
@@ -247,7 +248,6 @@ const olympiads: Olympiad[] = [
   },
 
   // ========== БИОЛОГИЯ ==========
-  // Бесплатные
   {
     title: "Республиканская олимпиада школьников (Кыргызстан)",
     subject: "Биология",
@@ -314,7 +314,6 @@ const olympiads: Olympiad[] = [
     type: "Национальная",
     sortGroup: 0,
   },
-  // Платные
   {
     title: "British Biology Olympiad (BBO)",
     subject: "Биология",
@@ -354,7 +353,7 @@ const olympiads: Olympiad[] = [
     dates: "Круглый год",
     location: "Онлайн",
     fee: "Платно (есть бесплатный доступ)",
-    description: "Не классические олимпиады, но полезны для подготовки. Без ограничений по возрасту.",
+    description: "Не классические олимпиады, но полезны для подготовки.",
     status: "Круглый год",
     type: "Онлайн",
     sortGroup: 1,
@@ -372,14 +371,13 @@ const olympiads: Olympiad[] = [
   },
 
   // ========== ХИМИЯ ==========
-  // Бесплатные
   {
     title: "Национальная олимпиада по химии Кыргызской Республики",
     subject: "Химия",
     dates: "I этап: январь 2026 | II этап: февраль 2026 | III этап: март 2026 | IV этап: апрель 2026",
     location: "Кыргызстан, официальное участие",
     fee: "Бесплатно",
-    description: "Главная официальная олимпиада страны по химии. Четыре этапа. Участие бесплатное.",
+    description: "Главная официальная олимпиада страны по химии. Четыре этапа.",
     status: "Скоро",
     type: "Национальная",
     sortGroup: 0,
@@ -401,7 +399,7 @@ const olympiads: Olympiad[] = [
     dates: "Конец апреля – начало мая, 2026 год",
     location: "Ежегодно меняется",
     fee: "Бесплатно (через сборную)",
-    description: "Одна из самых престижных олимпиад мира после IChO. Участвуют победители и призёры национальных олимпиад.",
+    description: "Одна из самых престижных олимпиад мира после IChO.",
     status: "Отбор",
     type: "Международная",
     sortGroup: 0,
@@ -412,7 +410,7 @@ const olympiads: Olympiad[] = [
     dates: "Июль, 2026 год",
     location: "Ежегодно меняется",
     fee: "Бесплатно (через сборную)",
-    description: "Самая престижная школьная олимпиада по химии. Участвуют только члены национальной сборной после учебно-тренировочных сборов.",
+    description: "Самая престижная школьная олимпиада по химии. Только члены национальной сборной.",
     status: "Отбор",
     type: "Международная",
     sortGroup: 0,
@@ -423,7 +421,7 @@ const olympiads: Olympiad[] = [
     dates: "Май–июнь",
     location: "Узбекистан",
     fee: "Бесплатно (через сборную)",
-    description: "Одна из сильнейших международных олимпиад Центральной Азии. Приглашаются национальные сборные.",
+    description: "Одна из сильнейших международных олимпиад Центральной Азии.",
     status: "Отбор",
     type: "Международная",
     sortGroup: 0,
@@ -434,7 +432,7 @@ const olympiads: Olympiad[] = [
     dates: "Март–апрель",
     location: "Кыргызстан / Казахстан",
     fee: "Бесплатно (через отбор)",
-    description: "Участвуют лучшие школьники стран Центральной Азии. Отбор через национальные олимпиады.",
+    description: "Участвуют лучшие школьники стран Центральной Азии.",
     status: "Отбор",
     type: "Международная",
     sortGroup: 0,
@@ -445,7 +443,7 @@ const olympiads: Olympiad[] = [
     dates: "Декабрь, 2025",
     location: "Международное участие",
     fee: "Бесплатно (через отбор)",
-    description: "Для учеников младше 16 лет. Включает задания по химии, физике и биологии.",
+    description: "Для учеников младше 16 лет. Химия + физика + биология.",
     status: "Прошёл",
     type: "Международная",
     sortGroup: 0,
@@ -467,7 +465,7 @@ const olympiads: Olympiad[] = [
     dates: "Январь–март",
     location: "Россия (онлайн / офлайн)",
     fee: "Бесплатно",
-    description: "Организатор — МГУ. Включает дистанционный и очный этапы.",
+    description: "Организатор — МГУ. Дистанционный и очный этапы.",
     status: "Скоро",
     type: "Университетская",
     sortGroup: 0,
@@ -478,7 +476,7 @@ const olympiads: Olympiad[] = [
     dates: "Январь–март",
     location: "Россия (онлайн / офлайн)",
     fee: "Бесплатно",
-    description: "Популярна среди сильных олимпиадников стран СНГ. Дистанционный и заключительный этап.",
+    description: "Популярна среди сильных олимпиадников стран СНГ.",
     status: "Скоро",
     type: "Университетская",
     sortGroup: 0,
@@ -505,14 +503,24 @@ const olympiads: Olympiad[] = [
     type: "Национальная",
     sortGroup: 0,
   },
-  // Платные / уточняется
+  {
+    title: "Олимпиада «Высшая проба» по химии",
+    subject: "Химия",
+    dates: "Январь–апрель",
+    location: "Россия (онлайн / офлайн)",
+    fee: "Бесплатно",
+    description: "Организатор — НИУ ВШЭ. Дистанционный и заключительный этап.",
+    status: "Скоро",
+    type: "Университетская",
+    sortGroup: 0,
+  },
   {
     title: "Open International Chemistry Olympiad (OICO)",
     subject: "Химия",
     dates: "Июль",
     location: "Международное участие",
     fee: "Уточняется",
-    description: "Международная открытая олимпиада по химии. Участвуют сильнейшие школьники из различных стран.",
+    description: "Международная открытая олимпиада по химии.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 2,
@@ -523,7 +531,7 @@ const olympiads: Olympiad[] = [
     dates: "Июнь",
     location: "Международное участие",
     fee: "Уточняется",
-    description: "Командный турнир исследовательского типа. Участники заранее решают открытые научные задачи и защищают решения.",
+    description: "Командный турнир исследовательского типа. Участники решают открытые научные задачи.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 2,
@@ -534,7 +542,7 @@ const olympiads: Olympiad[] = [
     dates: "Июль",
     location: "Международное участие",
     fee: "Уточняется",
-    description: "Командный исследовательский турнир. Участники получают реальные научные задачи и защищают решения.",
+    description: "Командный исследовательский турнир.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 2,
@@ -545,7 +553,7 @@ const olympiads: Olympiad[] = [
     dates: "Ежегодно",
     location: "Международное участие",
     fee: "Уточняется",
-    description: "Решение сложных задач, экспериментальные задания, научные дискуссии. Хорошая подготовка к международным олимпиадам.",
+    description: "Решение задач, эксперименты, научные дискуссии. Подготовка к международным олимпиадам.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 2,
@@ -556,21 +564,10 @@ const olympiads: Olympiad[] = [
     dates: "Ежегодно",
     location: "Россия",
     fee: "Уточняется",
-    description: "Командная олимпиада по химии. Включает исследовательские и нестандартные задачи.",
+    description: "Командная олимпиада. Исследовательские и нестандартные задачи.",
     status: "Скоро",
     type: "Университетская",
     sortGroup: 2,
-  },
-  {
-    title: "Олимпиада «Высшая проба» по химии",
-    subject: "Химия",
-    dates: "Январь–апрель",
-    location: "Россия (онлайн / офлайн)",
-    fee: "Бесплатно",
-    description: "Организатор — НИУ ВШЭ. Есть дистанционный и заключительный этап.",
-    status: "Скоро",
-    type: "Университетская",
-    sortGroup: 0,
   },
   {
     title: "Open Chemistry Olympiad (Турция)",
@@ -578,41 +575,56 @@ const olympiads: Olympiad[] = [
     dates: "Ежегодно",
     location: "Турция",
     fee: "Уточняется",
-    description: "Ежегодная международная открытая олимпиада. Иногда принимает иностранных участников.",
+    description: "Ежегодная международная открытая олимпиада.",
     status: "Скоро",
     type: "Международная",
     sortGroup: 2,
   },
 ]
 
-const groupConfig = [
-  { key: 0, label: "Бесплатные" },
-  { key: 1, label: "Платные" },
-  { key: 2, label: "Взнос уточняется" },
-] as const
+const allSubjects: { value: OlympiadSubject | "all"; label: string; icon: React.ReactNode }[] = [
+  { value: "all", label: "Все предметы", icon: <Filter className="h-4 w-4" /> },
+  { value: "Математика", label: "Математика", icon: <Sigma className="h-4 w-4" /> },
+  { value: "Биология", label: "Биология", icon: <Dna className="h-4 w-4" /> },
+  { value: "Химия", label: "Химия", icon: <FlaskConical className="h-4 w-4" /> },
+  { value: "Физика", label: "Физика", icon: <Atom className="h-4 w-4" /> },
+]
 
-const subjectIcons: Record<string, React.ReactNode> = {
-  "Математика": <Sigma className="h-5 w-5" />,
-  "Биология": <Dna className="h-5 w-5" />,
-  "Физика": <Atom className="h-5 w-5" />,
-  "Химия": <FlaskConical className="h-5 w-5" />,
+const statusColors: Record<string, string> = {
+  "Скоро": "bg-amber-500/15 text-amber-500 border-amber-500/30",
+  "Отбор": "bg-blue-500/15 text-blue-500 border-blue-500/30",
+  "Идет регистрация": "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
+  "Круглый год": "bg-violet-500/15 text-violet-500 border-violet-500/30",
+  "Прошёл": "bg-muted text-muted-foreground border-border/40",
 }
 
-const subjects = ["Математика", "Биология", "Химия"] as const
-
-export default function OlympiadsHub() {
+function OlympiadsPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const subjectParam = searchParams.get("subject") as OlympiadSubject | null
+
   const [question, setQuestion] = useState("")
   const [answer, setAnswer] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
+  const currentSubject: OlympiadSubject | "all" = subjectParam && allSubjects.some(s => s.value === subjectParam)
+    ? subjectParam
+    : "all"
 
+  const filteredOlympiads = currentSubject === "all"
+    ? olympiads
+    : olympiads.filter((o) => o.subject === currentSubject)
 
-  const grouped: Record<string, Record<number, Olympiad[]>> = {}
-  for (const o of olympiads) {
-    ;(grouped[o.subject] ??= {})[o.sortGroup] ??= []
-    grouped[o.subject][o.sortGroup].push(o)
+  const handleSubjectChange = (subject: OlympiadSubject | "all") => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (subject === "all") {
+      params.delete("subject")
+    } else {
+      params.set("subject", subject)
+    }
+    const query = params.toString()
+    router.push(query ? `/olympiads?${query}` : "/olympiads")
   }
 
   const askAssistant = async () => {
@@ -649,19 +661,24 @@ export default function OlympiadsHub() {
   }
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-2">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Link href="/dashboard" className="text-sm hover:text-primary transition-colors">Дашборд</Link>
+            <span className="text-xs">/</span>
+            <span className="text-sm text-foreground font-medium">Олимпиады</span>
+          </div>
           <h1 className="text-4xl font-headline font-black tracking-tight">Olympiad Hub</h1>
-          <p className="text-muted-foreground text-lg">Ваш навигатор в мире олимпиад и интеллектуальных соревнований.</p>
+          <p className="text-muted-foreground text-lg">
+            Ваш навигатор в мире олимпиад и интеллектуальных соревнований
+          </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button
-            variant="outline"
-            className="h-12 rounded-full border-border/40 hover:bg-secondary"
-            onClick={() => router.push("/dashboard")}
-          >
-            Назад
+          <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" asChild>
+            <Link href="/dashboard">
+              Назад
+            </Link>
           </Button>
           <Button
             variant="outline"
@@ -673,102 +690,83 @@ export default function OlympiadsHub() {
         </div>
       </div>
 
-      {subjects.map((subject) => {
-        const subjectData = grouped[subject]
-        if (!subjectData) return null
+      <div className="flex flex-wrap items-center gap-3">
+        <Filter className="h-4 w-4 text-muted-foreground" />
+        {allSubjects.map((s) => (
+          <button
+            key={s.value}
+            onClick={() => handleSubjectChange(s.value)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
+              currentSubject === s.value
+                ? "bg-primary text-primary-foreground border-primary shadow-md"
+                : "bg-card/50 text-muted-foreground border-border/40 hover:border-primary/30 hover:text-foreground"
+            }`}
+          >
+            {s.icon}
+            {s.label}
+          </button>
+        ))}
+      </div>
 
-        const hasAny = Object.values(subjectData).some((arr) => arr.length > 0)
-        if (!hasAny) return null
+      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+        <BookCheck className="h-4 w-4" />
+        <span>
+          Найдено: <span className="font-bold text-foreground">{filteredOlympiads.length}</span>
+          {" "}олимпиад{currentSubject !== "all" && (
+            <span> по предмету «<span className="font-semibold text-foreground">{currentSubject}</span>»</span>
+          )}
+        </span>
+      </div>
 
-        return (
-          <div key={subject}>
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border/40" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredOlympiads.map((olimp, i) => (
+          <Card
+            key={i}
+            className="border-border/40 bg-card/50 shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-200 group overflow-hidden"
+          >
+            <div className="h-2 bg-primary/20 group-hover:bg-primary transition-colors" />
+            <CardContent className="p-5 space-y-3">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5">
+                  {olimp.type}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${statusColors[olimp.status] || "bg-muted text-muted-foreground border-border/40"}`}
+                >
+                  {olimp.status}
+                </Badge>
+                <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5">
+                  {olimp.subject}
+                </Badge>
               </div>
-              <div className="relative flex justify-center">
-                <span className="bg-background px-6 py-1 text-sm font-bold font-headline tracking-[0.2em] text-muted-foreground uppercase flex items-center gap-2">
-                  {subjectIcons[subject]}
-                  {subject}
-                </span>
-              </div>
-            </div>
 
-            {groupConfig.map(({ key, label }) => {
-              const items = subjectData[key]
-              if (!items || items.length === 0) return null
+              <h3 className="font-headline font-bold text-lg tracking-tight group-hover:text-primary transition-colors line-clamp-2">
+                {olimp.title}
+              </h3>
 
-              return (
-                <div key={key} className="mb-10">
-                  <h3 className="text-xl font-headline font-bold mb-4">{label}</h3>
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {items.map((olimp, i) => (
-                      <Card
-                        key={i}
-                        className="bg-card/40 border-border/40 hover:border-primary/30 transition-all group overflow-hidden"
-                      >
-                        <div className="h-2 bg-primary/20 group-hover:bg-primary transition-colors" />
-                        <CardHeader>
-                          <div className="flex justify-between items-start mb-2">
-                            <Badge className="bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
-                              {olimp.type}
-                            </Badge>
-                            <Badge
-                              variant="outline"
-                              className="text-emerald-500 border-emerald-500/20"
-                            >
-                              {olimp.status}
-                            </Badge>
-                          </div>
-                          <CardTitle className="text-2xl font-headline font-bold leading-tight group-hover:text-primary transition-colors">
-                            {olimp.title}
-                          </CardTitle>
-                          <CardDescription className="text-muted-foreground font-semibold uppercase tracking-wider text-[10px] mt-1">
-                            {olimp.subject}
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-5">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-2">
-                              <Calendar className="h-4 w-4 text-primary shrink-0" />
-                              <span>{olimp.dates}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <MapPin className="h-4 w-4 text-primary shrink-0" />
-                              <span className="truncate">{olimp.location}</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <CircleDollarSign className="h-4 w-4 text-primary shrink-0" />
-                              <span>{olimp.fee}</span>
-                            </div>
-                          </div>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {olimp.description}
+              </p>
 
-                          <p className="text-sm leading-relaxed text-muted-foreground/90">
-                            {olimp.description}
-                          </p>
-
-                          <div className="flex flex-wrap gap-3 pt-4 border-t border-border/20">
-                            <Button className="flex-1 bg-secondary hover:bg-primary hover:text-white transition-all rounded-xl">
-                              Подробнее
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="flex-1 border-border/40 hover:bg-secondary rounded-xl"
-                            >
-                              <ExternalLink className="mr-2 h-4 w-4" />
-                              Сайт
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+              <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-3 w-3 text-primary shrink-0" />
+                  <span>{olimp.dates}</span>
                 </div>
-              )
-            })}
-          </div>
-        )
-      })}
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-3 w-3 text-primary shrink-0" />
+                  <span className="truncate">{olimp.location}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CircleDollarSign className="h-3 w-3 text-primary shrink-0" />
+                  <span>{olimp.fee}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <Card className="bg-secondary/10 border-border/40">
         <CardHeader>
@@ -830,5 +828,21 @@ export default function OlympiadsHub() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function OlympiadsHub() {
+  return (
+    <Suspense fallback={
+      <div className="space-y-8 px-6 py-10 md:px-10 lg:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-48 rounded-xl bg-card/40 animate-pulse" />
+          ))}
+        </div>
+      </div>
+    }>
+      <OlympiadsPageContent />
+    </Suspense>
   )
 }
