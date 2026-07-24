@@ -58,6 +58,15 @@ export default async function BiologyPage() {
               </div>
 
               <div className="pt-4 border-t border-border/20">
+                {topic.books && (
+                  <div className="mb-4">
+                    <h4 className="font-semibold mb-2">📚 Книги</h4>
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      {topic.books.basic && <p><span className="font-medium text-foreground">Basic / Intermediate:</span> {topic.books.basic}</p>}
+                      {topic.books.advanced && <p><span className="font-medium text-foreground">Advanced:</span> {topic.books.advanced}</p>}
+                    </div>
+                  </div>
+                )}
                 <h4 className="font-semibold mb-2">Материалы</h4>
                 <div className="flex flex-col gap-2">
                   {findFor(topic).length === 0 && <div className="text-sm text-muted-foreground">Материалы не найдены в папке Biology.</div>}

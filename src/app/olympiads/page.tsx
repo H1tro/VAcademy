@@ -10,21 +10,242 @@ import { Textarea } from "@/components/ui/textarea"
 import { Calendar, MapPin, CircleDollarSign, ExternalLink, Bell, MessageCircle, Filter, BookCheck, Sigma, Dna, Atom, FlaskConical } from "lucide-react"
 import Link from "next/link"
 
-type OlympiadSubject = "Математика" | "Биология" | "Химия" | "Физика"
+type OlympiadSubject = "Математика" | "Биология" | "Химия" | "Физика" | "Информатика" | "Робототехника"
 
 type Olympiad = {
   title: string
   subject: OlympiadSubject
+  subjects?: string[]
   dates: string
   location: string
   description: string
   fee: string
   status: string
   type: string
+  url?: string
   sortGroup: 0 | 1 | 2
+  category?: string
 }
 
 const olympiads: Olympiad[] = [
+  // ========== ⚡ ОБЩИЕ ОЛИМПИАДЫ ==========
+  {
+    title: "Олимпиада «Высшая проба» (НИУ ВШЭ)",
+    subject: "Математика",
+    subjects: ["Математика", "Информатика", "Физика", "Дайджест гуманитарных наук"],
+    dates: "Регистрация: август – октябрь 2026. Отбор: ноябрь 2026 (онлайн). Финал: февраль 2027.",
+    location: "Онлайн + очные площадки (включая Бишкек)",
+    fee: "Бесплатно",
+    description: "Одна из главных олимпиад для поступления в вузы. Широкий выбор предметов.",
+    status: "Регистрация",
+    type: "Университетская",
+    url: "https://olymp.hse.ru",
+    sortGroup: 0,
+    category: "Общие олимпиады",
+  },
+  {
+    title: "Открытая олимпиада школьников (ИТМО)",
+    subject: "Информатика",
+    subjects: ["Информатика", "Программирование", "Математика"],
+    dates: "1-й отбор: декабрь 2026. 2-й отбор: январь 2027. Финал: март 2027.",
+    location: "Онлайн (отбор), очно/онлайн (финал)",
+    fee: "Бесплатно",
+    description: "Сильная олимпиада по информатике и программированию от Университета ИТМО.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://ec.itmo.ru",
+    sortGroup: 0,
+    category: "Общие олимпиады",
+  },
+  {
+    title: "Всероссийская олимпиада по искусственному интеллекту",
+    subject: "Информатика",
+    subjects: ["Программирование", "Алгоритмы", "ML/AI"],
+    dates: "Регистрация: сентябрь 2026. Отборочные этапы: сентябрь – октябрь 2026. Финал: ноябрь 2026.",
+    location: "Полностью онлайн",
+    fee: "Бесплатно",
+    description: "Олимпиада по AI: программирование, алгоритмы и машинное обучение.",
+    status: "Скоро",
+    type: "Онлайн",
+    url: "https://ai.edu.gov.ru",
+    sortGroup: 0,
+    category: "Общие олимпиады",
+  },
+  {
+    title: "Олимпиада «ТехноКубок» (МФТИ и VK)",
+    subject: "Информатика",
+    subjects: ["Спортивное программирование", "Алгоритмы"],
+    dates: "Раунды отбора: сентябрь – ноябрь 2026. Финал: март 2027.",
+    location: "Онлайн (Codeforces) / Финал очно или прокторинг",
+    fee: "Бесплатно",
+    description: "Спортивное программирование на базе Codeforces от МФТИ и VK.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://technocup.mail.ru",
+    sortGroup: 0,
+    category: "Общие олимпиады",
+  },
+  {
+    title: "Московская олимпиада школьников (МОШ)",
+    subject: "Математика",
+    subjects: ["Математика", "Информатика", "Физика", "Робототехника"],
+    dates: "Отбор: ноябрь – декабрь 2026. Финал: февраль – март 2027.",
+    location: "Дистанционно (отбор)",
+    fee: "Бесплатно",
+    description: "Престижная олимпиада высокого уровня с широким выбором предметов.",
+    status: "Скоро",
+    type: "Национальная",
+    url: "https://mos.olimpiada.ru",
+    sortGroup: 0,
+    category: "Общие олимпиады",
+  },
+
+  // ========== ⚡ ФИЗИКА, ИНЖЕНЕРИЯ И РОБОТОТЕХНИКА ==========
+  {
+    title: "Олимпиада «Росатом» (НИЯУ МИФИ)",
+    subject: "Физика",
+    subjects: ["Физика", "Математика"],
+    dates: "Регистрация: октябрь 2026. Отбор: ноябрь – декабрь 2026. Финал: февраль 2027.",
+    location: "Онлайн + выездные очные площадки",
+    fee: "Бесплатно",
+    description: "Физико-математическая олимпиада НИЯУ МИФИ и ГК «Росатом».",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://org.mephi.ru",
+    sortGroup: 0,
+    category: "Физика, Инженерия и Робототехника",
+  },
+  {
+    title: "Олимпиада «Физтех» (МФТИ)",
+    subject: "Физика",
+    subjects: ["Физика", "Математика", "Биология"],
+    dates: "Онлайн-этап: сентябрь – январь 2027. Финал: февраль 2027.",
+    location: "Онлайн (отбор), площадки в городах СНГ (финал)",
+    fee: "Бесплатно",
+    description: "Одна из сильнейших олимпиад МФТИ. Отборочный этап онлайн.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://olymp.mipt.ru",
+    sortGroup: 0,
+    category: "Физика, Инженерия и Робототехника",
+  },
+  {
+    title: "Инженерная олимпиада школьников",
+    subject: "Физика",
+    subjects: ["Физика", "Инженерные науки"],
+    dates: "Регистрация: октябрь 2026. Отбор: ноябрь – декабрь 2026. Финал: февраль 2027.",
+    location: "Дистанционно / очно",
+    fee: "Бесплатно",
+    description: "Олимпиада МИФИ, СПбЭТУ «ЛЭТИ», НГТУ по инженерным наукам.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://org.mephi.ru/pupil-engineer",
+    sortGroup: 0,
+    category: "Физика, Инженерия и Робототехника",
+  },
+  {
+    title: "Всесибирская открытая олимпиада школьников (НГУ)",
+    subject: "Математика",
+    subjects: ["Физика", "Математика", "Информатика", "Химия", "Биология"],
+    dates: "Регистрация: сентябрь – октябрь 2026. 1-й отбор: октябрь – ноябрь 2026. Финал: март 2027.",
+    location: "Очно на региональных площадках и онлайн",
+    fee: "Бесплатно",
+    description: "Олимпиада НГУ с широким выбором естественно-научных предметов.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://sesc.nsu.ru/olymp-vsesib/",
+    sortGroup: 0,
+    category: "Физика, Инженерия и Робототехника",
+  },
+
+  // ========== 🧪 ЕСТЕСТВЕННЫЕ НАУКИ ==========
+  {
+    title: "Олимпиада «Ломоносов» (МГУ)",
+    subject: "Химия",
+    subjects: ["Химия", "Биология", "Математика", "Физика", "Механика"],
+    dates: "Регистрация и отбор: ноябрь – декабрь 2026. Финал: февраль – март 2027.",
+    location: "Онлайн (отбор)",
+    fee: "Бесплатно",
+    description: "Олимпиада МГУ им. Ломоносова — одна из главных для поступления в МГУ.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://olymp.msu.ru",
+    sortGroup: 0,
+    category: "Естественные науки",
+  },
+  {
+    title: "Олимпиада «Покори Воробьёвы горы!» (МГУ и ИД «МК»)",
+    subject: "Физика",
+    subjects: ["Физика", "Математика", "Биология", "Обществознание"],
+    dates: "Отбор: ноябрь – декабрь 2026. Финал: февраль – март 2027.",
+    location: "Онлайн (отбор)",
+    fee: "Бесплатно",
+    description: "Совместная олимпиада МГУ и «Московского комсомольца».",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://pvg.mk.ru",
+    sortGroup: 0,
+    category: "Естественные науки",
+  },
+  {
+    title: "Олимпиада школьников СПбГУ",
+    subject: "Математика",
+    subjects: ["Математика", "Информатика", "Физика", "Химия", "Биология"],
+    dates: "Регистрация и отбор: октябрь – декабрь 2026. Финал: февраль – март 2027.",
+    location: "Онлайн (отбор)",
+    fee: "Бесплатно",
+    description: "Олимпиада Санкт-Петербургского государственного университета.",
+    status: "Скоро",
+    type: "Университетская",
+    url: "https://olympiada.spbu.ru",
+    sortGroup: 0,
+    category: "Естественные науки",
+  },
+
+  // ========== 🇰🇬 НАЦИОНАЛЬНЫЕ И МЕЖДУНАРОДНЫЕ ТУРНИРЫ ==========
+  {
+    title: "Национальная олимпиада школьников Кыргызстана",
+    subject: "Математика",
+    subjects: ["Математика", "Физика", "Информатика", "Биология"],
+    dates: "Школьный этап: январь 2027. Районный/Областной: февраль – март 2027. Республиканский финал: апрель 2027.",
+    location: "Очно в школах и областных центрах КР",
+    fee: "Бесплатно",
+    description: "Главная официальная олимпиада Кыргызстана по всем школьным предметам.",
+    status: "Скоро",
+    type: "Национальная",
+    url: "https://edu.gov.kg",
+    sortGroup: 0,
+    category: "Национальные и Международные Турниры",
+  },
+  {
+    title: "Международная олимпиада «Шаг в будущее» (МГТУ им. Н.Э. Баумана)",
+    subject: "Физика",
+    subjects: ["Физика", "Математика", "Компьютерное моделирование", "Инженерное дело"],
+    dates: "Регистрация: сентябрь – октябрь 2026. Отбор: ноябрь – декабрь 2026. Финал: февраль – март 2027.",
+    location: "Онлайн (отбор)",
+    fee: "Бесплатно",
+    description: "Международная олимпиада МГТУ им. Баумана для школьников.",
+    status: "Скоро",
+    type: "Международная",
+    url: "https://bmstu.ru/olymp",
+    sortGroup: 0,
+    category: "Национальные и Международные Турниры",
+  },
+  {
+    title: "Международная Жаутыковская олимпиада (IZhO)",
+    subject: "Математика",
+    subjects: ["Математика", "Физика", "Информатика"],
+    dates: "Регистрация команд: ноябрь – декабрь 2026. Проведение: январь 2027.",
+    location: "Очно (Алматы, Казахстан) / Гибридный формат",
+    fee: "Бесплатно (через отбор)",
+    description: "Одна из самых престижных командных олимпиад для физматшкол мира.",
+    status: "Скоро",
+    type: "Международная",
+    url: "https://izho.kz",
+    sortGroup: 0,
+    category: "Национальные и Международные Турниры",
+  },
+
   // ========== МАТЕМАТИКА ==========
   {
     title: "Олимпиада им. Л. Эйлера I тур",
@@ -965,15 +1186,18 @@ const olympiads: Olympiad[] = [
 const allSubjects: { value: OlympiadSubject | "all"; label: string; icon: React.ReactNode }[] = [
   { value: "all", label: "Все предметы", icon: <Filter className="h-4 w-4" /> },
   { value: "Математика", label: "Математика", icon: <Sigma className="h-4 w-4" /> },
-  { value: "Биология", label: "Биология", icon: <Dna className="h-4 w-4" /> },
-  { value: "Химия", label: "Химия", icon: <FlaskConical className="h-4 w-4" /> },
+  { value: "Информатика", label: "Информатика", icon: <BookCheck className="h-4 w-4" /> },
   { value: "Физика", label: "Физика", icon: <Atom className="h-4 w-4" /> },
+  { value: "Химия", label: "Химия", icon: <FlaskConical className="h-4 w-4" /> },
+  { value: "Биология", label: "Биология", icon: <Dna className="h-4 w-4" /> },
+  { value: "Робототехника", label: "Робототехника", icon: <ExternalLink className="h-4 w-4" /> },
 ]
 
 const statusColors: Record<string, string> = {
   "Скоро": "bg-amber-500/15 text-amber-500 border-amber-500/30",
   "Отбор": "bg-blue-500/15 text-blue-500 border-blue-500/30",
   "Идет регистрация": "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
+  "Регистрация": "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
   "Круглый год": "bg-violet-500/15 text-violet-500 border-violet-500/30",
   "Прошёл": "bg-muted text-muted-foreground border-border/40",
 }
@@ -994,7 +1218,7 @@ function OlympiadsPageContent() {
 
   const filteredOlympiads = currentSubject === "all"
     ? olympiads
-    : olympiads.filter((o) => o.subject === currentSubject)
+    : olympiads.filter((o) => o.subject === currentSubject || o.subjects?.some(s => s.toLowerCase().includes(currentSubject.toLowerCase())))
 
   const handleSubjectChange = (subject: OlympiadSubject | "all") => {
     const params = new URLSearchParams(searchParams.toString())
@@ -1116,9 +1340,15 @@ function OlympiadsPageContent() {
                 >
                   {olimp.status}
                 </Badge>
-                <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5">
-                  {olimp.subject}
-                </Badge>
+                {olimp.subjects?.map((s) => (
+                  <Badge key={s} variant="outline" className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5">
+                    {s}
+                  </Badge>
+                )) || (
+                  <Badge variant="outline" className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5">
+                    {olimp.subject}
+                  </Badge>
+                )}
               </div>
 
               <h3 className="font-headline font-bold text-lg tracking-tight group-hover:text-primary transition-colors line-clamp-2">
@@ -1142,6 +1372,12 @@ function OlympiadsPageContent() {
                   <CircleDollarSign className="h-3 w-3 text-primary shrink-0" />
                   <span>{olimp.fee}</span>
                 </div>
+                {olimp.url && (
+                  <a href={olimp.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline">
+                    <ExternalLink className="h-3 w-3 shrink-0" />
+                    <span className="truncate">{olimp.url}</span>
+                  </a>
+                )}
               </div>
             </CardContent>
           </Card>
