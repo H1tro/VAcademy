@@ -13,7 +13,6 @@ export const curriculum = [
     ],
     materials: [
       { name: "W3Schools C++: синтаксис", url: "https://www.w3schools.com/cpp/" },
-      { name: "LeetCode: Array 101", url: "https://leetcode.com/explore/learn/card/fun-with-arrays/" },
     ],
     keywords: [/c\+\+|синтакс|вектор|string|сортиров|начало/i]
   },
@@ -31,7 +30,6 @@ export const curriculum = [
     ],
     materials: [
       { name: "W3Schools: STL контейнеры", url: "https://www.w3schools.com/cpp/cpp_STL.asp" },
-      { name: "LeetCode: Big O Cheatsheet", url: "https://leetcode.com/explore/learn/card/recursion-i/256/principle-of-recursion/" },
     ],
     keywords: [/stl|big o|set|map|unordered|хеш|контейнер|начало/i]
   },
@@ -46,10 +44,7 @@ export const curriculum = [
         "Побитовые операции (AND, OR, XOR, сдвиги)"
       ]}
     ],
-    materials: [
-      { name: "LeetCode: Битовые операции", url: "https://leetcode.com/explore/learn/card/bit-manipulation/" },
-      { name: "Codeforces: Теория чисел", url: "https://codeforces.com/problemset?tags=number+theory" },
-    ],
+    materials: [],
     keywords: [/теория чисел|нод|нок|модульн|побит|решето|начало/i]
   },
   {
@@ -64,10 +59,7 @@ export const curriculum = [
         "Метод сканирующей прямой (line sweep)"
       ]}
     ],
-    materials: [
-      { name: "LeetCode: Two Pointers", url: "https://leetcode.com/explore/learn/card/array-and-string/" },
-      { name: "Codeforces: Бинарный поиск", url: "https://codeforces.com/problemset?tags=binary+search" },
-    ],
+    materials: [],
     keywords: [/указател|префиксн|бинарн|скользящ|two pointer|середин/i]
   },
   {
@@ -81,10 +73,7 @@ export const curriculum = [
         "Восстановление ответа — проход в обратном направлении"
       ]}
     ],
-    materials: [
-      { name: "LeetCode: DP", url: "https://leetcode.com/explore/learn/card/dynamic-programming/" },
-      { name: "Codeforces: DP", url: "https://codeforces.com/problemset?tags=dp" },
-    ],
+    materials: [],
     keywords: [/динамическ|dp|мемоизац|рюкзак|нвп|ноп|середин/i]
   },
   {
@@ -99,10 +88,7 @@ export const curriculum = [
         "Обходы графов (DFS и BFS)"
       ]}
     ],
-    materials: [
-      { name: "LeetCode: Graph", url: "https://leetcode.com/explore/learn/card/graph/" },
-      { name: "Codeforces: Графы", url: "https://codeforces.com/problemset?tags=graphs" },
-    ],
+    materials: [],
     keywords: [/стек|очеред|снм|dsu|граф|dfs|bfs|середин/i]
   },
   {
@@ -116,10 +102,7 @@ export const curriculum = [
         "Специфика деревьев (LCA, Эйлеров обход)"
       ]}
     ],
-    materials: [
-      { name: "Codeforces: Shortest Paths", url: "https://codeforces.com/problemset?tags=shortest+paths" },
-      { name: "LeetCode: Graph Advanced", url: "https://leetcode.com/explore/learn/card/graph/" },
-    ],
+    materials: [],
     keywords: [/дейкстр|беллман|флойд|остов|mst|lca|эйлер|конец/i]
   },
   {
@@ -133,10 +116,7 @@ export const curriculum = [
         "Дерево отрезков (Segment Tree) — O(log N)"
       ]}
     ],
-    materials: [
-      { name: "Codeforces: Segment Tree", url: "https://codeforces.com/problemset?tags=segment+tree" },
-      { name: "LeetCode: Range Queries", url: "https://leetcode.com/explore/learn/" },
-    ],
+    materials: [],
     keywords: [/отрезк|sparse|фенвик|segment tree|range quer|конец/i]
   },
   {
@@ -150,10 +130,7 @@ export const curriculum = [
         "Вычислительная геометрия (вектора, пересечения, выпуклая оболочка)"
       ]}
     ],
-    materials: [
-      { name: "LeetCode: Trie", url: "https://leetcode.com/explore/learn/card/trie/" },
-      { name: "Codeforces: Geometry", url: "https://codeforces.com/problemset?tags=geometry" },
-    ],
+    materials: [],
     keywords: [/строк|хеширован|trie|бор|геометри|выпукл|конец/i]
   },
 ]

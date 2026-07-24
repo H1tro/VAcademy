@@ -8,11 +8,13 @@ import { auth, db } from "@/lib/firebase"
 import { ProblemCard } from "@/components/problems/problem-card"
 import { ProblemModal } from "@/components/problems/problem-modal"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ArrowLeft, BookCheck, Filter } from "lucide-react"
+import { ArrowLeft, BookCheck, ExternalLink, Filter, Trophy } from "lucide-react"
 import Link from "next/link"
 import { problemsData } from "@/lib/problems-data"
 import type { Problem, ProblemSubject } from "@/lib/problems-data"
+import { OLYMPIAD_RESOURCES } from "@/lib/olympiad-resources"
 
 const allSubjects: { value: ProblemSubject | "all"; label: string }[] = [
   { value: "all", label: "Все предметы" },
@@ -184,6 +186,69 @@ function ProblemsPageContent() {
         onOpenChange={setModalOpen}
         onSolved={handleSolved}
       />
+
+      {(currentSubject === "all" || OLYMPIAD_RESOURCES[currentSubject]) && (
+        <Card className="bg-card/40 border-border/40">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl font-headline font-bold">
+              <Trophy className="h-6 w-6 text-accent" />
+              Олимпиадные задачи
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {currentSubject === "all"
+              ? Object.entries(OLYMPIAD_RESOURCES).map(([key, categories]) => (
+                  <div key={key} className="mb-8 last:mb-0">
+                    <h3 className="text-lg font-semibold mb-3 capitalize">
+                      {key === "mathematics" ? "Математика" :
+                       key === "physics" ? "Физика" :
+                       key === "informatics" ? "Информатика" :
+                       key === "chemistry" ? "Химия" :
+                       key === "biology" ? "Биология" : key}
+                    </h3>
+                    {categories.map((cat) => (
+                      <div key={cat.title} className="mb-4 last:mb-0">
+                        <h4 className="text-sm font-semibold text-muted-foreground mb-2">{cat.title}</h4>
+                        <div className="flex flex-col gap-2">
+                          {cat.links.map((link) => (
+                            <a
+                              key={link.name}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 text-sm text-primary hover:underline"
+                            >
+                              <ExternalLink className="h-3 w-3 shrink-0" />
+                              <span>{link.name}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ))
+              : OLYMPIAD_RESOURCES[currentSubject]?.map((cat) => (
+                  <div key={cat.title} className="mb-4 last:mb-0">
+                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">{cat.title}</h4>
+                    <div className="flex flex-col gap-2">
+                      {cat.links.map((link) => (
+                        <a
+                          key={link.name}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm text-primary hover:underline"
+                        >
+                          <ExternalLink className="h-3 w-3 shrink-0" />
+                          <span>{link.name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

@@ -1,14 +1,16 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ClipboardCheck } from "lucide-react"
+import { ArrowLeft, ClipboardCheck } from "lucide-react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
 const testCategories = [
   {
     title: "Математика",
     description: "Тесты по комбинаторике, теории чисел, алгебре и геометрии",
-    href: "#",
+    href: "/tests/matematika/olympiad_math_test.pdf",
+    isPdf: true,
   },
   {
     title: "Физика",
@@ -18,12 +20,14 @@ const testCategories = [
   {
     title: "Информатика",
     description: "Тесты по алгоритмам, структурам данных и программированию",
-    href: "#",
+    href: "/tests/informatika/olympiad_cs_test.pdf",
+    isPdf: true,
   },
   {
     title: "Химия",
     description: "Тесты по неорганической, органической и физической химии",
-    href: "#",
+    href: "/tests/himiya/olympiad_chemistry_test.pdf",
+    isPdf: true,
   },
   {
     title: "Биология",
@@ -47,12 +51,20 @@ const testCategories = [
 export default function TestsPage() {
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700 px-6 py-10 md:px-10 lg:px-12">
-      <div className="flex items-center gap-3">
-        <ClipboardCheck className="h-8 w-8 text-primary" />
-        <div>
-          <h1 className="text-4xl font-headline font-black tracking-tight">Тесты</h1>
-          <p className="text-muted-foreground text-lg">Проверьте свои знания по предметам.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-3">
+          <ClipboardCheck className="h-8 w-8 text-primary" />
+          <div>
+            <h1 className="text-4xl font-headline font-black tracking-tight">Тесты</h1>
+            <p className="text-muted-foreground text-lg">Проверьте свои знания по предметам.</p>
+          </div>
         </div>
+        <Button variant="outline" className="h-12 rounded-full border-border/40 hover:bg-secondary" asChild>
+          <Link href="/dashboard">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Назад
+          </Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
