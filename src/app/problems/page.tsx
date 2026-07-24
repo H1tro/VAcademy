@@ -188,66 +188,73 @@ function ProblemsPageContent() {
       />
 
       {(currentSubject === "all" || OLYMPIAD_RESOURCES[currentSubject]) && (
-        <Card className="bg-card/40 border-border/40">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-2xl font-headline font-bold">
-              <Trophy className="h-6 w-6 text-accent" />
-              Олимпиадные задачи
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {currentSubject === "all"
-              ? Object.entries(OLYMPIAD_RESOURCES).map(([key, categories]) => (
-                  <div key={key} className="mb-8 last:mb-0">
-                    <h3 className="text-lg font-semibold mb-3 capitalize">
-                      {key === "mathematics" ? "Математика" :
-                       key === "physics" ? "Физика" :
-                       key === "informatics" ? "Информатика" :
-                       key === "chemistry" ? "Химия" :
-                       key === "biology" ? "Биология" : key}
-                    </h3>
-                    {categories.map((cat) => (
-                      <div key={cat.title} className="mb-4 last:mb-0">
-                        <h4 className="text-sm font-semibold text-muted-foreground mb-2">{cat.title}</h4>
-                        <div className="flex flex-col gap-2">
-                          {cat.links.map((link) => (
-                            <a
-                              key={link.name}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex items-center gap-2 text-sm text-primary hover:underline"
-                            >
-                              <ExternalLink className="h-3 w-3 shrink-0" />
+        <div className="space-y-8">
+          <div className="flex items-center gap-3">
+            <Trophy className="h-8 w-8 text-accent" />
+            <div>
+              <h2 className="text-3xl font-headline font-black tracking-tight">Олимпиадные задачи</h2>
+              <p className="text-muted-foreground text-base">Ссылки на внешние ресурсы с олимпиадными задачами</p>
+            </div>
+          </div>
+
+          {currentSubject === "all"
+            ? Object.entries(OLYMPIAD_RESOURCES).map(([key, categories]) => (
+                <div key={key}>
+                  <h3 className="text-xl font-headline font-bold mb-4">
+                    {key === "mathematics" ? "Математика" :
+                     key === "physics" ? "Физика" :
+                     key === "informatics" ? "Информатика" :
+                     key === "chemistry" ? "Химия" :
+                     key === "biology" ? "Биология" : key}
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {categories.flatMap((cat) =>
+                      cat.links.map((link) => (
+                        <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
+                          <Card className="bg-card/40 border-border/40 hover:border-primary/30 hover:bg-card/60 transition-all h-full">
+                            <CardHeader>
+                              <CardTitle className="text-base font-headline font-bold flex items-start gap-2">
+                                <ExternalLink className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
+                                <span>{link.name}</span>
+                              </CardTitle>
+                            </CardHeader>
+                            {link.description && (
+                              <CardContent className="pt-0">
+                                <p className="text-sm text-muted-foreground">{link.description}</p>
+                              </CardContent>
+                            )}
+                          </Card>
+                        </a>
+                      ))
+                    )}
+                  </div>
+                </div>
+              ))
+            : OLYMPIAD_RESOURCES[currentSubject]?.map((cat) => (
+                <div key={cat.title}>
+                  <h3 className="text-xl font-headline font-bold mb-4">{cat.title}</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {cat.links.map((link) => (
+                      <a key={link.name} href={link.url} target="_blank" rel="noopener noreferrer">
+                        <Card className="bg-card/40 border-border/40 hover:border-primary/30 hover:bg-card/60 transition-all h-full">
+                          <CardHeader>
+                            <CardTitle className="text-base font-headline font-bold flex items-start gap-2">
+                              <ExternalLink className="h-4 w-4 shrink-0 mt-0.5 text-muted-foreground" />
                               <span>{link.name}</span>
-                            </a>
-                          ))}
-                        </div>
-                      </div>
+                            </CardTitle>
+                          </CardHeader>
+                          {link.description && (
+                            <CardContent className="pt-0">
+                              <p className="text-sm text-muted-foreground">{link.description}</p>
+                            </CardContent>
+                          )}
+                        </Card>
+                      </a>
                     ))}
                   </div>
-                ))
-              : OLYMPIAD_RESOURCES[currentSubject]?.map((cat) => (
-                  <div key={cat.title} className="mb-4 last:mb-0">
-                    <h4 className="text-sm font-semibold text-muted-foreground mb-2">{cat.title}</h4>
-                    <div className="flex flex-col gap-2">
-                      {cat.links.map((link) => (
-                        <a
-                          key={link.name}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 text-sm text-primary hover:underline"
-                        >
-                          <ExternalLink className="h-3 w-3 shrink-0" />
-                          <span>{link.name}</span>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-          </CardContent>
-        </Card>
+                </div>
+              ))}
+        </div>
       )}
     </div>
   )
