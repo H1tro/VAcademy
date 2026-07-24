@@ -257,6 +257,7 @@ function InformatikaContent() {
           </Card>
         ))}
       </div>
+    </div>
   )
 }
 
