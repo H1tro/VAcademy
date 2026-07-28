@@ -9,8 +9,5 @@
   },
   "observability": {
     "enabled": true
-  },
-  "build": {
-    "command": "npm run cf:build"
   }
 }
