@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Youtube, Atom, Code2, Dna, ArrowLeft, Play, Film } from "lucide-react"
+import { Youtube, Atom, Code2, Dna, Calculator, FlaskConical, ArrowLeft, Play, Film, Clock } from "lucide-react"
 
 type Video = { name: string; url: string; section?: string }
 
@@ -69,6 +69,22 @@ const videoLessons = [
       { name: "EdLight Biology — наглядные лекции по биологии", url: "https://www.youtube.com/@edlightbiology7455" },
       { name: "Плейлист: Биология для олимпиадников", url: "https://www.youtube.com/playlist?list=PLJEDjAF9Nb8iM6KHecTjq_PRBl54xQY23" },
     ]
+  },
+  {
+    subject: "Математика",
+    icon: Calculator,
+    color: "from-violet-500/20 to-purple-600/10",
+    border: "border-violet-500/30",
+    badge: "bg-violet-500/20 text-violet-300",
+    videos: []
+  },
+  {
+    subject: "Химия",
+    icon: FlaskConical,
+    color: "from-amber-500/20 to-yellow-600/10",
+    border: "border-amber-500/30",
+    badge: "bg-amber-500/20 text-amber-300",
+    videos: []
   }
 ]
 
@@ -102,7 +118,7 @@ export default function CoursesPage() {
           return (
             <Card
               key={group.subject}
-              className={`bg-gradient-to-b ${group.color} ${group.border} overflow-hidden group hover:shadow-xl hover:shadow-${group.subject === "Физика" ? "sky" : group.subject === "Информатика" ? "emerald" : "rose"}-500/5 transition-all duration-300`}
+              className={`bg-gradient-to-b ${group.color} ${group.border} overflow-hidden group hover:shadow-xl transition-all duration-300`}
             >
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
@@ -119,27 +135,35 @@ export default function CoursesPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-0.5">
-                {group.videos.map((video, i) => (
-                  <a
-                    key={i}
-                    href={video.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-start gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-black/20 rounded-xl transition-all group/link"
-                  >
-                    <div className="shrink-0 mt-0.5">
-                      <Youtube className="h-4 w-4 text-red-500 group-hover/link:text-red-400 transition-colors" />
-                    </div>
-                    <div className="min-w-0">
-                      {video.section && (
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block leading-none mb-1">
-                          {video.section}
-                        </span>
-                      )}
-                      <span className="leading-snug">{video.name}</span>
-                    </div>
-                  </a>
-                ))}
+                {group.videos.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/60">
+                    <Clock className="h-8 w-8 mb-2" />
+                    <span className="text-sm font-medium">Coming soon</span>
+                    <span className="text-xs mt-0.5">Видео-уроки скоро появятся</span>
+                  </div>
+                ) : (
+                  group.videos.map((video, i) => (
+                    <a
+                      key={i}
+                      href={video.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-black/20 rounded-xl transition-all group/link"
+                    >
+                      <div className="shrink-0 mt-0.5">
+                        <Youtube className="h-4 w-4 text-red-500 group-hover/link:text-red-400 transition-colors" />
+                      </div>
+                      <div className="min-w-0">
+                        {video.section && (
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block leading-none mb-1">
+                            {video.section}
+                          </span>
+                        )}
+                        <span className="leading-snug">{video.name}</span>
+                      </div>
+                    </a>
+                  ))
+                )}
               </CardContent>
             </Card>
           )
