@@ -59,26 +59,30 @@ export default function ProfileEditPage() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        setAuthenticated(false)
+      try {
+        if (!user) {
+          setAuthenticated(false)
+          setLoading(false)
+          return
+        }
+
+        setAuthenticated(true)
+        setUserEmail(user.email || "")
+        setDisplayName(user.displayName || "")
+        setPhotoURL(user.photoURL || "")
+
+        const profileDoc = await getDoc(doc(db, "users", user.uid))
+        if (profileDoc.exists()) {
+          const data = profileDoc.data()
+          setSchool((data.school as string) || "")
+          setGrade((data.grade as string) || "")
+          setAbout((data.about as string) || "")
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Ошибка загрузки профиля")
+      } finally {
         setLoading(false)
-        return
       }
-
-      setAuthenticated(true)
-      setUserEmail(user.email || "")
-      setDisplayName(user.displayName || "")
-      setPhotoURL(user.photoURL || "")
-
-      const profileDoc = await getDoc(doc(db, "users", user.uid))
-      if (profileDoc.exists()) {
-        const data = profileDoc.data()
-        setSchool((data.school as string) || "")
-        setGrade((data.grade as string) || "")
-        setAbout((data.about as string) || "")
-      }
-
-      setLoading(false)
     })
 
     return () => unsubscribe()
