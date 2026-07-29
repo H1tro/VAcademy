@@ -1,5 +1,5 @@
-import { initializeApp, getApps, getApp } from "firebase/app"
-import { getFirestore } from "firebase/firestore"
+import { initializeApp, getApps } from "firebase/app"
+import { getFirestore, type Firestore } from "firebase/firestore"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim() || "",
@@ -10,5 +10,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || "",
 }
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
-export const db = getFirestore(app)
+function ensureApp() {
+  if (!getApps().length) {
+    initializeApp(firebaseConfig)
+  }
+}
+
+export const db = new Proxy({} as Firestore, {
+  get(_, prop) {
+    ensureApp()
+    return (getFirestore() as any)[prop]
+  },
+})
