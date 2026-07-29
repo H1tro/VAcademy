@@ -1,15 +1,14 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
-import { collection, doc, getDoc, getDocs, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
+import { FieldValue } from "firebase-admin/firestore"
 
 const SUBJECTS = ["biology", "physics", "chemistry", "math", "cs"]
 
-function fdb() { return getDb() }
-
 async function getConfig(subject: string) {
-  const snap = await getDoc(doc(fdb(), "admin_config", subject))
-  if (!snap.exists()) return { subject, chatIds: [] }
-  const data = snap.data()
+  const db = getDb()
+  const snap = await db.doc(`admin_config/${subject}`).get()
+  if (!snap.exists) return { subject, chatIds: [] }
+  const data = snap.data()!
   let chatIds: number[] = []
   if (Array.isArray(data.chatIds)) {
     chatIds = data.chatIds as number[]
@@ -48,12 +47,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 })
     }
 
-    const ref = doc(fdb(), "admin_config", subject)
-    const snap = await getDoc(ref)
-    if (!snap.exists()) {
-      await setDoc(ref, { chatIds: [chatId], department: subject, updatedAt: new Date() })
+    const db = getDb()
+    const ref = db.doc(`admin_config/${subject}`)
+    const snap = await ref.get()
+    if (!snap.exists) {
+      await ref.set({ chatIds: [chatId], department: subject, updatedAt: new Date() })
     } else {
-      await updateDoc(ref, { chatIds: arrayUnion(chatId), updatedAt: new Date() })
+      await ref.update({ chatIds: FieldValue.arrayUnion(chatId), updatedAt: new Date() })
     }
 
     return NextResponse.json({ ok: true })
@@ -72,14 +72,15 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 })
     }
 
-    const ref = doc(fdb(), "admin_config", subject)
-    const snap = await getDoc(ref)
-    if (snap.exists()) {
-      const data = snap.data()
+    const db = getDb()
+    const ref = db.doc(`admin_config/${subject}`)
+    const snap = await ref.get()
+    if (snap.exists) {
+      const data = snap.data()!
       if (data.chatIds) {
-        await updateDoc(ref, { chatIds: arrayRemove(chatId), updatedAt: new Date() })
+        await ref.update({ chatIds: FieldValue.arrayRemove(chatId), updatedAt: new Date() })
       } else if (data.chatId === chatId) {
-        await updateDoc(ref, { chatIds: [], chatId: 0, updatedAt: new Date() })
+        await ref.update({ chatIds: [], chatId: 0, updatedAt: new Date() })
       }
     }
 

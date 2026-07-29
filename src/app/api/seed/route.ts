@@ -1,26 +1,15 @@
-import { initializeApp, getApps, getApp } from "firebase/app"
-import { getFirestore, doc, setDoc } from "firebase/firestore"
+import { getDb } from "@/lib/firebase-server"
 import { problemsData } from "@/lib/problems-data"
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim() || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN?.trim() || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim() || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || "",
-}
-
 export async function GET() {
-  const app = !getApps().length ? initializeApp(firebaseConfig) : getApp()
-  const db = getFirestore(app)
+  const db = getDb()
 
   let seeded = 0
   let errors: string[] = []
 
   for (const problem of problemsData) {
     try {
-      await setDoc(doc(db, "problems", problem.id), problem)
+      await db.doc(`problems/${problem.id}`).set(problem)
       seeded++
     } catch (err) {
       errors.push(`${problem.id}: ${err instanceof Error ? err.message : "unknown error"}`)

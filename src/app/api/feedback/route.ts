@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
-import { addDoc, collection, serverTimestamp, doc, getDoc } from "firebase/firestore"
-
-const fdb = getDb()
+import { FieldValue } from "firebase-admin/firestore"
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
@@ -17,8 +15,9 @@ const SUBJECT_IDS: Record<string, string> = {
 
 async function getDeptAdminChatId(department: string): Promise<number | null> {
   try {
-    const snap = await getDoc(doc(fdb, "admin_config", department))
-    if (snap.exists()) return snap.data().chatId as number
+    const db = getDb()
+    const snap = await db.doc(`admin_config/${department}`).get()
+    if (snap.exists) return snap.data()!.chatId as number
   } catch {
     /* ignore */
   }
@@ -34,6 +33,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "subject, category, message are required" }, { status: 400 })
     }
 
+    const db = getDb()
     const ticket = {
       source: "web",
       userId: "",
@@ -46,12 +46,11 @@ export async function POST(req: Request) {
       message,
       fileIds: [] as string[],
       status: "open",
-      createdAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
     }
 
-    const ticketRef = await addDoc(collection(fdb, "tickets"), ticket)
+    const ticketRef = await db.collection("tickets").add(ticket)
 
-    // Notify ONLY the correct department
     const deptId = SUBJECT_IDS[subject]
     const adminChatId = deptId ? await getDeptAdminChatId(deptId) : null
     if (adminChatId) {

@@ -1,21 +1,26 @@
-import { initializeApp, getApps } from "firebase/app"
-import { getFirestore, type Firestore } from "firebase/firestore"
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim() || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN?.trim() || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim() || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || "",
-}
+import { initializeApp, getApps, cert } from "firebase-admin/app"
+import { getFirestore, type Firestore } from "firebase-admin/firestore"
 
 let _db: Firestore | null = null
 
 function getDb(): Firestore {
   if (_db) return _db
-  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
-  _db = getFirestore(app)
+
+  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim() || process.env.FIREBASE_PROJECT_ID?.trim() || ""
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim() || ""
+  const privateKey = (process.env.FIREBASE_PRIVATE_KEY?.trim() || "").replace(/\\n/g, "\n")
+
+  if (getApps().length === 0) {
+    if (clientEmail && privateKey && projectId) {
+      initializeApp({
+        credential: cert({ projectId, clientEmail, privateKey }),
+      })
+    } else {
+      initializeApp({ projectId: projectId || undefined })
+    }
+  }
+
+  _db = getFirestore()
   return _db
 }
 
