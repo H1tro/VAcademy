@@ -2,8 +2,6 @@ import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } from "firebase/firestore"
 
-const fdb = getDb()
-
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
 
@@ -35,7 +33,7 @@ const CATEGORIES = [
 
 const adminChats = new Map<string, number[]>()
 
-async function getDeptAdminChatIds(department: string): Promise<number[]> {
+async function getDeptAdminChatIds(department: string, fdb?: any): Promise<number[]> {
   if (adminChats.has(department)) return adminChats.get(department)!
   try {
     const snap = await getDoc(doc(fdb, "admin_config", department))
@@ -89,12 +87,12 @@ async function tgEdit(
   })
 }
 
-async function getSession(telegramId: number) {
+async function getSession(telegramId: number, fdb: any) {
   const snap = await getDoc(doc(fdb, "bot_sessions", String(telegramId)))
   return snap.exists() ? snap.data() : null
 }
 
-async function saveSession(telegramId: number, data: Record<string, unknown>) {
+async function saveSession(telegramId: number, fdb: any, data: Record<string, unknown>) {
   await setDoc(doc(fdb, "bot_sessions", String(telegramId)), data, { merge: true })
 }
 
@@ -137,7 +135,7 @@ function newTicketKeyboard() {
 
 // ---------- handlers ----------
 
-async function handleCallback(query: any) {
+async function handleCallback(query: any, fdb: any) {
   const { data, message, from, id: callbackId } = query
   const chatId: number = message.chat.id
   const messageId: number = message.message_id
@@ -182,7 +180,7 @@ async function handleCallback(query: any) {
 
   // new ticket — reset
   if (data === "new_ticket") {
-    await saveSession(telegramId, { step: STEPS.SUBJECT, updatedAt: serverTimestamp() })
+    await saveSession(telegramId, fdb, { step: STEPS.SUBJECT, updatedAt: serverTimestamp() })
     await tgEdit(
       chatId,
       messageId,
@@ -194,7 +192,7 @@ async function handleCallback(query: any) {
 
   // back to subject
   if (data === "back:subject") {
-    await saveSession(telegramId, { step: STEPS.SUBJECT, updatedAt: serverTimestamp() })
+    await saveSession(telegramId, fdb, { step: STEPS.SUBJECT, updatedAt: serverTimestamp() })
     await tgEdit(
       chatId,
       messageId,
@@ -206,7 +204,7 @@ async function handleCallback(query: any) {
 
   // back to category
   if (data === "back:category") {
-    await saveSession(telegramId, { step: STEPS.CATEGORY, updatedAt: serverTimestamp() })
+    await saveSession(telegramId, fdb, { step: STEPS.CATEGORY, updatedAt: serverTimestamp() })
     await tgEdit(chatId, messageId, "Выберите категорию обращения:", {
       reply_markup: categoryKeyboard(),
     })
@@ -219,7 +217,7 @@ async function handleCallback(query: any) {
     const subject = SUBJECTS.find((s) => s.id === subjectId)
     if (!subject) return
 
-    await saveSession(telegramId, {
+    await saveSession(telegramId, fdb, {
       step: STEPS.CATEGORY,
       subject: subjectId,
       subjectLabel: subject.label,
@@ -238,7 +236,7 @@ async function handleCallback(query: any) {
     const category = CATEGORIES.find((c) => c.id === categoryId)
     if (!category) return
 
-    await saveSession(telegramId, {
+    await saveSession(telegramId, fdb, {
       step: STEPS.MESSAGE,
       category: categoryId,
       categoryLabel: category.label,
@@ -261,7 +259,7 @@ async function handleCallback(query: any) {
   }
 }
 
-async function handleMessage(msg: any) {
+async function handleMessage(msg: any, fdb: any) {
   const { chat, from, text, message_id } = msg
   const chatId: number = chat.id
   const telegramId: number = from.id
@@ -280,7 +278,7 @@ async function handleMessage(msg: any) {
   if (text === "/unregister") {
     const registered: string[] = []
     for (const s of SUBJECTS) {
-      const ids = await getDeptAdminChatIds(s.id)
+      const ids = await getDeptAdminChatIds(s.id, fdb)
       if (ids.includes(chatId)) registered.push(s.label)
     }
     if (registered.length === 0) {
@@ -305,7 +303,7 @@ async function handleMessage(msg: any) {
 
   // ---- /start ----
   if (text === "/start") {
-    await saveSession(telegramId, {
+    await saveSession(telegramId, fdb, {
       step: STEPS.SUBJECT,
       telegramId,
       userName,
@@ -322,7 +320,7 @@ async function handleMessage(msg: any) {
   }
 
   // ---- session check ----
-  const session: any = await getSession(telegramId)
+  const session: any = await getSession(telegramId, fdb)
   if (!session) {
     await tgSend(chatId, "Пожалуйста, начните с команды /start")
     return
@@ -369,7 +367,7 @@ async function handleMessage(msg: any) {
     const ticketRef = await addDoc(collection(fdb, "tickets"), ticket)
 
     // forward to all admins of this department
-    const adminIds = await getDeptAdminChatIds(subjectId)
+    const adminIds = await getDeptAdminChatIds(subjectId, fdb)
     const header = [
       `📩 Новая заявка #${ticketRef.id}`,
       `👤 ${userName} (@${username}, ID: ${telegramId})`,
@@ -405,7 +403,7 @@ async function handleMessage(msg: any) {
       { reply_markup: newTicketKeyboard() }
     )
 
-    await saveSession(telegramId, { step: STEPS.DONE, updatedAt: serverTimestamp() })
+    await saveSession(telegramId, fdb, { step: STEPS.DONE, updatedAt: serverTimestamp() })
     return
   }
 
@@ -424,18 +422,23 @@ async function handleMessage(msg: any) {
 // ---------- main ----------
 
 export async function POST(req: Request) {
+  const update = await req.json()
+
+  processUpdate(update).catch((e) => console.error("processUpdate error:", e))
+
+  return NextResponse.json({ ok: true })
+}
+
+async function processUpdate(update: any) {
   try {
-    const update = await req.json()
+    const fdb = getDb()
 
     if (update.callback_query) {
-      await handleCallback(update.callback_query)
+      await handleCallback(update.callback_query, fdb)
     } else if (update.message) {
-      await handleMessage(update.message)
+      await handleMessage(update.message, fdb)
     }
-
-    return NextResponse.json({ ok: true })
   } catch (error) {
     console.error("Webhook error:", error)
-    return NextResponse.json({ ok: false })
   }
 }
