@@ -11,22 +11,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || "",
 };
 
-function ensureApp() {
+function getFirebaseApp() {
   if (!getApps().length) {
     initializeApp(firebaseConfig);
   }
+  return getApps()[0];
 }
 
-export const auth = new Proxy({} as Auth, {
-  get(_, prop) {
-    ensureApp();
-    return (getAuth() as any)[prop];
-  },
-});
-
-export const db = new Proxy({} as Firestore, {
-  get(_, prop) {
-    ensureApp();
-    return (getFirestore() as any)[prop];
-  },
-});
+export const app = getFirebaseApp();
+export const auth: Auth = getAuth(app);
+export const db: Firestore = getFirestore(app);
