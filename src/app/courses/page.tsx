@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Youtube, Atom, Code2, Dna, Calculator, FlaskConical, ArrowLeft, Play, Film, Clock, ChevronDown, ChevronUp } from "lucide-react"
+import { Youtube, Atom, Code2, Dna, Calculator, FlaskConical, ArrowLeft, Play, Film, Clock, ExternalLink } from "lucide-react"
 
 type Video = { name: string; url: string; section?: string }
 
@@ -91,7 +91,7 @@ const videoLessons = [
 
 export default function CoursesPage() {
   const router = useRouter()
-  const [expanded, setExpanded] = useState<string | null>(null)
+  const [openVideo, setOpenVideo] = useState<string | null>(null)
   const totalVideos = videoLessons.reduce((sum, g) => sum + g.videos.length, 0)
 
   return (
@@ -120,67 +120,69 @@ export default function CoursesPage() {
           return (
             <Card
               key={group.subject}
-              className={`bg-gradient-to-b ${group.color} ${group.border} overflow-hidden transition-all duration-300 ${expanded === group.subject ? "shadow-xl" : "hover:shadow-xl"}`}
+              className={`bg-gradient-to-b ${group.color} ${group.border} overflow-hidden transition-all duration-300 hover:shadow-xl`}
             >
-              <button
-                onClick={() => setExpanded(expanded === group.subject ? null : group.subject)}
-                className="w-full text-left"
-              >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2 text-xl">
-                      <div className="p-1.5 rounded-lg bg-background/50">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      {group.subject}
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className={`${group.badge} border-0 font-mono text-xs`}>
-                        <Play className="h-3 w-3 mr-1" />
-                        {group.videos.length}
-                      </Badge>
-                      {expanded === group.subject ? (
-                        <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      )}
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <div className="p-1.5 rounded-lg bg-background/50">
+                      <Icon className="h-5 w-5" />
                     </div>
+                    {group.subject}
+                  </CardTitle>
+                  <Badge variant="outline" className={`${group.badge} border-0 font-mono text-xs`}>
+                    <Play className="h-3 w-3 mr-1" />
+                    {group.videos.length}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-0.5">
+                {group.videos.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/60">
+                    <Clock className="h-8 w-8 mb-2" />
+                    <span className="text-sm font-medium">Coming soon</span>
+                    <span className="text-xs mt-0.5">Видео-уроки скоро появятся</span>
                   </div>
-                </CardHeader>
-              </button>
-              {expanded === group.subject && (
-                <CardContent className="space-y-0.5">
-                  {group.videos.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-8 text-muted-foreground/60">
-                      <Clock className="h-8 w-8 mb-2" />
-                      <span className="text-sm font-medium">Coming soon</span>
-                      <span className="text-xs mt-0.5">Видео-уроки скоро появятся</span>
-                    </div>
-                  ) : (
-                    group.videos.map((video, i) => (
-                      <a
-                        key={i}
-                        href={video.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-black/20 rounded-xl transition-all group/link"
-                      >
-                        <div className="shrink-0 mt-0.5">
-                          <Youtube className="h-4 w-4 text-red-500 group-hover/link:text-red-400 transition-colors" />
-                        </div>
-                        <div className="min-w-0">
-                          {video.section && (
-                            <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block leading-none mb-1">
-                              {video.section}
-                            </span>
-                          )}
-                          <span className="leading-snug">{video.name}</span>
-                        </div>
-                      </a>
-                    ))
-                  )}
-                </CardContent>
-              )}
+                ) : (
+                  group.videos.map((video, i) => {
+                    const key = `${group.subject}-${i}`
+                    const isOpen = openVideo === key
+                    return (
+                      <div key={i}>
+                        <button
+                          onClick={() => setOpenVideo(isOpen ? null : key)}
+                          className="w-full flex items-start gap-3 px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-black/20 rounded-xl transition-all text-left"
+                        >
+                          <div className="shrink-0 mt-0.5">
+                            <Youtube className="h-4 w-4 text-red-500" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            {video.section && (
+                              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60 block leading-none mb-1">
+                                {video.section}
+                              </span>
+                            )}
+                            <span className="leading-snug">{video.name}</span>
+                          </div>
+                        </button>
+                        {isOpen && (
+                          <div className="px-3 pb-3 pt-1">
+                            <a
+                              href={video.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 text-xs font-medium text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition-colors"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                              Смотреть на YouTube
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
+                )}
+              </CardContent>
             </Card>
           )
         })}
