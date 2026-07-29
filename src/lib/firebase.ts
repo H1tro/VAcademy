@@ -18,10 +18,6 @@ function getApp() {
   return getApps()[0];
 }
 
-export const auth = new Proxy({} as Auth, {
-  get(_, prop) {
-    return (getAuth(getApp()) as any)[prop];
-  },
-});
-
-export const db: Firestore = getFirestore(getApp());
+export const app = getApp();
+export const auth: Auth = getAuth(app);
+export const db: Firestore = getFirestore(app);
