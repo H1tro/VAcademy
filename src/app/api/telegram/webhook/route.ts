@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { db } from "@/lib/firebase-server"
-import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from "firebase/firestore"
+import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } from "firebase/firestore"
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
@@ -31,19 +31,29 @@ const CATEGORIES = [
   { id: "other", label: "\u2753 Другое" },
 ]
 
-const adminChats = new Map<string, number>()
+const adminChats = new Map<string, number[]>()
 
-async function getDeptAdminChatId(department: string): Promise<number | null> {
+async function getDeptAdminChatIds(department: string): Promise<number[]> {
   if (adminChats.has(department)) return adminChats.get(department)!
   try {
     const snap = await getDoc(doc(db, "admin_config", department))
     if (snap.exists()) {
-      const id = snap.data().chatId as number
-      adminChats.set(department, id)
-      return id
+      const data = snap.data()
+      let ids: number[] = []
+      if (Array.isArray(data.chatIds)) {
+        ids = data.chatIds as number[]
+      } else if (data.chatId) {
+        ids = [data.chatId as number]
+      }
+      adminChats.set(department, ids)
+      return ids
     }
   } catch {}
-  return null
+  return []
+}
+
+function invalidateCache(department: string) {
+  adminChats.delete(department)
 }
 
 // ---------- helpers ----------
@@ -138,9 +148,32 @@ async function handleCallback(query: any) {
     const dept = data.slice(5)
     const subject = SUBJECTS.find((s) => s.id === dept)
     if (!subject) return
-    adminChats.set(dept, chatId)
-    await setDoc(doc(db, "admin_config", dept), { chatId, department: dept, updatedAt: serverTimestamp() }, { merge: true })
+    invalidateCache(dept)
+    const ref = doc(db, "admin_config", dept)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) {
+      await setDoc(ref, { chatIds: [chatId], department: dept, updatedAt: serverTimestamp() })
+    } else {
+      await updateDoc(ref, { chatIds: arrayUnion(chatId), updatedAt: serverTimestamp() })
+    }
     await tgEdit(chatId, messageId, `✅ Вы зарегистрированы как **${subject.label}**.\n\nВсе заявки по этому предмету будут приходить сюда.`, { parse_mode: "Markdown" })
+    return
+  }
+
+  // unregister department
+  if (data.startsWith("unreg:")) {
+    const dept = data.slice(6)
+    const subject = SUBJECTS.find((s) => s.id === dept)
+    if (!subject) return
+    invalidateCache(dept)
+    const ref = doc(db, "admin_config", dept)
+    const snap = await getDoc(ref)
+    if (snap.exists() && snap.data().chatIds) {
+      await updateDoc(ref, { chatIds: arrayRemove(chatId), updatedAt: serverTimestamp() })
+    } else if (snap.exists() && snap.data().chatId === chatId) {
+      await updateDoc(ref, { chatIds: arrayRemove(chatId), chatId: 0, updatedAt: serverTimestamp() })
+    }
+    await tgEdit(chatId, messageId, `✅ Вы отписаны от уведомлений **${subject.label}**.`, { parse_mode: "Markdown" })
     return
   }
 
@@ -234,6 +267,33 @@ async function handleMessage(msg: any) {
     return
   }
 
+  // ---- /unregister ----
+  if (text === "/unregister") {
+    const registered: string[] = []
+    for (const s of SUBJECTS) {
+      const ids = await getDeptAdminChatIds(s.id)
+      if (ids.includes(chatId)) registered.push(s.label)
+    }
+    if (registered.length === 0) {
+      await tgSend(chatId, "❌ Вы не зарегистрированы ни по одному предмету.")
+      return
+    }
+    await tgSend(chatId, "Выберите предмет, от которого хотите отписаться:", {
+      reply_markup: {
+        inline_keyboard: SUBJECTS.filter((s) => registered.includes(s.label)).map((s) => [
+          { text: s.label, callback_data: `unreg:${s.id}` },
+        ]),
+      },
+    })
+    return
+  }
+
+  // ---- /myid ----
+  if (text === "/myid") {
+    await tgSend(chatId, `🆔 Ваш Telegram ID: \`${telegramId}\`\n\nПередайте этот ID администратору сайта, чтобы вас добавили как админа предмета.`, { parse_mode: "Markdown" })
+    return
+  }
+
   // ---- /start ----
   if (text === "/start") {
     await saveSession(telegramId, {
@@ -299,34 +359,34 @@ async function handleMessage(msg: any) {
 
     const ticketRef = await addDoc(collection(db, "tickets"), ticket)
 
-    // forward to correct department
-    const adminChatId = await getDeptAdminChatId(subjectId)
-    if (adminChatId) {
-      const header = [
-        `📩 Новая заявка #${ticketRef.id}`,
-        `👤 ${userName} (@${username}, ID: ${telegramId})`,
-        `📖 Предмет: ${subjectLabel}`,
-        `📂 Категория: ${session.categoryLabel || session.category}`,
-        `💬 ${text || "(без текста, только файлы)"}`,
-      ].join("\n")
+    // forward to all admins of this department
+    const adminIds = await getDeptAdminChatIds(subjectId)
+    const header = [
+      `📩 Новая заявка #${ticketRef.id}`,
+      `👤 ${userName} (@${username}, ID: ${telegramId})`,
+      `📖 Предмет: ${subjectLabel}`,
+      `📂 Категория: ${session.categoryLabel || session.category}`,
+      `💬 ${text || "(без текста, только файлы)"}`,
+    ].join("\n")
 
-      await tgSend(adminChatId, header)
-
-      // forward file
-      if (msg.document) {
-        const fileId = msg.document.file_id
-        const fileName = msg.document.file_name || "файл"
-        await tgSend(adminChatId, `📎 ${fileName}`)
-        await fetch(`${TG_API}/sendDocument`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: adminChatId,
-            document: fileId,
-            caption: `Файл от ${userName} (@${username})`,
-          }),
-        })
-      }
+    for (const adminChatId of adminIds) {
+      try {
+        await tgSend(adminChatId, header)
+        if (msg.document) {
+          const fileId = msg.document.file_id
+          const fileName = msg.document.file_name || "файл"
+          await tgSend(adminChatId, `📎 ${fileName}`)
+          await fetch(`${TG_API}/sendDocument`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chat_id: adminChatId,
+              document: fileId,
+              caption: `Файл от ${userName} (@${username})`,
+            }),
+          })
+        }
+      } catch {}
     }
 
     const departmentName = subjectLabel
