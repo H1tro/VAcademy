@@ -135,6 +135,96 @@ function newTicketKeyboard() {
   }
 }
 
+async function getAdminDepartments(chatId: number): Promise<string[]> {
+  const depts: string[] = []
+  for (const s of SUBJECTS) {
+    const ids = await getDeptAdminChatIds(s.id)
+    if (ids.includes(chatId)) depts.push(s.id)
+  }
+  return depts
+}
+
+async function replyToTicket(ticketId: string, replyText: string, adminChatId: number, adminTelegramId: number, adminName: string) {
+  try {
+    const db = getDb()
+    const snap = await db.doc(`tickets/${ticketId}`).get()
+    if (!snap.exists) {
+      await tgSend(adminChatId, `❌ Заявка #${ticketId} не найдена.`)
+      return
+    }
+
+    const ticket = snap.data()!
+    const adminDepts = await getAdminDepartments(adminChatId)
+    if (!adminDepts.includes(ticket.department as string)) {
+      await tgSend(adminChatId, "❌ У вас нет прав отвечать на заявки этого департамента.")
+      return
+    }
+
+    const reply = {
+      from: "admin",
+      adminName,
+      adminTelegramId,
+      text: replyText,
+      at: new Date(),
+    }
+
+    await db.doc(`tickets/${ticketId}`).update({
+      replies: FieldValue.arrayUnion(reply),
+      updatedAt: FieldValue.serverTimestamp(),
+    })
+
+    const userTgId = ticket.telegramId as number | undefined
+    if (userTgId) {
+      const userMsg = [
+        `📬 *Ответ от поддержки по заявке #${ticketId}*`,
+        "",
+        replyText,
+      ].join("\n")
+      await tgSend(userTgId, userMsg, { parse_mode: "Markdown" })
+    }
+
+    await tgSend(adminChatId, `✅ Ответ отправлен пользователю по заявке #${ticketId}.`)
+  } catch (e) {
+    const errMsg = e instanceof Error ? e.message : String(e)
+    await tgSend(adminChatId, `❌ Ошибка: ${errMsg}`)
+  }
+}
+
+async function closeTicket(ticketId: string, adminChatId: number, adminTelegramId: number) {
+  try {
+    const db = getDb()
+    const snap = await db.doc(`tickets/${ticketId}`).get()
+    if (!snap.exists) {
+      await tgSend(adminChatId, `❌ Заявка #${ticketId} не найдена.`)
+      return
+    }
+
+    const ticket = snap.data()!
+    const adminDepts = await getAdminDepartments(adminChatId)
+    if (!adminDepts.includes(ticket.department as string)) {
+      await tgSend(adminChatId, "❌ У вас нет прав закрывать заявки этого департамента.")
+      return
+    }
+
+    await db.doc(`tickets/${ticketId}`).update({
+      status: "closed",
+      closedAt: FieldValue.serverTimestamp(),
+      closedBy: adminTelegramId,
+      updatedAt: FieldValue.serverTimestamp(),
+    })
+
+    const userTgId = ticket.telegramId as number | undefined
+    if (userTgId) {
+      await tgSend(userTgId, `✅ Заявка #${ticketId} закрыта.\n\nЕсли у вас остались вопросы, создайте новую заявку через /start`)
+    }
+
+    await tgSend(adminChatId, `✅ Заявка #${ticketId} закрыта.`)
+  } catch (e) {
+    const errMsg = e instanceof Error ? e.message : String(e)
+    await tgSend(adminChatId, `❌ Ошибка: ${errMsg}`)
+  }
+}
+
 async function handleCallback(query: any) {
   const { data, message, from, id: callbackId } = query
   const chatId: number = message.chat.id
@@ -213,6 +303,13 @@ async function handleCallback(query: any) {
       await tgEdit(chatId, messageId, "Пожалуйста, подробно опишите ваш вопрос или проблему.\n\nПри необходимости вы можете прикрепить:\n\n• фотографии;\n• PDF-файлы;\n• документы;\n• архивы;\n• другие материалы.", { reply_markup: backToCategoryKeyboard() })
       return
     }
+
+    if (data.startsWith("reply_ticket:")) {
+      const ticketId = data.slice(13)
+      await saveSession(telegramId, { step: "reply", replyTicketId: ticketId, updatedAt: new Date() })
+      await tgSend(chatId, `✏️ Напишите текст ответа для заявки #${ticketId}:`)
+      return
+    }
   } catch (e) {
     console.error("handleCallback error:", e)
     const errMsg = e instanceof Error ? e.message : String(e)
@@ -267,6 +364,47 @@ async function handleMessage(msg: any) {
     return
   }
 
+  if (text === "/help") {
+    const helpText = [
+      "📋 *Команды бота:*",
+      "",
+      "• /start — Создать новую заявку",
+      "• /register — Зарегистрироваться как администратор",
+      "• /unregister — Отписаться от уведомлений",
+      "• /myid — Показать ваш Telegram ID",
+      "",
+      "*Для администраторов:*",
+      "• /reply `ID` `текст` — Ответить на заявку",
+      "• /close `ID` — Закрыть заявку",
+      "",
+      "Пример: `/reply abc123 Всё готово!`",
+    ].join("\n")
+    await tgSend(chatId, helpText, { parse_mode: "Markdown" })
+    return
+  }
+
+  if (text?.startsWith("/reply ")) {
+    const parts = text.slice(7).trim().split(/\s+/)
+    const ticketId = parts[0]
+    const replyText = parts.slice(1).join(" ")
+    if (!ticketId || !replyText) {
+      await tgSend(chatId, "❌ Использование: `/reply <ID заявки> <текст ответа>`", { parse_mode: "Markdown" })
+      return
+    }
+    await replyToTicket(ticketId, replyText, chatId, telegramId, userName)
+    return
+  }
+
+  if (text?.startsWith("/close ")) {
+    const ticketId = text.slice(7).trim()
+    if (!ticketId) {
+      await tgSend(chatId, "❌ Использование: `/close <ID заявки>`", { parse_mode: "Markdown" })
+      return
+    }
+    await closeTicket(ticketId, chatId, telegramId)
+    return
+  }
+
   const session: any = await getSession(telegramId)
   if (!session) {
     await tgSend(chatId, "Пожалуйста, начните с команды /start")
@@ -305,6 +443,7 @@ async function handleMessage(msg: any) {
       message: text || "(без текста, только файлы)",
       fileIds,
       status: "open",
+      replies: [],
       createdAt: FieldValue.serverTimestamp(),
     }
 
@@ -321,7 +460,12 @@ async function handleMessage(msg: any) {
 
     for (const adminChatId of adminIds) {
       try {
-        await tgSend(adminChatId, header)
+        const replyKeyboard = {
+          inline_keyboard: [
+            [{ text: "✏️ Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
+          ],
+        }
+        await tgSend(adminChatId, header, { reply_markup: replyKeyboard })
         if (msg.document) {
           const fileId = msg.document.file_id
           const fileName = msg.document.file_name || "файл"
@@ -338,6 +482,17 @@ async function handleMessage(msg: any) {
     await tgSend(chatId, `✅ Ваше обращение успешно отправлено.\n\nДепартамент ${subjectLabel} получил вашу заявку.\n\nМы свяжемся с вами как можно скорее.`, { reply_markup: newTicketKeyboard() })
 
     await saveSession(telegramId, { step: STEPS.DONE, updatedAt: new Date() })
+    return
+  }
+
+  if (session.step === "reply" && session.replyTicketId) {
+    const ticketId = session.replyTicketId as string
+    if (!text) {
+      await tgSend(chatId, "Пожалуйста, напишите текст ответа.")
+      return
+    }
+    await replyToTicket(ticketId, text, chatId, telegramId, userName)
+    await saveSession(telegramId, { step: STEPS.DONE, replyTicketId: undefined, updatedAt: new Date() })
     return
   }
 

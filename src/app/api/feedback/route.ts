@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       message,
       fileIds: [] as string[],
       status: "open",
+      replies: [],
       createdAt: FieldValue.serverTimestamp(),
     }
 
@@ -66,7 +67,15 @@ export async function POST(req: Request) {
       await fetch(`${TG_API}/sendMessage`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: adminChatId, text: header }),
+        body: JSON.stringify({
+          chat_id: adminChatId,
+          text: header,
+          reply_markup: {
+            inline_keyboard: [
+              [{ text: "✏️ Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
+            ],
+          },
+        }),
       })
     }
 
