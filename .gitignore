@@ -35,6 +35,7 @@ next-env.d.ts
 
 # opennext / cloudflare
 .open-next/
+.wrangler/
 
 # ide / misc artifacts
 .idx/
