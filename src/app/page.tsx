@@ -1,27 +1,13 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Atom, BookOpen, Trophy, Users, GraduationCap } from 'lucide-react';
+import { LandingHeader } from '@/components/landing-header';
+import { Atom, BookOpen, Trophy, GraduationCap } from 'lucide-react';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-[#161C1E]">
-      <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto w-full border-b border-border/10">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-xl bg-[#26A3E5] flex items-center justify-center">
-            <Atom className="text-white h-6 w-6" />
-          </div>
-          <span className="text-2xl font-headline font-bold tracking-tight text-[#26A3E5]">VAcademi</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link href="/login">Войти</Link>
-          </Button>
-          <Button className="bg-[#26A3E5] hover:bg-[#26A3E5]/90" asChild>
-            <Link href="/register">Регистрация</Link>
-          </Button>
-        </div>
-      </nav>
+      <LandingHeader />
 
       <main className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center space-y-12">
         <div className="space-y-6 max-w-4xl">
