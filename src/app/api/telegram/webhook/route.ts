@@ -253,8 +253,9 @@ async function handleCallback(query: any, fdb: any) {
   }
   } catch (e) {
     console.error("handleCallback error:", e)
+    const errMsg = e instanceof Error ? e.message : String(e)
     try {
-      await tgSend(chatId, "❌ Произошла ошибка. Пожалуйста, попробуйте ещё раз или напишите /start")
+      await tgSend(chatId, `❌ Ошибка: ${errMsg}`)
     } catch {}
   }
 }
@@ -432,6 +433,7 @@ export async function POST(req: Request) {
 async function processUpdate(update: any) {
   try {
     const fdb = getDb()
+    console.log("Firebase initialized, processing update:", update.callback_query ? "callback" : update.message ? "message" : "unknown")
 
     if (update.callback_query) {
       await handleCallback(update.callback_query, fdb)
@@ -439,6 +441,6 @@ async function processUpdate(update: any) {
       await handleMessage(update.message, fdb)
     }
   } catch (error) {
-    console.error("Webhook error:", error)
+    console.error("processUpdate error:", error)
   }
 }
