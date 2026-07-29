@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/firebase-server"
+import { getDb } from "@/lib/firebase-server"
 import { doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } from "firebase/firestore"
+
+const fdb = getDb()
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
@@ -36,7 +38,7 @@ const adminChats = new Map<string, number[]>()
 async function getDeptAdminChatIds(department: string): Promise<number[]> {
   if (adminChats.has(department)) return adminChats.get(department)!
   try {
-    const snap = await getDoc(doc(db, "admin_config", department))
+    const snap = await getDoc(doc(fdb, "admin_config", department))
     if (snap.exists()) {
       const data = snap.data()
       let ids: number[] = []
@@ -88,12 +90,12 @@ async function tgEdit(
 }
 
 async function getSession(telegramId: number) {
-  const snap = await getDoc(doc(db, "bot_sessions", String(telegramId)))
+  const snap = await getDoc(doc(fdb, "bot_sessions", String(telegramId)))
   return snap.exists() ? snap.data() : null
 }
 
 async function saveSession(telegramId: number, data: Record<string, unknown>) {
-  await setDoc(doc(db, "bot_sessions", String(telegramId)), data, { merge: true })
+  await setDoc(doc(fdb, "bot_sessions", String(telegramId)), data, { merge: true })
 }
 
 // ---------- keyboards ----------
@@ -141,7 +143,8 @@ async function handleCallback(query: any) {
   const messageId: number = message.message_id
   const telegramId: number = from.id
 
-  await tgAnswer(callbackId)
+  try {
+    await tgAnswer(callbackId)
 
   // register department
   if (data.startsWith("dept:")) {
@@ -149,7 +152,7 @@ async function handleCallback(query: any) {
     const subject = SUBJECTS.find((s) => s.id === dept)
     if (!subject) return
     invalidateCache(dept)
-    const ref = doc(db, "admin_config", dept)
+    const ref = doc(fdb, "admin_config", dept)
     const snap = await getDoc(ref)
     if (!snap.exists()) {
       await setDoc(ref, { chatIds: [chatId], department: dept, updatedAt: serverTimestamp() })
@@ -166,7 +169,7 @@ async function handleCallback(query: any) {
     const subject = SUBJECTS.find((s) => s.id === dept)
     if (!subject) return
     invalidateCache(dept)
-    const ref = doc(db, "admin_config", dept)
+    const ref = doc(fdb, "admin_config", dept)
     const snap = await getDoc(ref)
     if (snap.exists() && snap.data().chatIds) {
       await updateDoc(ref, { chatIds: arrayRemove(chatId), updatedAt: serverTimestamp() })
@@ -249,6 +252,12 @@ async function handleCallback(query: any) {
       { reply_markup: backToCategoryKeyboard() }
     )
     return
+  }
+  } catch (e) {
+    console.error("handleCallback error:", e)
+    try {
+      await tgSend(chatId, "❌ Произошла ошибка. Пожалуйста, попробуйте ещё раз или напишите /start")
+    } catch {}
   }
 }
 
@@ -357,7 +366,7 @@ async function handleMessage(msg: any) {
       createdAt: serverTimestamp(),
     }
 
-    const ticketRef = await addDoc(collection(db, "tickets"), ticket)
+    const ticketRef = await addDoc(collection(fdb, "tickets"), ticket)
 
     // forward to all admins of this department
     const adminIds = await getDeptAdminChatIds(subjectId)

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/firebase-server"
+import { getDb } from "@/lib/firebase-server"
 import { addDoc, collection, serverTimestamp, doc, getDoc } from "firebase/firestore"
+
+const fdb = getDb()
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
@@ -15,7 +17,7 @@ const SUBJECT_IDS: Record<string, string> = {
 
 async function getDeptAdminChatId(department: string): Promise<number | null> {
   try {
-    const snap = await getDoc(doc(db, "admin_config", department))
+    const snap = await getDoc(doc(fdb, "admin_config", department))
     if (snap.exists()) return snap.data().chatId as number
   } catch {
     /* ignore */
@@ -47,7 +49,7 @@ export async function POST(req: Request) {
       createdAt: serverTimestamp(),
     }
 
-    const ticketRef = await addDoc(collection(db, "tickets"), ticket)
+    const ticketRef = await addDoc(collection(fdb, "tickets"), ticket)
 
     // Notify ONLY the correct department
     const deptId = SUBJECT_IDS[subject]

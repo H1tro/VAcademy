@@ -10,11 +10,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || "",
 }
 
-function getApp() {
-  if (!getApps().length) {
-    initializeApp(firebaseConfig)
-  }
-  return getApps()[0]
+let _db: Firestore | null = null
+
+function getDb(): Firestore {
+  if (_db) return _db
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig)
+  _db = getFirestore(app)
+  return _db
 }
 
-export const db: Firestore = getFirestore(getApp())
+export { getDb }
+export type { Firestore }

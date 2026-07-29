@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
-import { db } from "@/lib/firebase-server"
+import { getDb } from "@/lib/firebase-server"
 import { collection, doc, getDoc, getDocs, setDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 
 const SUBJECTS = ["biology", "physics", "chemistry", "math", "cs"]
+const fdb = getDb()
 
 async function getConfig(subject: string) {
-  const snap = await getDoc(doc(db, "admin_config", subject))
+  const snap = await getDoc(doc(fdb, "admin_config", subject))
   if (!snap.exists()) return { subject, chatIds: [] }
   const data = snap.data()
   let chatIds: number[] = []
@@ -46,7 +47,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 })
     }
 
-    const ref = doc(db, "admin_config", subject)
+    const ref = doc(fdb, "admin_config", subject)
     const snap = await getDoc(ref)
     if (!snap.exists()) {
       await setDoc(ref, { chatIds: [chatId], department: subject, updatedAt: new Date() })
@@ -70,7 +71,7 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "Invalid subject" }, { status: 400 })
     }
 
-    const ref = doc(db, "admin_config", subject)
+    const ref = doc(fdb, "admin_config", subject)
     const snap = await getDoc(ref)
     if (snap.exists()) {
       const data = snap.data()
