@@ -7,9 +7,22 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Filter, PlayCircle, Star, Users, Clock, X } from "lucide-react"
+import { Search, Filter, PlayCircle, Star, Users, Clock, X, Youtube, ChevronDown, ChevronUp } from "lucide-react"
 
-const courses = [
+type Video = { name: string; url: string }
+
+const courses: ({
+  id: number
+  title: string
+  instructor: string
+  rating: number
+  students: string
+  duration: string
+  subject: string
+  level: string
+  image: string
+  videos?: Video[]
+})[] = [
   {
     id: 1,
     title: "Олимпиадная Геометрия: От основ до IMO",
@@ -30,7 +43,10 @@ const courses = [
     duration: "40 часов",
     subject: "Информатика",
     level: "Advanced",
-    image: "https://picsum.photos/seed/info1/400/220"
+    image: "https://picsum.photos/seed/info1/400/220",
+    videos: [
+      { name: "Алгоритмы — видеоурок", url: "https://youtu.be/cpuRbnWEPio?si=lfWk8C74av8jvucE" },
+    ]
   },
   {
     id: 3,
@@ -41,7 +57,38 @@ const courses = [
     duration: "18 часов",
     subject: "Физика",
     level: "Advanced",
-    image: "https://picsum.photos/seed/phys1/400/220"
+    image: "https://picsum.photos/seed/phys1/400/220",
+    videos: [
+      { name: "Павел Виктор: Кинематика для начинающих", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Кинематика" },
+      { name: "Физика с АВ: Равноускоренное движение", url: "https://www.youtube.com/results?search_query=Физика+с+АВ+Равноускоренное+движение" },
+      { name: "Павел Виктор: Движение под углом", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Движение+под+углом+к+горизонту" },
+      { name: "Walter Lewin: Projectile Motion", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Projectile+Motion" },
+      { name: "Павел Виктор: Законы Ньютона", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Законы+Ньютона" },
+      { name: "Walter Lewin: Newton's Laws", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Newton%27s+Laws" },
+      { name: "Павел Виктор: Динамика на наклонной плоскости", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Наклонная+плоскость" },
+      { name: "Walter Lewin: Friction and Inclined Planes", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Friction+Inclined+Planes" },
+      { name: "Павел Виктор: Гравитация и вес", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Закон+всемирного+тяготения" },
+      { name: "Walter Lewin: Gravity and Orbits", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Gravity" },
+      { name: "Павел Виктор: Орбитальная механика", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Космические+скорости" },
+      { name: "Walter Lewin: Orbital Mechanics", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Central+Forces" },
+      { name: "Павел Виктор: Идеальный газ для начинающих", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Идеальный+газ" },
+      { name: "Физика с АВ: Молекулярная физика", url: "https://www.youtube.com/results?search_query=Физика+с+АВ+МКТ" },
+      { name: "Павел Виктор: Молекулярно-кинетическая теория", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Основное+уравнение+МКТ" },
+      { name: "Павел Виктор: Электростатика для начинающих", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Электростатика" },
+      { name: "Walter Lewin: Electrostatics", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Electrostatics" },
+      { name: "Павел Виктор: Электрический потенциал", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Потенциал" },
+      { name: "Walter Lewin: Electric Potential", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Electric+Potential" },
+      { name: "Павел Виктор: Закон Ома для начинающих", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Закон+Ома" },
+      { name: "Walter Lewin: Ohm's Law", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Ohm+Law" },
+      { name: "Павел Виктор: Электрические цепи", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Последовательное+параллельное+соединение" },
+      { name: "Walter Lewin: Circuits", url: "https://www.youtube.com/results?search_query=Walter+Lewin+DC+Circuits" },
+      { name: "Павел Виктор: Гармонические колебания", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Гармонические+колебания" },
+      { name: "Павел Виктор: Энергия колебаний", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Превращение+энергии+при+колебаниях" },
+      { name: "Павел Виктор: Геометрическая оптика", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Геометрическая+оптика" },
+      { name: "Павел Виктор: Линзы и зеркала", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Линзы" },
+      { name: "Павел Виктор: Фотоны и фотоэффект", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Фотоэффект" },
+      { name: "Павел Виктор: Модель Бора", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Постулаты+Бора" },
+    ]
   },
   {
     id: 4,
@@ -63,7 +110,12 @@ const courses = [
     duration: "22 часа",
     subject: "Биология",
     level: "Beginner",
-    image: "https://picsum.photos/seed/bio1/400/220"
+    image: "https://picsum.photos/seed/bio1/400/220",
+    videos: [
+      { name: "Ninja Nerd Official — подробные видеоуроки по биологии, анатомии и физиологии", url: "https://www.youtube.com/@NinjaNerdOfficial" },
+      { name: "EdLight Biology — наглядные лекции по биологии", url: "https://www.youtube.com/@edlightbiology7455" },
+      { name: "Плейлист: Биология для олимпиадников", url: "https://www.youtube.com/playlist?list=PLJEDjAF9Nb8iM6KHecTjq_PRBl54xQY23" },
+    ]
   },
   {
     id: 6,
@@ -84,6 +136,7 @@ export default function CoursesPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null)
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null)
+  const [expandedCourseId, setExpandedCourseId] = useState<number | null>(null)
 
   const subjects = useMemo(() => Array.from(new Set(courses.map((course) => course.subject))), [])
   const levels = useMemo(() => Array.from(new Set(courses.map((course) => course.level))), [])
@@ -233,6 +286,41 @@ export default function CoursesPage() {
               <Button className="w-full mt-6 bg-secondary hover:bg-primary hover:text-white transition-all rounded-xl">
                 Начать обучение
               </Button>
+              {course.videos && course.videos.length > 0 && (
+                <div className="mt-3">
+                  <Button
+                    variant="ghost"
+                    className="w-full flex items-center justify-between text-sm text-muted-foreground hover:text-primary"
+                    onClick={() => setExpandedCourseId(expandedCourseId === course.id ? null : course.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Youtube className="h-4 w-4 text-red-500" />
+                      <span>Видео-уроки ({course.videos.length})</span>
+                    </div>
+                    {expandedCourseId === course.id ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                  {expandedCourseId === course.id && (
+                    <div className="mt-2 space-y-1 max-h-48 overflow-y-auto rounded-lg border border-border/20 p-2">
+                      {course.videos.map((video, i) => (
+                        <a
+                          key={i}
+                          href={video.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:text-primary hover:bg-secondary/50 rounded-md transition-colors"
+                        >
+                          <Youtube className="h-3.5 w-3.5 shrink-0 text-red-500" />
+                          <span className="truncate">{video.name}</span>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}

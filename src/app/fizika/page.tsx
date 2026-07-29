@@ -1,13 +1,12 @@
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ExternalLink, Trophy, Youtube, BookOpen, Globe, Award, Map } from "lucide-react"
+import { ExternalLink, Trophy, BookOpen, Globe, Award, Map } from "lucide-react"
 import curriculum from "@/lib/fizika-curriculum"
 import { FIZIKA_OLYMPIADS } from "@/lib/fizika-olympiads"
 
 function materialIcon(name: string, url: string) {
   const s = (name + " " + url).toLowerCase()
-  if (/youtube|павел|walter|физика с ав|lew/i.test(s)) return Youtube
   if (/ipho|олимпиад/i.test(s)) return Trophy
   if (/khan|academy|курс/i.test(s)) return BookOpen
   return ExternalLink

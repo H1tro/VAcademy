@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { GraduationCap, ExternalLink, Trophy, Youtube, BookOpen, Download, FileText } from "lucide-react"
+import { GraduationCap, ExternalLink, Trophy, BookOpen, Download, FileText } from "lucide-react"
 import { SubjectSelector, SUBJECTS, type SubjectId } from "@/components/strategy/subject-selector"
 import fizikaCurriculum from "@/lib/fizika-curriculum"
 import { curriculum as biologyCurriculum } from "@/lib/biology-curriculum"
@@ -18,7 +18,6 @@ const PLACEHOLDER_SUBJECTS: SubjectId[] = []
 
 function materialIcon(name: string, url: string) {
   const s = (name + " " + url).toLowerCase()
-  if (/youtube|павел|walter|физика с ав|lew/i.test(s)) return Youtube
   if (/ipho|олимпиад/i.test(s)) return Trophy
   if (/khan|academy|курс/i.test(s)) return BookOpen
   return ExternalLink
