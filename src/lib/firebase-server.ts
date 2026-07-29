@@ -21,6 +21,7 @@ function getDb(): Firestore {
   }
 
   _db = getFirestore()
+  _db.settings({ preferRest: true })
   return _db
 }
 
