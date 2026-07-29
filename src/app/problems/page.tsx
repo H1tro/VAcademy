@@ -50,10 +50,7 @@ function ProblemsPageContent() {
       setLoading(true)
       try {
         if (user) {
-          const token = await user.getIdToken()
-          const res = await fetch("/api/profile", {
-            headers: { authorization: `Bearer ${token}` },
-          })
+          const res = await fetch(`/api/profile?uid=${user.uid}`)
           if (res.ok) {
             const data = await res.json()
             if (data && data.solvedProblems) {
@@ -78,14 +75,11 @@ function ProblemsPageContent() {
     setSolvedIds(newSolvedIds)
 
     try {
-      const token = await user.getIdToken()
       const res = await fetch("/api/profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          uid: user.uid,
           solvedProblems: newSolvedIds,
           tasksSolved: newSolvedIds.length,
         }),

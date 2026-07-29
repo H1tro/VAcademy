@@ -84,10 +84,7 @@ export default function DashboardPage() {
       }
 
       const loadUserStats = async () => {
-        const token = await user.getIdToken()
-        const profileRes = await fetch("/api/profile", {
-          headers: { authorization: `Bearer ${token}` },
-        })
+        const profileRes = await fetch(`/api/profile?uid=${user.uid}`)
         if (profileRes.ok) {
           const profileData = await profileRes.json()
           if (profileData && profileData.school !== undefined) {

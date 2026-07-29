@@ -70,10 +70,7 @@ export default function ProfileEditPage() {
         setDisplayName(user.displayName || "")
         setPhotoURL(user.photoURL || "")
 
-        const token = await user.getIdToken()
-        const res = await fetch("/api/profile", {
-          headers: { authorization: `Bearer ${token}` },
-        })
+        const res = await fetch(`/api/profile?uid=${user.uid}`)
         if (res.ok) {
           const data = await res.json()
           if (data && data.school !== undefined) {
@@ -156,14 +153,11 @@ export default function ProfileEditPage() {
         photoURL: photoURL || undefined,
       })
 
-      const token = await user.getIdToken()
       const res = await fetch("/api/profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          uid: user.uid,
           displayName,
           photoURL,
           school,

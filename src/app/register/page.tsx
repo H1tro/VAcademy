@@ -51,14 +51,11 @@ export default function RegisterPage() {
         photoURL: photoURL || undefined,
       });
 
-      const token = await user.getIdToken();
       await fetch("/api/profile", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          authorization: `Bearer ${token}`,
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          uid: user.uid,
           displayName,
           email: user.email,
           photoURL: photoURL || "",
