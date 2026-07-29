@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server"
+import { waitUntil } from "@vercel/functions"
+import { LRUCache } from "lru-cache"
 import { getDb } from "@/lib/firebase-server"
 import { FieldValue } from "firebase-admin/firestore"
 
@@ -31,6 +33,8 @@ const CATEGORIES = [
 ]
 
 const adminChats = new Map<string, number[]>()
+
+const sessionCache = new LRUCache<number, Record<string, unknown>>({ max: 1000, ttl: 30_000 })
 
 async function getDeptAdminChatIds(department: string): Promise<number[]> {
   if (adminChats.has(department)) return adminChats.get(department)!
@@ -81,14 +85,19 @@ async function tgEdit(chatId: number, messageId: number, text: string, opts?: Re
 }
 
 async function getSession(telegramId: number) {
+  const cached = sessionCache.get(telegramId)
+  if (cached) return cached
   const db = getDb()
   const snap = await db.doc(`bot_sessions/${telegramId}`).get()
-  return snap.exists ? snap.data() : null
+  const data = snap.exists ? snap.data() : null
+  if (data) sessionCache.set(telegramId, data)
+  return data
 }
 
 async function saveSession(telegramId: number, data: Record<string, unknown>) {
   const db = getDb()
   await db.doc(`bot_sessions/${telegramId}`).set(data, { merge: true })
+  sessionCache.set(telegramId, data)
 }
 
 function subjectKeyboard() {
@@ -343,7 +352,7 @@ async function handleMessage(msg: any) {
 
 export async function POST(req: Request) {
   const update = await req.json()
-  processUpdate(update).catch((e) => console.error("processUpdate error:", e))
+  waitUntil(processUpdate(update).catch((e) => console.error("processUpdate error:", e)))
   return NextResponse.json({ ok: true })
 }
 
