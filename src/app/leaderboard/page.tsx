@@ -5,8 +5,7 @@ export const dynamic = "force-dynamic"
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
-import { collection, getDocs, orderBy, query } from "firebase/firestore"
-import { auth, db } from "@/lib/firebase"
+import { auth } from "@/lib/firebase"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -63,25 +62,11 @@ export default function LeaderboardPage() {
     const loadLeaderboard = async () => {
       try {
         setLoading(true)
-        const usersQuery = query(collection(db, "users"), orderBy("tasksSolved", "desc"))
-        const snapshot = await getDocs(usersQuery)
-        const users = snapshot.docs.map((doc) => {
-          const data = doc.data()
-          const solvedProblems = (data.solvedProblems as string[]) || []
-          const solvedSubjects: Record<string, number> = {}
-          for (const id of solvedProblems) {
-            const subject = getSubjectFromId(id)
-            solvedSubjects[subject] = (solvedSubjects[subject] || 0) + 1
-          }
-          return {
-            uid: doc.id,
-            displayName: (data.displayName as string) || ((data.email as string)?.split("@")[0] ?? "Ученик"),
-            photoURL: (data.photoURL as string) || "",
-            tasksSolved: Number(data.tasksSolved ?? 0),
-            solvedSubjects,
-          }
-        })
-        setLeaderboardData(users)
+        const res = await fetch("/api/leaderboard")
+        if (res.ok) {
+          const users = await res.json()
+          setLeaderboardData(users as LeaderboardUser[])
+        }
       } finally {
         setLoading(false)
       }

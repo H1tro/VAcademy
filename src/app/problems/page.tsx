@@ -5,8 +5,7 @@ export const dynamic = "force-dynamic"
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
-import { auth, db } from "@/lib/firebase"
+import { auth } from "@/lib/firebase"
 import { ProblemCard } from "@/components/problems/problem-card"
 import { ProblemModal } from "@/components/problems/problem-modal"
 import { Button } from "@/components/ui/button"
@@ -51,10 +50,15 @@ function ProblemsPageContent() {
       setLoading(true)
       try {
         if (user) {
-          const profileDoc = await getDoc(doc(db, "users", user.uid))
-          if (profileDoc.exists()) {
-            const data = profileDoc.data()
-            setSolvedIds((data.solvedProblems as string[]) || [])
+          const token = await user.getIdToken()
+          const res = await fetch("/api/profile", {
+            headers: { authorization: `Bearer ${token}` },
+          })
+          if (res.ok) {
+            const data = await res.json()
+            if (data && data.solvedProblems) {
+              setSolvedIds(data.solvedProblems as string[])
+            }
           }
         }
       } finally {
@@ -74,15 +78,19 @@ function ProblemsPageContent() {
     setSolvedIds(newSolvedIds)
 
     try {
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
+      const token = await user.getIdToken()
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           solvedProblems: newSolvedIds,
           tasksSolved: newSolvedIds.length,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      )
+        }),
+      })
+      if (!res.ok) throw new Error("Failed to save progress")
     } catch (err) {
       setSolvedIds(solvedIds)
       console.error("Failed to save progress", err)

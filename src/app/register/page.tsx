@@ -4,9 +4,8 @@ export const dynamic = "force-dynamic"
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -52,28 +51,33 @@ export default function RegisterPage() {
         photoURL: photoURL || undefined,
       });
 
-      await setDoc(doc(db, "users", user.uid), {
-        uid: user.uid,
-        displayName,
-        email: user.email,
-        photoURL: photoURL || "",
-        school,
-        about,
-        goal: "Подготовка к олимпиадам",
-        streakDays: 0,
-        maxStreakDays: 0,
-        tasksSolved: 0,
-        solvedProblems: [],
-        studyTimeMinutes: 0,
-        subjectProgress: {
-          mathematics: 0,
-          physics: 0,
-          informatics: 0,
-          chemistry: 0,
-          biology: 0,
+      const token = await user.getIdToken();
+      await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
         },
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
+        body: JSON.stringify({
+          displayName,
+          email: user.email,
+          photoURL: photoURL || "",
+          school,
+          about,
+          goal: "Подготовка к олимпиадам",
+          streakDays: 0,
+          maxStreakDays: 0,
+          tasksSolved: 0,
+          solvedProblems: [],
+          studyTimeMinutes: 0,
+          subjectProgress: {
+            mathematics: 0,
+            physics: 0,
+            informatics: 0,
+            chemistry: 0,
+            biology: 0,
+          },
+        }),
       });
 
       setSuccess("Регистрация прошла успешно!");

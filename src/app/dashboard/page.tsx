@@ -6,8 +6,7 @@ export const dynamic = "force-dynamic"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
-import { auth, db } from "@/lib/firebase"
-import { collection, doc, getDoc, getDocs, orderBy, query } from "firebase/firestore"
+import { auth } from "@/lib/firebase"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
@@ -85,31 +84,37 @@ export default function DashboardPage() {
       }
 
       const loadUserStats = async () => {
-        const profileDoc = await getDoc(doc(db, "users", user.uid), { source: "server" })
-        if (profileDoc.exists()) {
-          const profileData = profileDoc.data()
-          setGoal(profileData.goal || "Подготовка к олимпиадам")
-          setStats({
-            streakDays: Number(profileData.streakDays ?? 0),
-            maxStreakDays: Number(profileData.maxStreakDays ?? 0),
-            tasksSolved: Number(profileData.tasksSolved ?? 0),
-            studyTimeMinutes: Number(profileData.studyTimeMinutes ?? 0),
-            subjectProgress: {
-              mathematics: Number((profileData.subjectProgress as any)?.mathematics ?? 0),
-              physics: Number((profileData.subjectProgress as any)?.physics ?? 0),
-              informatics: Number((profileData.subjectProgress as any)?.informatics ?? 0),
-              chemistry: Number((profileData.subjectProgress as any)?.chemistry ?? 0),
-              biology: Number((profileData.subjectProgress as any)?.biology ?? 0),
-            },
-          })
+        const token = await user.getIdToken()
+        const profileRes = await fetch("/api/profile", {
+          headers: { authorization: `Bearer ${token}` },
+        })
+        if (profileRes.ok) {
+          const profileData = await profileRes.json()
+          if (profileData && profileData.school !== undefined) {
+            setGoal(profileData.goal || "Подготовка к олимпиадам")
+            setStats({
+              streakDays: Number(profileData.streakDays ?? 0),
+              maxStreakDays: Number(profileData.maxStreakDays ?? 0),
+              tasksSolved: Number(profileData.tasksSolved ?? 0),
+              studyTimeMinutes: Number(profileData.studyTimeMinutes ?? 0),
+              subjectProgress: {
+                mathematics: Number((profileData.subjectProgress as any)?.mathematics ?? 0),
+                physics: Number((profileData.subjectProgress as any)?.physics ?? 0),
+                informatics: Number((profileData.subjectProgress as any)?.informatics ?? 0),
+                chemistry: Number((profileData.subjectProgress as any)?.chemistry ?? 0),
+                biology: Number((profileData.subjectProgress as any)?.biology ?? 0),
+              },
+            })
+          }
         }
 
-        const usersQuery = query(collection(db, "users"), orderBy("tasksSolved", "desc"))
-        const usersSnapshot = await getDocs(usersQuery)
-        const docs = usersSnapshot.docs
-        setUsersCount(docs.length)
-        const position = docs.findIndex((doc) => doc.id === user.uid)
-        setRank(position === -1 ? null : position + 1)
+        const leaderRes = await fetch("/api/leaderboard")
+        if (leaderRes.ok) {
+          const users = await leaderRes.json()
+          setUsersCount(users.length)
+          const position = users.findIndex((u: any) => u.uid === user.uid)
+          setRank(position === -1 ? null : position + 1)
+        }
       }
 
       void loadUserStats()

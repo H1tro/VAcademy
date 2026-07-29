@@ -3,9 +3,8 @@
 export const dynamic = "force-dynamic"
 
 import { useEffect, useState, type FormEvent, useRef } from "react"
-import { auth, db } from "@/lib/firebase"
+import { auth } from "@/lib/firebase"
 import { onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth"
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -71,12 +70,17 @@ export default function ProfileEditPage() {
         setDisplayName(user.displayName || "")
         setPhotoURL(user.photoURL || "")
 
-        const profileDoc = await getDoc(doc(db, "users", user.uid))
-        if (profileDoc.exists()) {
-          const data = profileDoc.data()
-          setSchool((data.school as string) || "")
-          setGrade((data.grade as string) || "")
-          setAbout((data.about as string) || "")
+        const token = await user.getIdToken()
+        const res = await fetch("/api/profile", {
+          headers: { authorization: `Bearer ${token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          if (data && data.school !== undefined) {
+            setSchool(data.school as string || "")
+            setGrade(data.grade as string || "")
+            setAbout(data.about as string || "")
+          }
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Ошибка загрузки профиля")
@@ -152,19 +156,27 @@ export default function ProfileEditPage() {
         photoURL: photoURL || undefined,
       })
 
-      await setDoc(
-        doc(db, "users", user.uid),
-        {
+      const token = await user.getIdToken()
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
           displayName,
           photoURL,
           school,
           grade,
           about,
           email: user.email,
-          updatedAt: serverTimestamp(),
-        },
-        { merge: true }
-      )
+        }),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json()
+        throw new Error(errData.error || "Не удалось сохранить профиль")
+      }
 
       setSuccess("Профиль успешно обновлен.")
     } catch (err) {
