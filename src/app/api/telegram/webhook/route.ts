@@ -496,12 +496,16 @@ async function handleMessage(msg: any) {
     return
   }
 
+  if (session.step === STEPS.DONE) {
+    await saveSession(telegramId, { step: STEPS.SUBJECT, updatedAt: new Date() })
+    await tgSend(chatId, "Добро пожаловать в STEM Support!\n\nВыберите предмет, по которому у вас возник вопрос.", { reply_markup: subjectKeyboard() })
+    return
+  }
+
   if (session.step === STEPS.SUBJECT) {
     await tgSend(chatId, "Пожалуйста, выберите предмет, используя кнопки выше.")
   } else if (session.step === STEPS.CATEGORY) {
     await tgSend(chatId, "Пожалуйста, выберите категорию обращения, используя кнопки выше.")
-  } else {
-    await tgSend(chatId, "Хотите создать новую заявку?", { reply_markup: newTicketKeyboard() })
   }
 }
 
