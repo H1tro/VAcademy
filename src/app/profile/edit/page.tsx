@@ -48,6 +48,9 @@ export default function ProfileEditPage() {
   const [leetcodeUsername, setLeetcodeUsername] = useState("")
   const [authenticated, setAuthenticated] = useState(false)
 
+  const [syncing, setSyncing] = useState(false)
+  const [syncResult, setSyncResult] = useState("")
+
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -183,6 +186,35 @@ export default function ProfileEditPage() {
       setError(err instanceof Error ? err.message : "Не удалось сохранить профиль.")
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleSyncCodeforces = async () => {
+    const user = auth.currentUser
+    if (!user || !codeforcesHandle.trim()) return
+
+    setSyncing(true)
+    setSyncResult("")
+    try {
+      const res = await fetch("/api/sync/codeforces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: user.uid }),
+      })
+      if (!res.ok) {
+        const err = await res.json()
+        throw new Error(err.error || "Ошибка синхронизации")
+      }
+      const data = await res.json()
+      setSyncResult(
+        data.synced > 0
+          ? `Синхронизировано ${data.synced} новых задач`
+          : "Новых задач не найдено",
+      )
+    } catch (err) {
+      setSyncResult(err instanceof Error ? err.message : "Ошибка синхронизации")
+    } finally {
+      setSyncing(false)
     }
   }
 
@@ -400,6 +432,24 @@ export default function ProfileEditPage() {
                           onChange={(e) => setCodeforcesHandle(e.target.value)}
                           placeholder="например: tourist"
                         />
+                        {codeforcesHandle.trim() && (
+                          <div className="flex items-center gap-2 pt-1">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={handleSyncCodeforces}
+                              disabled={syncing}
+                            >
+                              {syncing ? "Синхронизация..." : "Синхронизировать решённые"}
+                            </Button>
+                            {syncResult && (
+                              <span className={`text-xs ${syncResult.includes("Ошибка") ? "text-red-500" : "text-emerald-500"}`}>
+                                {syncResult}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="leetcode">LeetCode Username</Label>
