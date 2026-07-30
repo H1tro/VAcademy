@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic"
 
-import { Suspense, useEffect, useState } from "react"
+import { Suspense, useCallback, useEffect, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/lib/firebase"
@@ -63,6 +63,36 @@ function ProblemsPageContent() {
     return true
   })
 
+  const syncing = useRef(false)
+
+  const autoSync = useCallback(async (user: { uid: string }) => {
+    if (syncing.current) return
+    const last = localStorage.getItem("lastSyncAt")
+    if (last && Date.now() - Number(last) < 600_000) return
+    syncing.current = true
+    try {
+      const res = await fetch("/api/sync/codeforces", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: user.uid }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        if (data.synced > 0) {
+          const r = await fetch(`/api/profile?uid=${user.uid}`)
+          if (r.ok) {
+            const p = await r.json()
+            setSolvedIds((p.solvedProblems as string[]) || [])
+          }
+        }
+        localStorage.setItem("lastSyncAt", String(Date.now()))
+      }
+    } catch {
+    } finally {
+      syncing.current = false
+    }
+  }, [])
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true)
@@ -82,6 +112,13 @@ function ProblemsPageContent() {
     })
     return () => unsubscribe()
   }, [])
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user && user.uid) autoSync(user)
+    })
+    return () => unsub()
+  }, [autoSync])
 
   const handleSolved = async (problemId: string) => {
     const user = auth.currentUser
