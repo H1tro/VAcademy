@@ -16,6 +16,7 @@ import Link from "next/link"
 import { problemsData, externalProblemsData } from "@/lib/problems-data"
 import type { Problem, ExternalProblem, ProblemSubject } from "@/lib/problems-data"
 import { OLYMPIAD_RESOURCES } from "@/lib/olympiad-resources"
+import { useToast } from "@/hooks/use-toast"
 
 const allSubjects: { value: ProblemSubject | "all"; label: string }[] = [
   { value: "all", label: "Все предметы" },
@@ -42,6 +43,7 @@ function ProblemsPageContent() {
   const searchParams = useSearchParams()
   const subjectParam = searchParams.get("subject") as ProblemSubject | null
   const platformParam = searchParams.get("platform") || "all"
+  const { toast } = useToast()
 
   const [solvedIds, setSolvedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -140,9 +142,10 @@ function ProblemsPageContent() {
         }),
       })
       if (!res.ok) throw new Error("Failed to save progress")
+      toast({ title: "Прогресс сохранён" })
     } catch (err) {
       setSolvedIds(solvedIds)
-      console.error("Failed to save progress", err)
+      toast({ title: "Ошибка сохранения", description: "Попробуйте ещё раз", variant: "destructive" })
     }
   }
 
