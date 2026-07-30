@@ -44,6 +44,8 @@ export default function ProfileEditPage() {
   const [school, setSchool] = useState("")
   const [grade, setGrade] = useState("")
   const [about, setAbout] = useState("")
+  const [codeforcesHandle, setCodeforcesHandle] = useState("")
+  const [leetcodeUsername, setLeetcodeUsername] = useState("")
   const [authenticated, setAuthenticated] = useState(false)
 
   const [currentPassword, setCurrentPassword] = useState("")
@@ -77,6 +79,8 @@ export default function ProfileEditPage() {
             setSchool(data.school as string || "")
             setGrade(data.grade as string || "")
             setAbout(data.about as string || "")
+            setCodeforcesHandle(data.codeforcesHandle as string || "")
+            setLeetcodeUsername(data.leetcodeUsername as string || "")
           }
         }
       } catch (err) {
@@ -163,6 +167,8 @@ export default function ProfileEditPage() {
           school,
           grade,
           about,
+          codeforcesHandle,
+          leetcodeUsername,
           email: user.email,
         }),
       })
@@ -381,6 +387,30 @@ export default function ProfileEditPage() {
                       placeholder="Кратко о целях и планах"
                       rows={3}
                     />
+                  </div>
+
+                  <div className="pt-2 border-t border-border/40">
+                    <p className="text-sm font-semibold text-muted-foreground mb-3">Привязка внешних аккаунтов</p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="codeforces">Codeforces Handle</Label>
+                        <Input
+                          id="codeforces"
+                          value={codeforcesHandle}
+                          onChange={(e) => setCodeforcesHandle(e.target.value)}
+                          placeholder="например: tourist"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="leetcode">LeetCode Username</Label>
+                        <Input
+                          id="leetcode"
+                          value={leetcodeUsername}
+                          onChange={(e) => setLeetcodeUsername(e.target.value)}
+                          placeholder="например: johndoe"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex flex-col gap-3 pt-2 md:flex-row md:items-center md:justify-between">

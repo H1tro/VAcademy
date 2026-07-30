@@ -1,6 +1,31 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
 import { FieldValue } from "firebase-admin/firestore"
+import { DIFFICULTY_POINTS, type ExternalProblem, type Problem } from "@/lib/problems-data"
+
+async function getExternalProblems(): Promise<ExternalProblem[]> {
+  const db = getDb()
+  const snap = await db.collection("externalProblems").get()
+  return snap.docs.map((d) => d.data() as ExternalProblem)
+}
+
+async function getInternalProblems(): Promise<Problem[]> {
+  const db = getDb()
+  const snap = await db.collection("problems").get()
+  return snap.docs.map((d) => d.data() as Problem)
+}
+
+function computeTotalScore(
+  solvedIds: string[],
+  internalProblems: Problem[],
+  externalProblems: ExternalProblem[],
+): number {
+  const probMap = new Map<string, number>()
+  for (const p of internalProblems) probMap.set(p.id, DIFFICULTY_POINTS[p.difficulty])
+  for (const p of externalProblems) probMap.set(p.id, DIFFICULTY_POINTS[p.difficulty])
+
+  return solvedIds.reduce((sum, id) => sum + (probMap.get(id) ?? 1), 0)
+}
 
 export async function GET(req: Request) {
   try {
@@ -25,6 +50,16 @@ export async function POST(req: Request) {
     if (!uid) return NextResponse.json({ error: "uid required" }, { status: 400 })
 
     const { createdAt: _, updatedAt: __, ...safeBody } = body
+
+    const solvedProblems: string[] = safeBody.solvedProblems || []
+
+    if (solvedProblems.length > 0) {
+      const [internalProblems, externalProblems] = await Promise.all([
+        getInternalProblems(),
+        getExternalProblems(),
+      ])
+      safeBody.totalScore = computeTotalScore(solvedProblems, internalProblems, externalProblems)
+    }
 
     const db = getDb()
     const snap = await db.doc(`users/${uid}`).get()

@@ -13,8 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowLeft, BookCheck, ExternalLink, Filter, Trophy } from "lucide-react"
 import Link from "next/link"
-import { problemsData } from "@/lib/problems-data"
-import type { Problem, ProblemSubject } from "@/lib/problems-data"
+import { problemsData, externalProblemsData } from "@/lib/problems-data"
+import type { Problem, ExternalProblem, ProblemSubject } from "@/lib/problems-data"
 import { OLYMPIAD_RESOURCES } from "@/lib/olympiad-resources"
 
 const allSubjects: { value: ProblemSubject | "all"; label: string }[] = [
@@ -26,24 +26,42 @@ const allSubjects: { value: ProblemSubject | "all"; label: string }[] = [
   { value: "biology", label: "Биология" },
 ]
 
+const platformFilters = [
+  { value: "all", label: "Все" },
+  { value: "internal", label: "Внутренние" },
+  { value: "codeforces", label: "Codeforces" },
+  { value: "leetcode", label: "LeetCode" },
+]
+
+function getPlatform(problem: Problem | ExternalProblem): string {
+  return "platform" in problem ? problem.platform : "internal"
+}
+
 function ProblemsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const subjectParam = searchParams.get("subject") as ProblemSubject | null
+  const platformParam = searchParams.get("platform") || "all"
 
-  const [problems] = useState<Problem[]>(problemsData)
   const [solvedIds, setSolvedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null)
+  const [selectedProblem, setSelectedProblem] = useState<Problem | ExternalProblem | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
   const currentSubject: ProblemSubject | "all" = subjectParam && allSubjects.some(s => s.value === subjectParam)
     ? subjectParam
     : "all"
+  const currentPlatform = platformFilters.some(p => p.value === platformParam) ? platformParam : "all"
 
-  const filteredProblems = currentSubject === "all"
-    ? problems
-    : problems.filter((p) => p.subject === currentSubject)
+  const allProblems = [...problemsData, ...externalProblemsData]
+
+  const filteredProblems = allProblems.filter((p) => {
+    if (currentSubject !== "all" && p.subject !== currentSubject) return false
+    if (currentPlatform === "internal" && getPlatform(p) !== "internal") return false
+    if (currentPlatform === "codeforces" && getPlatform(p) !== "codeforces") return false
+    if (currentPlatform === "leetcode" && getPlatform(p) !== "leetcode") return false
+    return true
+  })
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -102,6 +120,17 @@ function ProblemsPageContent() {
     router.push(query ? `/problems?${query}` : "/problems")
   }
 
+  const handlePlatformChange = (platform: string) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (platform === "all") {
+      params.delete("platform")
+    } else {
+      params.set("platform", platform)
+    }
+    const query = params.toString()
+    router.push(query ? `/problems?${query}` : "/problems")
+  }
+
   const unsolvedCount = filteredProblems.filter((p) => !solvedIds.includes(p.id)).length
   const solvedCount = filteredProblems.filter((p) => solvedIds.includes(p.id)).length
 
@@ -144,6 +173,22 @@ function ProblemsPageContent() {
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center gap-3">
+        {platformFilters.map((p) => (
+          <button
+            key={p.value}
+            onClick={() => handlePlatformChange(p.value)}
+            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
+              currentPlatform === p.value
+                ? "bg-secondary text-foreground border-primary/50 shadow-md"
+                : "bg-card/50 text-muted-foreground border-border/40 hover:border-primary/30 hover:text-foreground"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
       <div className="flex items-center gap-4 text-sm text-muted-foreground">
         <BookCheck className="h-4 w-4" />
         <span>
@@ -167,6 +212,12 @@ function ProblemsPageContent() {
           {Array.from({ length: 6 }).map((_, i) => (
             <Skeleton key={i} className="h-32 rounded-xl bg-card/40" />
           ))}
+        </div>
+      ) : filteredProblems.length === 0 ? (
+        <div className="rounded-3xl border border-border/40 bg-card/40 p-12 text-center space-y-4">
+          <Trophy className="h-12 w-12 mx-auto text-muted-foreground/40" />
+          <h3 className="text-xl font-headline font-bold">Нет задач</h3>
+          <p className="text-muted-foreground">По выбранным фильтрам задач не найдено</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

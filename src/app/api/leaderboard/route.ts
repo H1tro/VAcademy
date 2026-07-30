@@ -17,7 +17,7 @@ function getSubjectFromId(id: string): string {
 export async function GET() {
   try {
     const db = getDb()
-    const usersSnap = await db.collection("users").orderBy("tasksSolved", "desc").get()
+    const usersSnap = await db.collection("users").get()
 
     const leaderboard: Record<string, unknown>[] = []
     for (const doc of usersSnap.docs) {
@@ -31,15 +31,19 @@ export async function GET() {
       }
 
       const displayName = (data.displayName as string) || ((data.email as string)?.split("@")[0]) || "Ученик"
+      const totalScore = Number(data.totalScore ?? 0)
 
       leaderboard.push({
         uid: doc.id,
         displayName,
         photoURL: (data.photoURL as string) || "",
         tasksSolved: Number(data.tasksSolved ?? 0),
+        totalScore,
         solvedSubjects,
       })
     }
+
+    leaderboard.sort((a, b) => (b.totalScore as number) - (a.totalScore as number))
 
     return NextResponse.json(leaderboard)
   } catch (error) {
