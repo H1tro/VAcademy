@@ -5,8 +5,8 @@ type Platform = "codeforces" | "leetcode"
 
 const cache = new LRUCache<string, boolean>({ max: 1000, ttl: 60_000 })
 
-async function checkCodeforces(handle: string, problemId: string): Promise<boolean> {
-  const cacheKey = `cf:${handle}:${problemId}`
+async function checkCodeforces(handle: string, externalId: string): Promise<boolean> {
+  const cacheKey = `cf:${handle}:${externalId}`
   const cached = cache.get(cacheKey)
   if (cached !== undefined) return cached
 
@@ -17,10 +17,13 @@ async function checkCodeforces(handle: string, problemId: string): Promise<boole
   const data = await res.json()
   if (data.status !== "OK") return false
 
+  const [contestId, index] = externalId.split("/")
+
   const solved = (data.result as any[]).some(
     (s: any) =>
       s.verdict === "OK" &&
-      (s.problem.index === problemId || s.problem.name?.toLowerCase() === problemId.toLowerCase()),
+      String(s.problem.contestId) === contestId &&
+      s.problem.index === index,
   )
 
   cache.set(cacheKey, solved)

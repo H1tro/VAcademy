@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
 import { FieldValue } from "firebase-admin/firestore"
 import { DIFFICULTY_POINTS, type ExternalProblem, type Problem } from "@/lib/problems-data"
+import { externalProblemsData } from "@/lib/problems-data"
 import { LRUCache } from "lru-cache"
 
 const statusCache = new LRUCache<string, any[]>({ max: 100, ttl: 300_000 })
@@ -22,6 +23,27 @@ async function fetchCFStatus(handle: string): Promise<any[]> {
   return data.result
 }
 
+async function getCFProblems(): Promise<ExternalProblem[]> {
+  const db = getDb()
+  const extSnap = await db.collection("externalProblems").get()
+
+  if (!extSnap.empty) {
+    return extSnap.docs
+      .map((d) => d.data() as ExternalProblem)
+      .filter((p) => p.platform === "codeforces")
+  }
+
+  if (externalProblemsData.length > 0) {
+    const batch = db.batch()
+    for (const p of externalProblemsData) {
+      batch.set(db.doc(`externalProblems/${p.id}`), { ...p, createdAt: FieldValue.serverTimestamp() })
+    }
+    await batch.commit()
+  }
+
+  return externalProblemsData.filter((p) => p.platform === "codeforces")
+}
+
 export async function POST(req: Request) {
   try {
     const { uid } = await req.json()
@@ -35,27 +57,21 @@ export async function POST(req: Request) {
     const handle = userData.codeforcesHandle as string | undefined
     if (!handle) return NextResponse.json({ error: "codeforcesHandle not set" }, { status: 400 })
 
-    const [extSnap, intSnap] = await Promise.all([
-      db.collection("externalProblems").get(),
-      db.collection("problems").get(),
-    ])
-
-    const cfProblems = extSnap.docs
-      .map((d) => d.data() as ExternalProblem)
-      .filter((p) => p.platform === "codeforces")
-
+    const cfProblems = await getCFProblems()
     if (cfProblems.length === 0) return NextResponse.json({ synced: 0, totalScore: userData.totalScore || 0 })
 
-    const idByIndex = new Map<string, string>()
-    for (const p of cfProblems) idByIndex.set(p.externalId, p.id)
+    const idByKey = new Map<string, string>()
+    for (const p of cfProblems) idByKey.set(p.externalId, p.id)
 
     const submissions = await fetchCFStatus(handle)
     const syncedIds = new Set<string>()
     for (const sub of submissions) {
       if (sub.verdict !== "OK") continue
-      const index: string = sub.problem?.index
-      if (!index) continue
-      const mapped = idByIndex.get(index)
+      const cid: number = sub.problem?.contestId
+      const idx: string = sub.problem?.index
+      if (!cid || !idx) continue
+      const key = `${cid}/${idx}`
+      const mapped = idByKey.get(key)
       if (mapped) syncedIds.add(mapped)
     }
 
@@ -72,9 +88,14 @@ export async function POST(req: Request) {
     if (added === 0) return NextResponse.json({ synced: 0, totalScore: userData.totalScore || 0 })
 
     const pointsMap = new Map<string, number>()
-    for (const p of intSnap.docs) pointsMap.set(p.id, DIFFICULTY_POINTS[(p.data() as Problem).difficulty])
-    for (const p of extSnap.docs) pointsMap.set(p.id, DIFFICULTY_POINTS[(p.data() as ExternalProblem).difficulty])
-    const totalScore = currentSolved.reduce((sum, id) => sum + (pointsMap.get(id) ?? 1), 0)
+    for (const p of cfProblems) pointsMap.set(p.id, DIFFICULTY_POINTS[p.difficulty])
+
+    let totalScore = userData.totalScore as number || 0
+    for (const id of syncedIds) {
+      if (!existingSet.has(id)) {
+        totalScore += pointsMap.get(id) ?? 1
+      }
+    }
 
     await db.doc(`users/${uid}`).set(
       {
