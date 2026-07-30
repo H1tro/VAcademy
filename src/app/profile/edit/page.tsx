@@ -196,6 +196,13 @@ export default function ProfileEditPage() {
     setSyncing(true)
     setSyncResult("")
     try {
+      const save = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid: user.uid, codeforcesHandle }),
+      })
+      if (!save.ok) throw new Error("Не удалось сохранить handle")
+
       const res = await fetch("/api/sync/codeforces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -211,6 +218,7 @@ export default function ProfileEditPage() {
           ? `Синхронизировано ${data.synced} новых задач`
           : "Новых задач не найдено",
       )
+      setSuccess("Ручка сохранена и синхронизация выполнена")
     } catch (err) {
       setSyncResult(err instanceof Error ? err.message : "Ошибка синхронизации")
     } finally {

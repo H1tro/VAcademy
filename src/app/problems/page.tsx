@@ -54,24 +54,28 @@ function ProblemsPageContent() {
     if (last && Date.now() - Number(last) < 600_000) return
     syncing.current = true
     try {
+      const prof = await fetch(`/api/profile?uid=${user.uid}`)
+      if (!prof.ok) return
+      const data = await prof.json()
+      if (!data.codeforcesHandle) return
       const res = await fetch("/api/sync/codeforces", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid: user.uid }),
       })
       if (res.ok) {
-        const data = await res.json()
-        if (data.synced > 0) {
+        const syncData = await res.json()
+        if (syncData.synced > 0) {
           const r = await fetch(`/api/profile?uid=${user.uid}`)
           if (r.ok) {
             const p = await r.json()
             setSolvedIds((p.solvedProblems as string[]) || [])
           }
         }
-        localStorage.setItem("lastSyncAt", String(Date.now()))
       }
     } catch {
     } finally {
+      localStorage.setItem("lastSyncAt", String(Date.now()))
       syncing.current = false
     }
   }, [])
