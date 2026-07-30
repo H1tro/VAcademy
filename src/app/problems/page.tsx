@@ -13,8 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ArrowLeft, BookCheck, ExternalLink, Filter, Trophy } from "lucide-react"
 import Link from "next/link"
-import { problemsData, externalProblemsData } from "@/lib/problems-data"
-import type { Problem, ExternalProblem, ProblemSubject } from "@/lib/problems-data"
+import { problemsData } from "@/lib/problems-data"
+import type { Problem, ProblemSubject } from "@/lib/problems-data"
 import { OLYMPIAD_RESOURCES } from "@/lib/olympiad-resources"
 import { useToast } from "@/hooks/use-toast"
 
@@ -27,43 +27,24 @@ const allSubjects: { value: ProblemSubject | "all"; label: string }[] = [
   { value: "biology", label: "Биология" },
 ]
 
-const platformFilters = [
-  { value: "all", label: "Все" },
-  { value: "internal", label: "Внутренние" },
-  { value: "codeforces", label: "Codeforces" },
-  { value: "leetcode", label: "LeetCode" },
-]
-
-function getPlatform(problem: Problem | ExternalProblem): string {
-  return "platform" in problem ? problem.platform : "internal"
-}
-
 function ProblemsPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const subjectParam = searchParams.get("subject") as ProblemSubject | null
-  const platformParam = searchParams.get("platform") || "all"
   const { toast } = useToast()
 
   const [solvedIds, setSolvedIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedProblem, setSelectedProblem] = useState<Problem | ExternalProblem | null>(null)
+  const [selectedProblem, setSelectedProblem] = useState<Problem | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
 
   const currentSubject: ProblemSubject | "all" = subjectParam && allSubjects.some(s => s.value === subjectParam)
     ? subjectParam
     : "all"
-  const currentPlatform = platformFilters.some(p => p.value === platformParam) ? platformParam : "all"
 
-  const allProblems = [...problemsData, ...externalProblemsData]
-
-  const filteredProblems = allProblems.filter((p) => {
-    if (currentSubject !== "all" && p.subject !== currentSubject) return false
-    if (currentPlatform === "internal" && getPlatform(p) !== "internal") return false
-    if (currentPlatform === "codeforces" && getPlatform(p) !== "codeforces") return false
-    if (currentPlatform === "leetcode" && getPlatform(p) !== "leetcode") return false
-    return true
-  })
+  const filteredProblems = currentSubject === "all"
+    ? problemsData
+    : problemsData.filter((p) => p.subject === currentSubject)
 
   const syncing = useRef(false)
 
@@ -209,22 +190,6 @@ function ProblemsPageContent() {
             }`}
           >
             {s.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        {platformFilters.map((p) => (
-          <button
-            key={p.value}
-            onClick={() => handlePlatformChange(p.value)}
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
-              currentPlatform === p.value
-                ? "bg-secondary text-foreground border-primary/50 shadow-md"
-                : "bg-card/50 text-muted-foreground border-border/40 hover:border-primary/30 hover:text-foreground"
-            }`}
-          >
-            {p.label}
           </button>
         ))}
       </div>
