@@ -141,17 +141,6 @@ function ProblemsPageContent() {
     router.push(query ? `/problems?${query}` : "/problems")
   }
 
-  const handlePlatformChange = (platform: string) => {
-    const params = new URLSearchParams(searchParams.toString())
-    if (platform === "all") {
-      params.delete("platform")
-    } else {
-      params.set("platform", platform)
-    }
-    const query = params.toString()
-    router.push(query ? `/problems?${query}` : "/problems")
-  }
-
   const unsolvedCount = filteredProblems.filter((p) => !solvedIds.includes(p.id)).length
   const solvedCount = filteredProblems.filter((p) => solvedIds.includes(p.id)).length
 

@@ -38,7 +38,79 @@ export function isExternalProblem(
   return 'platform' in p
 }
 
-export const problemsData: Problem[] = []
+export const problemsData: Problem[] = [
+  {
+    id: "math-001",
+    title: "Сумма чисел",
+    description: "Найдите сумму первых 100 натуральных чисел.",
+    subject: "mathematics",
+    difficulty: "easy",
+    type: "text",
+    correctAnswer: "5050",
+    explanation: "Используем формулу суммы арифметической прогрессии: S = n(n+1)/2 = 100*101/2 = 5050",
+  },
+  {
+    id: "math-002",
+    title: "Простое число",
+    description: "Является ли число 97 простым? Ответьте 'да' или 'нет'.",
+    subject: "mathematics",
+    difficulty: "easy",
+    type: "text",
+    correctAnswer: "да",
+    explanation: "97 делится только на 1 и на себя, поэтому это простое число.",
+  },
+  {
+    id: "phys-001",
+    title: "Свободное падение",
+    description: "Тело падает с высоты 45 м. Сколько секунд длится падение? Ускорение g = 10 м/с². Ответ округлите до целого.",
+    subject: "physics",
+    difficulty: "easy",
+    type: "text",
+    correctAnswer: "3",
+    explanation: "h = gt²/2 → t = √(2h/g) = √(90/10) = √9 = 3 секунды.",
+  },
+  {
+    id: "phys-002",
+    title: "Закон Ома",
+    description: "Через резистор 10 Ом течёт ток 2 А. Какое напряжение на резисторе?",
+    subject: "physics",
+    difficulty: "easy",
+    type: "text",
+    correctAnswer: "20",
+    explanation: "U = I·R = 2·10 = 20 В.",
+  },
+  {
+    id: "inf-001",
+    title: "Бинарный поиск",
+    description: "Сколько сравнений нужно в худшем случае для бинарного поиска в массиве из 16 элементов?",
+    subject: "informatics",
+    difficulty: "medium",
+    type: "text",
+    correctAnswer: "4",
+    explanation: "log₂(16) = 4 сравнения.",
+  },
+  {
+    id: "chem-001",
+    title: "Молярная масса",
+    description: "Чему равна молярная масса воды H₂O? Ответ округлите до целого.",
+    subject: "chemistry",
+    difficulty: "easy",
+    type: "text",
+    correctAnswer: "18",
+    explanation: "2·1 + 16 = 18 г/моль.",
+  },
+  {
+    id: "bio-001",
+    title: "Клеточное дыхание",
+    description: "Какой газ поглощается при фотосинтезе?",
+    subject: "biology",
+    difficulty: "easy",
+    type: "choice",
+    options: ["Кислород", "Углекислый газ", "Азот", "Водород"],
+    correctAnswer: "Углекислый газ",
+    explanation: "При фотосинтезе растения поглощают CO₂ и выделяют O₂.",
+  },
+]
 
 const cf = (c: number, i: string, t: string): ExternalProblem => ({
   id: `cf-${c}${i}`,
