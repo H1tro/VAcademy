@@ -27,7 +27,7 @@ export async function GET(req: Request) {
     const asciiName = file.replace(/[^\x20-\x7E]/g, "_")
     headers.set("Content-Disposition", `inline; filename="${asciiName}"`)
 
-    return new NextResponse(buffer, { status: 200, headers })
+    return new NextResponse(new Uint8Array(buffer), { status: 200, headers })
   } catch (e) {
     return new NextResponse(String(e), { status: 500 })
   }

@@ -11,13 +11,22 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
-        code: ['Source Code Pro', 'monospace'],
+        body: ['Manrope', 'sans-serif'],
+        headline: ['Unbounded', 'sans-serif'],
+        code: ['JetBrains Mono', 'monospace'],
+        mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        panel: 'var(--panel)',
+        'panel-2': 'var(--panel-2)',
+        violet: 'var(--violet)',
+        cyan: 'var(--cyan)',
+        mint: 'var(--mint)',
+        amber: 'var(--amber)',
+        sky: 'var(--sky)',
+        text: 'var(--text)',
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -71,6 +80,12 @@ export default {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
+      boxShadow: {
+        'glow-sm': '0 0 20px -4px rgba(124, 58, 237, 0.45)',
+        glow: '0 0 32px -4px rgba(124, 58, 237, 0.6), 0 0 16px -6px rgba(34, 211, 238, 0.5)',
       },
       keyframes: {
         'accordion-down': {
@@ -89,10 +104,24 @@ export default {
             height: '0',
           },
         },
+        float: {
+          '0%, 100%': {transform: 'translate(0, 0) scale(1)'},
+          '50%': {transform: 'translate(24px, -32px) scale(1.08)'},
+        },
+        'float-slow': {
+          '0%, 100%': {transform: 'translate(0, 0) scale(1)'},
+          '50%': {transform: 'translate(-32px, 24px) scale(0.94)'},
+        },
+        'spin-slow': {
+          to: {transform: 'rotate(360deg)'},
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        float: 'float 18s ease-in-out infinite',
+        'float-slow': 'float-slow 26s ease-in-out infinite',
+        'spin-slow': 'spin-slow 40s linear infinite',
       },
     },
   },

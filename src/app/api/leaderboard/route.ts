@@ -14,8 +14,11 @@ function getSubjectFromId(id: string): string {
   return SUBJECT_PREFIXES[prefix] || "other"
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url)
+    const subject = searchParams.get("subject")
+
     const db = getDb()
     const usersSnap = await db.collection("users").get()
 
@@ -32,6 +35,9 @@ export async function GET() {
 
       const displayName = (data.displayName as string) || ((data.email as string)?.split("@")[0]) || "Ученик"
       const totalScore = Number(data.totalScore ?? 0)
+      const subjectScore = subject ? (solvedSubjects[subject] ?? 0) : 0
+
+      if (subject && subjectScore === 0) continue
 
       leaderboard.push({
         uid: doc.id,
@@ -39,6 +45,7 @@ export async function GET() {
         photoURL: (data.photoURL as string) || "",
         tasksSolved: Number(data.tasksSolved ?? 0),
         totalScore,
+        subjectScore,
         solvedSubjects,
       })
     }

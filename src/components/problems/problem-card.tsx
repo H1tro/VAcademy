@@ -1,99 +1,81 @@
-"use client"
+"use client";
 
-import type { Problem, ExternalProblem } from "@/lib/problems-data"
-import { isExternalProblem } from "@/lib/problems-data"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Circle, ExternalLink } from "lucide-react"
+import type { Problem, ProblemDifficulty, ProblemSubject } from "@/lib/problems-data";
+import { DIFFICULTY_POINTS } from "@/lib/problems-data";
+import { subjectByKey } from "@/lib/navigation";
+import { IconCheckCircle } from "@/components/icons";
+import { cn } from "@/lib/utils";
 
-const subjectLabels: Record<string, string> = {
+const SUBJECT_LABELS: Record<string, string> = {
   mathematics: "Математика",
   physics: "Физика",
   informatics: "Информатика",
   chemistry: "Химия",
   biology: "Биология",
-}
+};
 
-const difficultyColors: Record<string, string> = {
-  easy: "bg-emerald-500/15 text-emerald-500 border-emerald-500/30",
-  medium: "bg-amber-500/15 text-amber-500 border-amber-500/30",
-  hard: "bg-red-500/15 text-red-500 border-red-500/30",
-}
+const DIFFICULTY_META: Record<
+  ProblemDifficulty,
+  { label: string; badge: string; text: string }
+> = {
+  easy: { label: "Базовый", badge: "border-mint/30 bg-mint/10 text-mint", text: "text-mint" },
+  medium: { label: "Средний", badge: "border-amber/30 bg-amber/10 text-amber", text: "text-amber" },
+  hard: { label: "Олимпиадный", badge: "border-sky/30 bg-sky/10 text-sky", text: "text-sky" },
+};
 
-const difficultyLabels: Record<string, string> = {
-  easy: "Лёгкая",
-  medium: "Средняя",
-  hard: "Сложная",
-}
-
-const platformLabels: Record<string, string> = {
-  codeforces: "Codeforces",
-  leetcode: "LeetCode",
-}
-
-const platformColors: Record<string, string> = {
-  codeforces: "bg-blue-500/15 text-blue-500 border-blue-500/30",
-  leetcode: "bg-orange-500/15 text-orange-500 border-orange-500/30",
-}
-
-interface ProblemCardProps {
-  problem: Problem | ExternalProblem
-  solved: boolean
-  onClick: (external?: boolean) => void
-}
-
-export function ProblemCard({ problem, solved, onClick }: ProblemCardProps) {
-  const external = isExternalProblem(problem)
-  const subjectLabel = subjectLabels[problem.subject] || problem.subject
+export function ProblemCard({
+  problem,
+  solved,
+  onClick,
+}: {
+  problem: Problem;
+  solved: boolean;
+  onClick: () => void;
+}) {
+  const meta = DIFFICULTY_META[problem.difficulty];
+  const subject = subjectByKey(problem.subject as ProblemSubject);
 
   return (
-    <Card
-      className="border-border/40 bg-card/50 shadow-lg hover:shadow-primary/5 hover:border-primary/30 transition-all duration-200 cursor-pointer group"
-      onClick={() => onClick(external)}
+    <button
+      type="button"
+      onClick={onClick}
+      className="card-surface card-hover group w-full p-5 text-left"
+      aria-pressed={solved}
     >
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5">
-                {subjectLabel}
-              </Badge>
-              <Badge variant="outline" className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${difficultyColors[problem.difficulty]}`}>
-                {difficultyLabels[problem.difficulty]}
-              </Badge>
-              {external && (
-                <Badge variant="outline" className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 ${platformColors[problem.platform]}`}>
-                  {platformLabels[problem.platform]}
-                </Badge>
-              )}
-            </div>
-            <h3 className="font-headline font-bold text-lg tracking-tight group-hover:text-primary transition-colors truncate">
-              {problem.title}
-            </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2 flex items-center gap-1">
-              {external ? (
-                <>
-                  <ExternalLink className="h-3 w-3 shrink-0" />
-                  {problem.platform === "codeforces" ? (
-                    <>Задача #{problem.externalId} на Codeforces</>
-                  ) : (
-                    <>{problem.externalId} на LeetCode</>
-                  )}
-                </>
-              ) : (
-                (problem as Problem).description
-              )}
-            </p>
-          </div>
-          <div className="flex-shrink-0 mt-1">
-            {solved ? (
-              <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-            ) : (
-              <Circle className="h-6 w-6 text-muted-foreground/40 group-hover:text-muted-foreground/60 transition-colors" />
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  )
+      <div className="flex items-start justify-between gap-3">
+        <span
+          className={cn("mt-1 h-2 w-2 shrink-0 rounded-full", subject?.text ?? "bg-white/40")}
+          aria-hidden="true"
+        />
+        <span
+          className={cn(
+            "rounded-full border px-2.5 py-0.5 font-mono text-[10px] uppercase tracking-wider",
+            meta.badge
+          )}
+        >
+          {meta.label}
+        </span>
+        <span className="font-mono text-xs text-muted-foreground">
+          <span className={meta.text}>{DIFFICULTY_POINTS[problem.difficulty]} XP</span>
+        </span>
+      </div>
+
+      <h3 className="mt-3 font-headline text-base font-bold leading-snug group-hover:text-cyan">
+        {problem.title}
+      </h3>
+      <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground">{problem.description}</p>
+
+      <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+          {SUBJECT_LABELS[problem.subject] ?? problem.subject}
+        </span>
+        {solved && (
+          <span className="flex items-center gap-1 font-mono text-[11px] text-mint">
+            <IconCheckCircle className="h-4 w-4" />
+            Решено
+          </span>
+        )}
+      </div>
+    </button>
+  );
 }

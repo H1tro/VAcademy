@@ -23,6 +23,13 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const subject = searchParams.get("subject")
 
+    if (searchParams.get("global") === "true") {
+      const db = getDb()
+      const snap = await db.doc("admin_config/global").get()
+      const aiEnabled = snap.exists ? (snap.data()!.aiEnabled ?? true) : true
+      return NextResponse.json({ aiEnabled })
+    }
+
     if (subject) {
       if (!SUBJECTS.includes(subject)) {
         return NextResponse.json({ error: "Invalid subject" }, { status: 400 })

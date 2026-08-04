@@ -1,16 +1,16 @@
 "use client"
 
-import { Sigma, Atom, Code2, FlaskConical, Dna } from "lucide-react"
+import { IconSigma, IconAtom, IconCode, IconFlask, IconDna } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
 export type SubjectId = "matematika" | "fizika" | "informatika" | "himiya" | "biology"
 
-export const SUBJECTS: { id: SubjectId; name: string; Icon: typeof Sigma }[] = [
-  { id: "matematika", name: "Математика", Icon: Sigma },
-  { id: "fizika", name: "Физика", Icon: Atom },
-  { id: "informatika", name: "Информатика", Icon: Code2 },
-  { id: "himiya", name: "Химия", Icon: FlaskConical },
-  { id: "biology", name: "Биология", Icon: Dna },
+export const SUBJECTS: { id: SubjectId; name: string; Icon: typeof IconSigma }[] = [
+  { id: "matematika", name: "Математика", Icon: IconSigma },
+  { id: "fizika", name: "Физика", Icon: IconAtom },
+  { id: "informatika", name: "Информатика", Icon: IconCode },
+  { id: "himiya", name: "Химия", Icon: IconFlask },
+  { id: "biology", name: "Биология", Icon: IconDna },
 ]
 
 export function SubjectSelector({
@@ -21,29 +21,24 @@ export function SubjectSelector({
   onSelect: (id: SubjectId) => void
 }) {
   return (
-    <div className="flex flex-wrap gap-3 justify-center">
-      {SUBJECTS.map(({ id, Icon }) => {
+    <div className="flex flex-wrap gap-2">
+      {SUBJECTS.map(({ id, name, Icon }) => {
         const isActive = active === id
         return (
           <button
             key={id}
             type="button"
             onClick={() => onSelect(id)}
+            aria-pressed={isActive}
             className={cn(
-              "group flex flex-col items-center gap-2 rounded-2xl border px-5 py-4 transition-all duration-200",
+              "flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
               isActive
-                ? "border-primary bg-primary/10 shadow-lg shadow-primary/10"
-                : "border-border/40 bg-card/40 hover:border-primary/40 hover:bg-primary/5"
+                ? "border-cyan/60 bg-cyan/10 text-cyan"
+                : "border-border text-muted-foreground hover:border-white/20 hover:text-foreground"
             )}
           >
-            <span
-              className={cn(
-                "flex h-11 w-11 items-center justify-center rounded-xl transition-colors",
-                isActive ? "bg-primary text-white" : "bg-secondary text-foreground group-hover:text-primary"
-              )}
-            >
-              <Icon className="h-5 w-5" />
-            </span>
+            <Icon className="h-4 w-4" />
+            {name}
           </button>
         )
       })}
