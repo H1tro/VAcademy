@@ -4,7 +4,8 @@ export const dynamic = "force-dynamic"
 
 import { useEffect, useState, type FormEvent, useRef } from "react"
 import { auth } from "@/lib/firebase"
-import { onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth"
+import { signOut, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -31,6 +32,63 @@ const GRADES = [
   { value: "11", label: "11 класс" },
 ]
 
+function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
+  const router = useRouter()
+  const [sending, setSending] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState("")
+
+  const handleRequest = async () => {
+    setSending(true)
+    setError("")
+
+    try {
+      const res = await fetch("/api/account/request-deletion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ uid, email }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Ошибка отправки")
+      }
+
+      setSent(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось отправить письмо")
+    } finally {
+      setSending(false)
+    }
+  }
+
+  if (sent) {
+    return (
+      <div className="rounded-xl bg-mint/10 p-4 text-sm text-mint">
+        Письмо с ссылкой для подтверждения отправлено на <strong>{email}</strong>. Проверьте почту.
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {error && (
+        <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
+      )}
+      <Button variant="destructive" onClick={handleRequest} disabled={sending}>
+        {sending ? (
+          <>
+            <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
+            Отправляем...
+          </>
+        ) : (
+          "Удалить аккаунт"
+        )}
+      </Button>
+    </div>
+  )
+}
+
 export default function ProfileEditPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -44,7 +102,10 @@ export default function ProfileEditPage() {
   const [school, setSchool] = useState("")
   const [grade, setGrade] = useState("")
   const [about, setAbout] = useState("")
+  const [codeforces, setCodeforces] = useState("")
+  const [leetcode, setLeetcode] = useState("")
   const [authenticated, setAuthenticated] = useState(false)
+  const [uid, setUid] = useState("")
 
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
@@ -66,6 +127,7 @@ export default function ProfileEditPage() {
         }
 
         setAuthenticated(true)
+        setUid(user.uid)
         setUserEmail(user.email || "")
         setDisplayName(user.displayName || "")
         setPhotoURL(user.photoURL || "")
@@ -77,6 +139,8 @@ export default function ProfileEditPage() {
             setSchool(data.school as string || "")
             setGrade(data.grade as string || "")
             setAbout(data.about as string || "")
+            setCodeforces(data.codeforces as string || "")
+            setLeetcode(data.leetcode as string || "")
           }
         }
       } catch (err) {
@@ -163,6 +227,8 @@ export default function ProfileEditPage() {
           school,
           grade,
           about,
+          codeforces,
+          leetcode,
           email: user.email,
         }),
       })
@@ -382,6 +448,31 @@ export default function ProfileEditPage() {
                     />
                   </div>
 
+                  <Separator />
+
+                  <p className="text-sm font-medium text-muted-foreground">Соревновательные платформы</p>
+
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="codeforces">Codeforces</Label>
+                      <Input
+                        id="codeforces"
+                        value={codeforces}
+                        onChange={(e) => setCodeforces(e.target.value)}
+                        placeholder="Ник на Codeforces"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="leetcode">LeetCode</Label>
+                      <Input
+                        id="leetcode"
+                        value={leetcode}
+                        onChange={(e) => setLeetcode(e.target.value)}
+                        placeholder="Ник на LeetCode"
+                      />
+                    </div>
+                  </div>
+
                   <div className="flex flex-col gap-3 pt-2 md:flex-row md:items-center md:justify-between">
                     <Button type="submit" variant="gradient" className="w-full md:w-auto" disabled={saving}>
                       {saving ? (
@@ -491,6 +582,19 @@ export default function ProfileEditPage() {
                     </Button>
                   </div>
                 </form>
+              </CardContent>
+            </Card>
+
+            <Card className="card-surface border-destructive/20">
+              <CardHeader className="space-y-1 p-6">
+                <CardTitle className="text-2xl text-destructive">Удаление аккаунта</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 p-6">
+                <p className="text-sm text-muted-foreground">
+                  Вы запросите удаление аккаунта. На вашу почту придёт ссылка для подтверждения.
+                  После подтверждения аккаунт и все данные будут удалены навсегда.
+                </p>
+                <DeleteAccountSection email={userEmail} uid={uid} />
               </CardContent>
             </Card>
           </TabsContent>

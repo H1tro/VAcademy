@@ -16,6 +16,8 @@ export interface UserProfile {
   school?: string
   grade?: string
   about?: string
+  codeforces?: string
+  leetcode?: string
   streakDays?: number
   maxStreakDays?: number
   tasksSolved?: number
