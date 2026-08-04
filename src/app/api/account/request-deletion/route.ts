@@ -4,10 +4,13 @@ import { FieldValue } from "firebase-admin/firestore"
 import { Resend } from "resend"
 import crypto from "crypto"
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.RESEND_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: "RESEND_API_KEY not configured" }, { status: 500 })
+    }
+
     const { uid, email } = await req.json()
 
     if (!uid || !email) {
@@ -38,6 +41,7 @@ export async function POST(req: Request) {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vacademy-beta.vercel.app"
     const confirmUrl = `${baseUrl}/delete-account?token=${token}&uid=${uid}`
 
+    const resend = new Resend(apiKey)
     await resend.emails.send({
       from: "VAcademy <onboarding@resend.dev>",
       to: email,
