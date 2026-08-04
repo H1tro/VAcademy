@@ -1,15 +1,7 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
-import { initializeApp, getApps, cert, getApp } from "firebase-admin/app"
 import { getAuth } from "firebase-admin/auth"
-
-function getFirebaseAdmin() {
-  if (getApps().length > 0) return getApp()
-  const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim() || ""
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL?.trim() || ""
-  const privateKey = (process.env.FIREBASE_PRIVATE_KEY?.trim() || "").replace(/\\n/g, "\n")
-  return initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) })
-}
+import { getApp } from "firebase-admin/app"
 
 export async function POST(req: Request) {
   try {
@@ -50,8 +42,8 @@ export async function POST(req: Request) {
 
     // Delete Firebase Auth user
     try {
-      getFirebaseAdmin()
-      await getAuth().deleteUser(uid)
+      const app = getApp()
+      await getAuth(app).deleteUser(uid)
     } catch {
       // Auth user may already be deleted or not exist — continue
     }
