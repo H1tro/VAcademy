@@ -3,6 +3,11 @@ import { put } from "@vercel/blob"
 
 export async function POST(req: Request) {
   try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN || process.env.VAcademy_READ_WRITE_TOKEN
+    if (!token) {
+      return NextResponse.json({ error: "BLOB_READ_WRITE_TOKEN is not set" }, { status: 500 })
+    }
+
     const formData = await req.formData()
     const file = formData.get("file") as File | null
 
@@ -24,6 +29,7 @@ export async function POST(req: Request) {
     const blob = await put(filename, buffer, {
       access: "public",
       contentType: file.type,
+      token,
     })
 
     return NextResponse.json({ url: blob.url })
