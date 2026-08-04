@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       createdAt: FieldValue.serverTimestamp(),
     })
 
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vacademy-weld.vercel.app"
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://vacademy-beta.vercel.app"
     const confirmUrl = `${baseUrl}/delete-account?token=${token}&uid=${uid}`
 
     await resend.emails.send({
