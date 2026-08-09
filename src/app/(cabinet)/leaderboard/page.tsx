@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SUBJECTS } from "@/lib/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { IconCrown, IconTrophy, IconFlame, IconTarget, IconUser } from "@/components/icons";
+import { IconCrown, IconTrophy, IconFlame, IconTarget, IconUser, IconCodeforces } from "@/components/icons";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -17,6 +17,8 @@ interface LeaderboardEntry {
   tasksSolved: number;
   totalScore: number;
   subjectScore?: number;
+  cfCompleted?: number;
+  cfTotal?: number;
 }
 
 interface UserProfileData {
@@ -60,7 +62,12 @@ export default function LeaderboardPage() {
   const sorted = useMemo(
     () =>
       [...data].sort(
-        (a, b) => (subject === "all" ? b.totalScore : (b.subjectScore ?? 0)) - (subject === "all" ? a.totalScore : (a.subjectScore ?? 0))
+        (a, b) =>
+          subject === "codeforces"
+            ? (b.cfCompleted ?? 0) - (a.cfCompleted ?? 0)
+            : subject === "all"
+              ? b.totalScore - a.totalScore
+              : (b.subjectScore ?? 0) - (a.subjectScore ?? 0)
       ),
     [data, subject]
   );
@@ -132,7 +139,7 @@ export default function LeaderboardPage() {
       </div>
 
       <div className="flex flex-wrap gap-2" role="group" aria-label="Рейтинг по предметам">
-        {[{ value: "all", label: "Общий" }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name }))].map((s) => (
+        {[{ value: "all", label: "Общий" }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name })), { value: "codeforces", label: "Codeforces" }].map((s) => (
           <button
             key={s.value}
             type="button"
@@ -189,7 +196,11 @@ export default function LeaderboardPage() {
                     {isMe && <span className="ml-1.5 text-xs text-cyan">(вы)</span>}
                   </p>
                   <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    {subject === "all" ? `${entry.totalScore} XP` : `${entry.subjectScore} задач`}
+                    {subject === "codeforces"
+                      ? `${entry.cfCompleted ?? 0} решено`
+                      : subject === "all"
+                        ? `${entry.totalScore} XP`
+                        : `${entry.subjectScore} задач`}
                   </p>
                 </div>
               );
@@ -200,8 +211,8 @@ export default function LeaderboardPage() {
             <div className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 border-b border-border px-5 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               <span>#</span>
               <span>Ученик</span>
-              <span className="text-right">Задачи</span>
-              <span className="w-16 text-right">XP</span>
+              <span className="text-right">{subject === "codeforces" ? "CF решено" : "Задачи"}</span>
+              <span className="w-16 text-right">{subject === "codeforces" ? "Всего" : "XP"}</span>
             </div>
             {rest.map((entry, i) => {
               const rank = i + 4;
@@ -226,10 +237,10 @@ export default function LeaderboardPage() {
                     </span>
                   </div>
                   <span className="text-right font-mono text-sm text-muted-foreground">
-                    {subject === "all" ? entry.tasksSolved : entry.subjectScore}
+                    {subject === "codeforces" ? (entry.cfCompleted ?? 0) : subject === "all" ? entry.tasksSolved : entry.subjectScore}
                   </span>
                   <span className="w-16 text-right font-mono text-sm text-foreground">
-                    {entry.totalScore}
+                    {subject === "codeforces" ? (entry.cfTotal ?? 0) : entry.totalScore}
                   </span>
                 </div>
               );

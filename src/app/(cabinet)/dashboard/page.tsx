@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { IconFlame, IconTarget, IconTrophy, IconClock, IconChevronRight, IconPlay, IconBook, IconSparkles } from "@/components/icons"
+import { IconFlame, IconTarget, IconTrophy, IconClock, IconChevronRight, IconPlay, IconBook, IconSparkles, IconCodeforces } from "@/components/icons"
 import Link from "next/link"
 import { SUBJECTS } from "@/lib/navigation"
 
@@ -42,6 +42,8 @@ export default function DashboardPage() {
   const [stats, setStats] = useState<UserStats>(zeroStats)
   const [rank, setRank] = useState<number | null>(null)
   const [usersCount, setUsersCount] = useState(0)
+  const [cfCompleted, setCfCompleted] = useState(0)
+  const [cfTotal, setCfTotal] = useState(0)
 
   useEffect(() => {
     const name = user?.displayName || user?.email?.split("@")[0] || "Гость"
@@ -74,6 +76,13 @@ export default function DashboardPage() {
         setUsersCount(users.length)
         const position = users.findIndex((u: { uid: string }) => u.uid === uid)
         setRank(position === -1 ? null : position + 1)
+      }
+
+      const cfRes = await fetch(`/api/codeforces/tasks?uid=${uid}`)
+      if (cfRes.ok) {
+        const tasks = await cfRes.json()
+        setCfTotal(tasks.length)
+        setCfCompleted(tasks.filter((t: { status: string }) => t.status === "completed").length)
       }
     }
 
@@ -115,11 +124,14 @@ export default function DashboardPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard icon={<IconFlame className="text-amber" />} label="Дни подряд" value={`${stats.streakDays}`} sub={`Рекорд: ${stats.maxStreakDays}`} />
         <StatCard icon={<IconTarget className="text-cyan" />} label="Решено задач" value={`${stats.tasksSolved}`} sub="Всего решено" />
         <StatCard icon={<IconTrophy className="text-amber" />} label="Ранг" value={rank ? `#${rank}` : "—"} sub={rank ? `Место ${rank} из ${usersCount}` : "Нет данных"} />
         <StatCard icon={<IconClock className="text-sky" />} label="Время обучения" value={formatStudyTime(stats.studyTimeMinutes)} sub="Всего минут" />
+        <Link href="/codeforces" className="block">
+          <StatCard icon={<IconCodeforces className="text-sky" />} label="Codeforces" value={`${cfCompleted}/${cfTotal}`} sub={cfTotal > 0 ? "Решено" : "Нет задач"} />
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">

@@ -58,7 +58,10 @@ const videoLessons: VideoGroup[] = [
   {
     subjectKey: "informatics",
     subject: "Информатика",
-    videos: [{ name: "Алгоритмы — видеоурок", url: "https://youtu.be/cpuRbnWEPio?si=lfWk8C74av8jvucE" }],
+    videos: [
+      { name: "Вся IT-база в ОДНОМ видео: Память, Процессор, Код", url: "https://youtu.be/oOiyHq9MiAM?si=KH6LPz9h8DtK5M3H" },
+      { name: "Алгоритмы — видеоурок", url: "https://youtu.be/cpuRbnWEPio?si=lfWk8C74av8jvucE" },
+    ],
   },
   {
     subjectKey: "biology",

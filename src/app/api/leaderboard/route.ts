@@ -22,6 +22,16 @@ export async function GET(request: Request) {
     const db = getDb()
     const usersSnap = await db.collection("users").get()
 
+    const cfTasksSnap = await db.collection("cf_tasks").get()
+    const cfByUser: Record<string, { total: number; completed: number }> = {}
+    for (const doc of cfTasksSnap.docs) {
+      const d = doc.data()
+      const uid = d.uid as string
+      if (!cfByUser[uid]) cfByUser[uid] = { total: 0, completed: 0 }
+      cfByUser[uid].total++
+      if (d.status === "completed") cfByUser[uid].completed++
+    }
+
     const leaderboard: Record<string, unknown>[] = []
     for (const doc of usersSnap.docs) {
       const data = doc.data()
@@ -36,8 +46,13 @@ export async function GET(request: Request) {
       const displayName = (data.displayName as string) || ((data.email as string)?.split("@")[0]) || "Ученик"
       const totalScore = Number(data.totalScore ?? 0)
       const subjectScore = subject ? (solvedSubjects[subject] ?? 0) : 0
+      const cf = cfByUser[doc.id] || { total: 0, completed: 0 }
 
-      if (subject && subjectScore === 0) continue
+      if (subject === "codeforces") {
+        if (cf.completed === 0) continue
+      } else if (subject && subjectScore === 0) {
+        continue
+      }
 
       leaderboard.push({
         uid: doc.id,
@@ -47,10 +62,17 @@ export async function GET(request: Request) {
         totalScore,
         subjectScore,
         solvedSubjects,
+        cfCompleted: cf.completed,
+        cfTotal: cf.total,
       })
     }
 
-    leaderboard.sort((a, b) => (b.totalScore as number) - (a.totalScore as number))
+    leaderboard.sort((a, b) => {
+      if (subject === "codeforces") {
+        return (b.cfCompleted as number) - (a.cfCompleted as number)
+      }
+      return (b.totalScore as number) - (a.totalScore as number)
+    })
 
     return NextResponse.json(leaderboard)
   } catch (error) {
