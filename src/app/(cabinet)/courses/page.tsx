@@ -75,7 +75,20 @@ const videoLessons: VideoGroup[] = [
   {
     subjectKey: "mathematics",
     subject: "Математика",
-    videos: [],
+    videos: [
+      { name: "Mektep Online — онлайн-уроки математики", url: "https://youtube.com/@mektep_online_matematika?si=cgoIDgYldPKJbB5f" },
+      { name: "TutorOnline — видеоуроки по математике", url: "https://youtube.com/@tutoronline_ru?si=pkHYmH6GFz_4JzRm" },
+      { name: "Линейное уравнение с двумя переменными (7 класс)", url: "https://youtu.be/oPrp1YSens4?is=cta8QcxFv98HUCQk", section: "Алгебра" },
+      { name: "Линейная функция: краткие ответы на важные вопросы", url: "https://youtu.be/nbFbaio2xUg?is=magzilh09A5gJlWC", section: "Алгебра" },
+      { name: "Одночлены (7 класс)", url: "https://youtu.be/tbXBX9M__8s?is=SRGVCFp4zQqHXFmr", section: "Алгебра" },
+      { name: "Многочлены (10 класс)", url: "https://youtu.be/IO-ECB0cXjU?is=MspVhgb49r7AqYH4", section: "Алгебра" },
+      { name: "Деление многочленов", url: "https://youtu.be/yhJ9xeo_W8c?is=WFUY9iAJGq06Iblz", section: "Алгебра" },
+      { name: "Квадратный корень (8 класс)", url: "https://youtu.be/S2r57OCeZq0?is=WueFxmiECxM3EwJJ", section: "Алгебра" },
+      { name: "SOS-ГЕОМЕТРИЯ! Отрезки и углы, смежные и вертикальные углы", url: "https://youtu.be/WfoumSADFFc?is=bYpvlyrSF18zbHHA", section: "Геометрия" },
+      { name: "Теорема Пифагора (8 класс)", url: "https://youtu.be/1OJiyT4xz5g?is=miX0VcJUw2uU4cVI", section: "Геометрия" },
+      { name: "Как решать задачи по геометрии?", url: "https://youtu.be/x7zeRCn_-0o?is=IZkRl5Z1UyDyNYyY", section: "Геометрия" },
+      { name: "Угол между прямыми в пространстве (10 класс)", url: "https://youtu.be/EKpD4ZrMLzo?is=F3Q4yGAS9dg0-XPl", section: "Геометрия" },
+    ],
   },
   {
     subjectKey: "chemistry",

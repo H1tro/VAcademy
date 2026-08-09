@@ -61,6 +61,14 @@ const tests: TestItem[] = [
     isPdf: true,
   },
   {
+    id: "bio-diagnostic",
+    title: "Biology Diagnostic Test",
+    subject: "biology",
+    description: "Диагностический тест по биологии для проверки знаний",
+    href: "/tests/biology/Biology_Diagnostic_Test_Full.pdf",
+    isPdf: true,
+  },
+  {
     id: "phys-extra",
     title: "Дополнительный план подготовки к олимпиадам",
     subject: "physics",
