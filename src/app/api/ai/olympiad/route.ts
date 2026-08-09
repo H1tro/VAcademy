@@ -32,7 +32,7 @@ export async function POST(req: Request) {
         }
       ],
       temperature: 0,
-      max_tokens: 250,
+      max_tokens: 2048,
     }
 
     // Правильный эндпоинт Groq API
