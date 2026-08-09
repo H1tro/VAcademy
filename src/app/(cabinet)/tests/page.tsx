@@ -51,14 +51,7 @@ const tests: TestItem[] = [
     href: "/tests/himiya/olympiad_chemistry_test.pdf",
     isPdf: true,
   },
-  {
-    id: "bio-1",
-    title: "Биология",
-    subject: "biology",
-    description: "Тесты по молекулярной биологии, генетике и экологии",
-    href: "#",
-    isPdf: false,
-  },
+
   {
     id: "bio-campbell",
     title: "Campbell Biology — Test Bank",
@@ -72,7 +65,7 @@ const tests: TestItem[] = [
     title: "Дополнительный план подготовки к олимпиадам",
     subject: "physics",
     description: "Сборник тестов для подготовки к олимпиадам по физике",
-    href: "/tests/fizika/Тесты_по_дополнительному_плану_подготовки_к_физическим_олимпиадам.pdf",
+    href: "/tests/fizika/Итоговый_проверочный_тест_по_материалам_плана_подготовки_к_физическим_олимпиадам.pdf",
     isPdf: true,
   },
 ];

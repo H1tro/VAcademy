@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
-import { getAuth } from "firebase-admin/auth"
-import { getApp } from "firebase-admin/app"
 
 export async function POST(req: Request) {
   try {
@@ -10,6 +8,8 @@ export async function POST(req: Request) {
     if (!token || !uid) {
       return NextResponse.json({ error: "token and uid required" }, { status: 400 })
     }
+
+    const hasFirebaseCreds = !!(process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY)
 
     const db = getDb()
     const tokenSnap = await db.doc(`deletion_tokens/${token}`).get()
@@ -28,27 +28,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Token expired" }, { status: 400 })
     }
 
-    // Delete submissions
     const submissionsSnap = await db.collection("submissions").where("uid", "==", uid).get()
     const batch = db.batch()
     submissionsSnap.docs.forEach((doc) => batch.delete(doc.ref))
     await batch.commit()
 
-    // Delete user document
     await db.doc(`users/${uid}`).delete()
-
-    // Delete deletion token
     await db.doc(`deletion_tokens/${token}`).delete()
 
-    // Delete Firebase Auth user
-    try {
-      const app = getApp()
-      await getAuth(app).deleteUser(uid)
-    } catch {
-      // Auth user may already be deleted or not exist — continue
+    let authDeleted = false
+    if (hasFirebaseCreds) {
+      try {
+        const { getAuth } = await import("firebase-admin/auth")
+        await getAuth().deleteUser(uid)
+        authDeleted = true
+      } catch (authErr) {
+        console.error("Auth delete failed:", authErr)
+      }
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      authDeleted,
+      warning: !hasFirebaseCreds ? "FIREBASE_CLIENT_EMAIL/FIREBASE_PRIVATE_KEY not set — Auth user not deleted" : undefined,
+    })
   } catch (error) {
     console.error("Confirm deletion error:", error)
     return NextResponse.json({ error: String(error) }, { status: 500 })

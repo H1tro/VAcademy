@@ -14,6 +14,7 @@ import {
   IconFlask,
   IconCode,
   IconDna,
+  IconCodeforces,
 } from "@/components/icons";
 import type { SubjectKey } from "./types";
 
@@ -32,6 +33,7 @@ export const CABINET_NAV: CabinetNavItem[] = [
   { name: "Курсы", href: "/courses", icon: IconBook },
   { name: "Материалы", href: "/strategy", icon: IconGraduation },
   { name: "Задачи", href: "/problems", icon: IconListCheck },
+  { name: "Codeforces", href: "/codeforces", icon: IconCodeforces },
   { name: "Рейтинг", href: "/leaderboard", icon: IconTrophy },
   { name: "Олимпиады", href: "/olympiads", icon: IconCalendar },
 ];
@@ -118,6 +120,7 @@ const ROUTE_TITLES: Record<string, string> = {
   courses: "Курсы",
   strategy: "Материалы",
   problems: "Задачи",
+  codeforces: "Codeforces",
   leaderboard: "Рейтинг",
   olympiads: "Олимпиады",
   profile: "Профиль",
