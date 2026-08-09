@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
-import { IconFlame, IconTarget, IconTrophy, IconClock, IconChevronRight, IconPlay, IconBook, IconSparkles, IconCodeforces } from "@/components/icons"
+import { IconFlame, IconTarget, IconTrophy, IconClock, IconChevronRight, IconBook, IconSparkles, IconCodeforces } from "@/components/icons"
 import Link from "next/link"
 import { SUBJECTS } from "@/lib/navigation"
 
@@ -161,18 +161,34 @@ export default function DashboardPage() {
 
         <Card className="card-surface">
           <CardHeader>
-            <CardTitle className="font-headline text-lg font-bold">Популярные уроки</CardTitle>
-            <CardDescription>Что сейчас изучают другие</CardDescription>
+            <CardTitle className="font-headline text-lg font-bold">Быстрые действия</CardTitle>
+            <CardDescription>Начните прямо сейчас</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <LessonItem title="Векторный метод в геометрии" time="45 мин" category="Математика" />
-            <LessonItem title="Динамическое программирование" time="60 мин" category="Информатика" />
-            <LessonItem title="Законы Кирхгофа" time="35 мин" category="Физика" />
-            <Button variant="ghost" className="mt-2 w-full text-cyan hover:bg-cyan/5" asChild>
-              <Link href="/courses">
-                Все уроки <IconChevronRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
+          <CardContent className="space-y-3">
+            <Link href="/problems" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan/10 text-cyan">
+                <IconTarget className="h-4 w-4" />
+              </span>
+              Решать задачи
+            </Link>
+            <Link href="/codeforces" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky/10 text-sky">
+                <IconCodeforces className="h-4 w-4" />
+              </span>
+              Codeforces
+            </Link>
+            <Link href="/courses" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet/10 text-violet">
+                <IconBook className="h-4 w-4" />
+              </span>
+              Смотреть курсы
+            </Link>
+            <Link href="/leaderboard" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber/10 text-amber">
+                <IconTrophy className="h-4 w-4" />
+              </span>
+              Рейтинг
+            </Link>
           </CardContent>
         </Card>
       </div>
@@ -211,21 +227,5 @@ function StatCard({ icon, label, value, sub }: { icon: React.ReactNode; label: s
         </div>
       </CardContent>
     </Card>
-  )
-}
-
-function LessonItem({ title, time, category }: { title: string; time: string; category: string }) {
-  return (
-    <div className="group flex cursor-pointer items-center gap-4 rounded-xl p-3 transition-colors hover:bg-white/5">
-      <IconPlay className="h-10 w-10 shrink-0 text-muted-foreground group-hover:text-cyan" />
-      <div className="flex min-w-0 flex-col">
-        <span className="truncate text-sm font-bold group-hover:text-cyan">{title}</span>
-        <div className="mt-1 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-          <span>{category}</span>
-          <span>•</span>
-          <span>{time}</span>
-        </div>
-      </div>
-    </div>
   )
 }
