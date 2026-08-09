@@ -76,7 +76,7 @@ export default function ProblemsPage() {
 
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по предмету">
-          {[{ value: "all", label: "Все предметы" }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name }))].map((s) => (
+          {[{ value: "all", label: "Все предметы" }, ...SUBJECTS.filter((s) => s.key !== "informatics").map((s) => ({ value: s.key, label: s.name }))].map((s) => (
             <button
               key={s.value}
               type="button"
