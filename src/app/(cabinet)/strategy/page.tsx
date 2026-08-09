@@ -7,6 +7,7 @@ import { SubjectSelector, SUBJECTS, type SubjectId } from "@/components/strategy
 import { IconTrophy, IconBook, IconExternalLink, IconDownload, IconFileText, IconGraduation } from "@/components/icons"
 import fizikaCurriculum from "@/lib/fizika-curriculum"
 import { curriculum as biologyCurriculum } from "@/lib/biology-curriculum"
+import { BIOLOGY_OLYMPIAD } from "@/lib/biology-olympiads"
 import informatikaCurriculum from "@/lib/informatika-curriculum"
 import matematikaCurriculum from "@/lib/matematika-curriculum"
 import himiyaCurriculum from "@/lib/himiya-curriculum"
@@ -115,70 +116,105 @@ function BiologyContent() {
         setFiles(data?.files || [])
       })
       .catch(() => setFiles([]))
-    return () => {
-      mounted = false
-    }
+    return () => { mounted = false }
   }, [])
 
-  if (files === null)
-    return <p className="text-sm text-muted-foreground">Загрузка материалов...</p>
-  if (files.length === 0)
-    return <p className="text-sm text-muted-foreground">Материалы не найдены.</p>
-
-  const matchMeta = (file: string) => {
-    const lc = file.toLowerCase()
-    let topic: string | null = null
-    let subtopic: string | null = null
-    for (const t of biologyCurriculum) {
-      if (t.keywords.some((rx: RegExp) => rx.test(file))) {
-        topic = t.title
-        for (const sec of t.sections) {
-          for (const it of sec.items) {
-            const norm = it.toLowerCase()
-            const key = norm.split(/[^a-zа-яё0-9]+/).filter(Boolean).slice(0, 3).join(" ")
-            if (key && lc.includes(key)) {
-              subtopic = it
-              break
-            }
-          }
-          if (subtopic) break
-        }
-        break
-      }
-    }
-    return { topic: topic || "Неопределено", subtopic: subtopic || "Не определено" }
+  const findFor = (topic: (typeof biologyCurriculum)[number]) => {
+    if (!files) return []
+    return files.filter((f) => topic.keywords.some((rx) => rx.test(f)))
   }
 
   return (
-    <div className="space-y-4">
-      {files.map((file) => {
-        const meta = matchMeta(file)
-        return (
-          <div key={file} className="card-surface flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-            <div className="min-w-0">
-              <p className="flex items-center gap-2 font-semibold">
-                <IconFileText className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <span className="truncate">{file}</span>
-              </p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Урок: {meta.topic} · Подтема: {meta.subtopic}
-              </p>
-            </div>
-            <div className="flex shrink-0 gap-2">
-              <Button variant="outline" size="sm" asChild>
-                <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                  <IconDownload className="mr-2 h-4 w-4" /> Скачать
-                </a>
-              </Button>
-              <Button size="sm" variant="gradient" asChild>
-                <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                  Открыть
-                </a>
-              </Button>
-            </div>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      {biologyCurriculum.map((topic) => (
+        <div key={topic.id} className="card-surface card-hover p-6">
+          <h3 className="font-headline text-lg font-bold leading-snug">
+            {topic.id}. {topic.title}
+          </h3>
+          <div className="mt-4 space-y-3 text-sm">
+            {topic.sections.map((sec, i) => (
+              <div key={i}>
+                <p className="font-semibold text-cyan">{sec.level}</p>
+                <ul className="mt-1 list-inside list-disc space-y-1 text-muted-foreground">
+                  {sec.items.map((it, j) => (
+                    <li key={j}>{it}</li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </div>
-        )
-      })}
+
+          {topic.books && (
+            <div className="mt-4 space-y-2 border-t border-border pt-4">
+              <p className="font-semibold">Книги</p>
+              <div className="space-y-1 text-sm text-muted-foreground">
+                {topic.books.basic && (
+                  <p>
+                    <span className="font-medium text-foreground">Basic:</span>{" "}
+                    {topic.books.basic}
+                  </p>
+                )}
+                {topic.books.advanced && (
+                  <p>
+                    <span className="font-medium text-foreground">Advanced:</span>{" "}
+                    {topic.books.advanced}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {findFor(topic).length > 0 && (
+            <div className="mt-4 space-y-2 border-t border-border pt-4">
+              <p className="font-semibold">PDF-материалы</p>
+              {findFor(topic).map((file) => (
+                <div key={file} className="flex items-center justify-between gap-4">
+                  <span className="flex min-w-0 items-center gap-2 truncate text-sm">
+                    <IconFileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <span className="truncate">{file}</span>
+                  </span>
+                  <div className="flex shrink-0 gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
+                        <IconDownload className="mr-2 h-4 w-4" /> Скачать
+                      </a>
+                    </Button>
+                    <Button size="sm" variant="gradient" asChild>
+                      <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
+                        Открыть
+                      </a>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+
+      <div className="card-surface p-6">
+        <h3 className="flex items-center gap-2 font-headline text-lg font-bold">
+          <IconTrophy className="h-5 w-5 text-amber" />
+          Олимпиадные задачи
+        </h3>
+        <div className="mt-4 flex flex-col gap-2">
+          {BIOLOGY_OLYMPIAD.map((m) => {
+            const Icon = /олимпиад/i.test(m.name) ? IconTrophy : IconExternalLink
+            return (
+              <a
+                key={m.name}
+                href={m.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-cyan hover:underline"
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span>{m.name}</span>
+              </a>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

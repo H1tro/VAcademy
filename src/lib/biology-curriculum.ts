@@ -51,6 +51,10 @@ export const curriculum = [
         "Кинетика ферментов"
       ]}
     ],
+    books: {
+      basic: "Lehninger Principles of Biochemistry (Nelson & Cox)",
+      advanced: "Biochemistry (Stryer)"
+    },
     keywords: [/biochem/i, /биохем|биохим/i]
   },
   {
@@ -71,6 +75,10 @@ export const curriculum = [
         "Геномы и их эволюция"
       ]}
     ],
+    books: {
+      basic: "Griffiths Introduction to Genetic Analysis",
+      advanced: "Molecular Genetics of Bacteria (Snyder & Champness)"
+    },
     keywords: [/genet/i, /генетик/i]
   },
   {
@@ -84,6 +92,10 @@ export const curriculum = [
         "История жизни на Земле"
       ]}
     ],
+    books: {
+      basic: "Evolution (Futuyma & Kirkpatrick)",
+      advanced: "Molecular Evolution (Nei)"
+    },
     keywords: [/evolut/i, /эволюц/i]
   },
   {
@@ -102,6 +114,10 @@ export const curriculum = [
         "Эволюция позвоночных"
       ]}
     ],
+    books: {
+      basic: "Campbell Biology (разделы по биоразнообразию)",
+      advanced: "The Biology of Invertebrates (Brusca & Brusca)"
+    },
     keywords: [/biodivers|biodiversity|biodivers/i, /биоразн/i]
   },
   {
@@ -116,6 +132,10 @@ export const curriculum = [
         "Гормоны растений"
       ]}
     ],
+    books: {
+      basic: "Plant Biology (Smith et al.)",
+      advanced: "Esau's Plant Anatomy (Evert)"
+    },
     keywords: [/plant/i, /растен/i]
   },
   {
@@ -136,6 +156,10 @@ export const curriculum = [
         "Поведение животных"
       ]}
     ],
+    books: {
+      basic: "Vander's Human Physiology (Silverthorn)",
+      advanced: "Guyton and Hall Textbook of Medical Physiology"
+    },
     keywords: [/anatomy|animal|physio/i, /анатом|физиол/i]
   },
   {
@@ -150,6 +174,10 @@ export const curriculum = [
         "Природоохранная биология и глобальные перемены"
       ]}
     ],
+    books: {
+      basic: "Ecology: Concepts and Applications (Molles)",
+      advanced: "Community Ecology (Morin)"
+    },
     keywords: [/ecology|ethology|эколог|этолог/i]
   }
 ]
