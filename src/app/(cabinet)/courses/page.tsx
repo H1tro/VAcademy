@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { IconPlay, IconExternalLink, IconChevronRight } from "@/components/icons"
 import { SUBJECTS } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
+import { chemistryVideos } from "@/lib/himiya-videos"
 
 interface Video {
   name: string
@@ -93,7 +94,11 @@ const videoLessons: VideoGroup[] = [
   {
     subjectKey: "chemistry",
     subject: "Химия",
-    videos: [],
+    videos: chemistryVideos.flatMap((level) =>
+      level.chapters.flatMap((ch) =>
+        ch.videos.map((v) => ({ name: v.name, url: v.url, section: ch.section }))
+      )
+    ),
   },
 ]
 
