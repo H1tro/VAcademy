@@ -59,22 +59,6 @@ const tests: TestItem[] = [
     href: "/tests/himiya/olympiad_chemistry_test.pdf",
     isPdf: true,
   },
-  {
-    id: "chem-vso-10",
-    title: "ВсОШ Химия — 10 класс (2023/24)",
-    subject: "chemistry",
-    description: "Школьный этап ВсОШ по химии для 10 класса. 12 заданий, макс. 50 баллов. Органическая и неорганическая химия.",
-    href: "#",
-    isPdf: false,
-  },
-  {
-    id: "chem-vso-9",
-    title: "ВсОШ Химия — 9 класс (2023/24)",
-    subject: "chemistry",
-    description: "Школьный этап ВсОШ по химии для 9 класса. 12 заданий, макс. 50 баллов. Неорганическая химия и расчёты.",
-    href: "#",
-    isPdf: false,
-  },
 
   {
     id: "bio-campbell",
