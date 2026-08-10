@@ -68,20 +68,13 @@ const tests: TestItem[] = [
     href: "/tests/biology/Campbell_Biology_10th_Edition_Test_Bank.pdf",
     isPdf: true,
   },
-  {
-    id: "bio-diagnostic",
-    title: "Biology Diagnostic Test",
-    subject: "biology",
-    description: "Диагностический тест по биологии для проверки знаний",
-    href: "/tests/biology/Biology_Diagnostic_Test_Full.pdf",
-    isPdf: true,
-  },
+
   {
     id: "phys-extra",
     title: "Дополнительный план подготовки к олимпиадам",
     subject: "physics",
     description: "Сборник тестов для подготовки к олимпиадам по физике",
-    href: "/tests/fizika/Итоговый_проверочный_тест_по_материалам_плана_подготовки_к_физическим_олимпиадам.pdf",
+    href: "/tests/fizika/itogovyj_proverochnyj_test.pdf",
     isPdf: true,
   },
 ];
