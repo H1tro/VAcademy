@@ -30,17 +30,17 @@ const tests: TestItem[] = [
   {
     id: "phys-1",
     title: "Практика 10-11 класс",
-    subject: "physics",
-    description: "Задачи по физике для 10-11 класса",
-    href: "/tests/fizika/practika_10_11.pdf",
+    subject: "chemistry",
+    description: "Задачи по химии для 10-11 класса",
+    href: "/tests/himiya/practika_10_11.pdf",
     isPdf: true,
   },
   {
     id: "phys-2",
     title: "Задачи для практики",
-    subject: "physics",
-    description: "Сборник задач для отработки навыков",
-    href: "/tests/fizika/zadachi_dlya_praktiki.pdf",
+    subject: "chemistry",
+    description: "Сборник задач по химии для отработки навыков",
+    href: "/tests/himiya/zadachi_dlya_praktiki.pdf",
     isPdf: true,
   },
   {
