@@ -29,7 +29,7 @@ export interface CabinetNavItem {
 export const CABINET_NAV: CabinetNavItem[] = [
   { name: "Обзор", href: "/dashboard", icon: IconGrid },
   { name: "AI", href: "/ai", icon: IconSparkles },
-  { name: "Тесты", href: "/tests", icon: IconClipboard },
+  { name: "Тесты & задачи", href: "/tests", icon: IconClipboard },
   { name: "Курсы", href: "/courses", icon: IconBook },
   { name: "Стратегия", href: "/strategy", icon: IconGraduation },
 
