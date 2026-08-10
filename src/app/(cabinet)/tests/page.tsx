@@ -29,7 +29,7 @@ const tests: TestItem[] = [
   },
   {
     id: "phys-1",
-    title: "Практика 10-11 класс",
+    title: "Химия 10-11 класс (2023/24)",
     subject: "chemistry",
     description: "Задачи по химии для 10-11 класса",
     href: "/tests/himiya/practika_10_11.pdf",
