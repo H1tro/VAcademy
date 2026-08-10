@@ -165,7 +165,7 @@ export default function DashboardPage() {
             <CardDescription>Начните прямо сейчас</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link href="/problems" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
+            <Link href="/tests" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan/10 text-cyan">
                 <IconTarget className="h-4 w-4" />
               </span>

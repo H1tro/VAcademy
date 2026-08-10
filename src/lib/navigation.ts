@@ -6,7 +6,7 @@ import {
   IconClipboard,
   IconBook,
   IconGraduation,
-  IconListCheck,
+
   IconTrophy,
   IconCalendar,
   IconSigma,
@@ -32,7 +32,7 @@ export const CABINET_NAV: CabinetNavItem[] = [
   { name: "Тесты", href: "/tests", icon: IconClipboard },
   { name: "Курсы", href: "/courses", icon: IconBook },
   { name: "Стратегия", href: "/strategy", icon: IconGraduation },
-  { name: "Задачи", href: "/problems", icon: IconListCheck },
+
   { name: "Codeforces", href: "/codeforces", icon: IconCodeforces },
   { name: "Рейтинг", href: "/leaderboard", icon: IconTrophy },
   { name: "Олимпиады", href: "/olympiads", icon: IconCalendar },
@@ -116,10 +116,10 @@ const ROUTE_TITLES: Record<string, string> = {
   dashboard: "Обзор",
   admin: "Администрирование",
   ai: "AI-помощник",
-  tests: "Тесты",
+  tests: "Тесты и задачи",
   courses: "Курсы",
   strategy: "Стратегия",
-  problems: "Задачи",
+
   codeforces: "Codeforces",
   leaderboard: "Рейтинг",
   olympiads: "Олимпиады",
