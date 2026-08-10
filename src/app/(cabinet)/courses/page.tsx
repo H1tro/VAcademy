@@ -1,12 +1,14 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { IconPlay, IconExternalLink, IconChevronRight } from "@/components/icons"
+import { IconPlay, IconExternalLink, IconChevronRight, IconCheck } from "@/components/icons"
 import { SUBJECTS } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
 import { chemistryVideos } from "@/lib/himiya-videos"
+import { useAuth } from "@/hooks/use-auth"
+import { ProgressBar } from "@/components/progress-bar"
 
 interface Video {
   name: string
@@ -103,9 +105,49 @@ const videoLessons: VideoGroup[] = [
 ]
 
 export default function CoursesPage() {
+  const { uid } = useAuth()
   const [openVideo, setOpenVideo] = useState<string | null>(null)
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
-  const totalVideos = videoLessons.reduce((sum, g) => sum + g.videos.length, 0)
+  const [collapsed, setCollapsed] = useState<Set<string>>(
+    () => new Set(videoLessons.map((g) => g.subjectKey))
+  )
+  const [watched, setWatched] = useState<Set<string>>(new Set())
+  const [cfSolved, setCfSolved] = useState(0)
+  const [cfTotal, setCfTotal] = useState(0)
+
+  useEffect(() => {
+    if (!uid) return
+    fetch(`/api/profile?uid=${uid}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (Array.isArray(d?.watchedVideos)) setWatched(new Set(d.watchedVideos))
+      })
+    fetch(`/api/codeforces/tasks?uid=${uid}`)
+      .then((r) => (r.ok ? r.json() : []))
+      .then((tasks) => {
+        setCfTotal(tasks.length)
+        setCfCompleted(tasks)
+      })
+  }, [uid])
+
+  const setCfCompleted = useCallback((tasks: { status: string }[]) => {
+    setCfSolved(tasks.filter((t) => t.status === "completed").length)
+  }, [])
+
+  const toggleWatch = useCallback(async (key: string) => {
+    setWatched((prev) => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      if (uid) {
+        fetch("/api/profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ uid, watchedVideos: Array.from(next) }),
+        })
+      }
+      return next
+    })
+  }, [uid])
 
   const toggleCollapse = (key: string) => {
     setCollapsed((prev) => {
@@ -116,6 +158,11 @@ export default function CoursesPage() {
     })
   }
 
+  const totalVideos = videoLessons.reduce((sum, g) => sum + g.videos.length, 0)
+  const totalWatched = videoLessons.reduce((sum, g) => {
+    return sum + g.videos.filter((_, i) => watched.has(`${g.subjectKey}-${i}`)).length
+  }, 0)
+
   return (
     <div className="animate-fade-up space-y-8">
       <div>
@@ -124,6 +171,15 @@ export default function CoursesPage() {
           <span className="font-semibold text-foreground">{totalVideos}</span> видео по предметам для подготовки к
           олимпиадам
         </p>
+        {uid && totalWatched > 0 && (
+          <div className="mt-3 max-w-md">
+            <div className="flex justify-between text-xs text-muted-foreground mb-1">
+              <span>Общий прогресс</span>
+              <span>{Math.round((totalWatched / totalVideos) * 100)}%</span>
+            </div>
+            <ProgressBar value={(totalWatched / totalVideos) * 100} className="h-2" />
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
@@ -131,6 +187,9 @@ export default function CoursesPage() {
           const meta = SUBJECTS.find((s) => s.key === group.subjectKey)
           const Icon = meta?.icon ?? IconPlay
           const isCollapsed = collapsed.has(group.subjectKey)
+          const watchedCount = group.videos.filter((_, i) => watched.has(`${group.subjectKey}-${i}`)).length
+          const progressPct = group.videos.length > 0 ? Math.round((watchedCount / group.videos.length) * 100) : 0
+
           return (
             <div key={group.subject} className="card-surface card-hover flex flex-col overflow-hidden">
               <div className={cn("h-1 bg-gradient-to-r", meta?.cover ?? "from-white/20 to-transparent")} />
@@ -146,10 +205,16 @@ export default function CoursesPage() {
                   {group.subject}
                 </h2>
                 <div className="flex items-center gap-2">
-                  <Badge className="gap-1 font-mono text-xs">
-                    <IconPlay className="h-3 w-3" />
-                    {group.videos.length}
-                  </Badge>
+                  {group.subjectKey === "informatics" && cfTotal > 0 ? (
+                    <Badge className="gap-1 font-mono text-xs" variant="outline">
+                      CF {cfSolved}/{cfTotal}
+                    </Badge>
+                  ) : (
+                    <Badge className="gap-1 font-mono text-xs">
+                      <IconPlay className="h-3 w-3" />
+                      {group.videos.length}
+                    </Badge>
+                  )}
                   <IconChevronRight
                     className={cn(
                       "h-4 w-4 text-muted-foreground transition-transform duration-200",
@@ -158,6 +223,15 @@ export default function CoursesPage() {
                   />
                 </div>
               </button>
+              {uid && watchedCount > 0 && (
+                <div className="px-5 pb-3">
+                  <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
+                    <span>{watchedCount}/{group.videos.length} просмотрено</span>
+                    <span>{progressPct}%</span>
+                  </div>
+                  <ProgressBar value={progressPct} className="h-1.5" />
+                </div>
+              )}
               {!isCollapsed && (
                 <div className="flex flex-1 flex-col px-2 pb-2">
                   {group.videos.length === 0 ? (
@@ -168,27 +242,46 @@ export default function CoursesPage() {
                     </div>
                   ) : (
                     group.videos.map((video, i) => {
-                      const key = `${group.subject}-${i}`
+                      const key = `${group.subjectKey}-${i}`
                       const isOpen = openVideo === key
+                      const isWatched = watched.has(key)
                       return (
                         <div key={key}>
-                          <button
-                            onClick={() => setOpenVideo(isOpen ? null : key)}
-                            aria-expanded={isOpen}
-                            className="flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
-                          >
-                            <IconPlay className="mt-0.5 h-4 w-4 shrink-0 text-cyan" />
-                            <span className="min-w-0 flex-1">
-                              {video.section && (
-                                <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-                                  {video.section}
+                          <div className="flex items-start gap-2">
+                            {uid && (
+                              <button
+                                onClick={() => toggleWatch(key)}
+                                className={cn(
+                                  "mt-2.5 h-4 w-4 shrink-0 rounded border transition-colors",
+                                  isWatched
+                                    ? "border-mint bg-mint text-white"
+                                    : "border-muted-foreground/30 hover:border-muted-foreground/60"
+                                )}
+                                aria-label={isWatched ? "Отменить просмотр" : "Отметить как просмотренное"}
+                              >
+                                {isWatched && <IconCheck className="h-3 w-3" />}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => setOpenVideo(isOpen ? null : key)}
+                              aria-expanded={isOpen}
+                              className="flex flex-1 items-start gap-3 rounded-xl px-3 py-2.5 text-left text-sm text-muted-foreground transition-colors hover:bg-white/5 hover:text-foreground"
+                            >
+                              <IconPlay className="mt-0.5 h-4 w-4 shrink-0 text-cyan" />
+                              <span className="min-w-0 flex-1">
+                                {video.section && (
+                                  <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
+                                    {video.section}
+                                  </span>
+                                )}
+                                <span className={cn("leading-snug", isWatched && "text-muted-foreground/50")}>
+                                  {video.name}
                                 </span>
-                              )}
-                              <span className="leading-snug">{video.name}</span>
-                            </span>
-                          </button>
+                              </span>
+                            </button>
+                          </div>
                           {isOpen && (
-                            <div className="px-3 pb-3 pt-1">
+                            <div className="px-3 pb-3 pt-1 pl-9">
                               <Button size="sm" variant="outline" asChild>
                                 <a href={video.url} target="_blank" rel="noopener noreferrer">
                                   <IconExternalLink className="mr-2 h-3.5 w-3.5" />
