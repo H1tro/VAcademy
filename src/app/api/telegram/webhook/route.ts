@@ -3,41 +3,26 @@ import { waitUntil } from "@vercel/functions"
 import { LRUCache } from "lru-cache"
 import { getDb } from "@/lib/firebase-server"
 import { FieldValue } from "firebase-admin/firestore"
+import {
+  BOT_STEPS,
+  BOT_SUBJECTS,
+  BOT_CATEGORIES,
+  subjectKeyboard,
+  categoryKeyboard,
+  backToCategoryKeyboard,
+  newTicketKeyboard,
+} from "@/lib/bot-constants"
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
 
-const STEPS = {
-  SUBJECT: "subject",
-  CATEGORY: "category",
-  MESSAGE: "message",
-  DONE: "done",
-} as const
-
-const SUBJECTS = [
-  { id: "biology", label: "\uD83E\uDDEC Биология" },
-  { id: "physics", label: "\u269B\uFE0F Физика" },
-  { id: "chemistry", label: "\uD83E\uDDEA Химия" },
-  { id: "math", label: "\u2797 Математика" },
-  { id: "cs", label: "\uD83D\uDCBB Информатика" },
-]
-
-const CATEGORIES = [
-  { id: "materials", label: "\uD83D\uDCDA Учебные материалы" },
-  { id: "documents", label: "\uD83D\uDCC4 Документы" },
-  { id: "homework", label: "\uD83D\uDCDD Домашнее задание" },
-  { id: "olympiads", label: "\uD83C\uDF93 Олимпиады" },
-  { id: "teacher", label: "\uD83D\uDC68\u200D\uD83C\uDF93 Преподаватель" },
-  { id: "technical", label: "\u2699\uFE0F Техническая проблема" },
-  { id: "other", label: "\u2753 Другое" },
-]
-
-const adminChats = new Map<string, number[]>()
-
+const adminChats = new LRUCache<string, number[]>({ max: 500, ttl: 300_000 })
+const reverseAdminCache = new LRUCache<number, string[]>({ max: 1000, ttl: 300_000 })
 const sessionCache = new LRUCache<number, Record<string, unknown>>({ max: 1000, ttl: 30_000 })
 
 async function getDeptAdminChatIds(department: string): Promise<number[]> {
-  if (adminChats.has(department)) return adminChats.get(department)!
+  const cached = adminChats.get(department)
+  if (cached) return cached
   try {
     const db = getDb()
     const snap = await db.doc(`admin_config/${department}`).get()
@@ -58,30 +43,43 @@ async function getDeptAdminChatIds(department: string): Promise<number[]> {
 
 function invalidateCache(department: string) {
   adminChats.delete(department)
+  reverseAdminCache.clear()
 }
 
 async function tgSend(chatId: number, text: string, opts?: Record<string, unknown>) {
-  await fetch(`${TG_API}/sendMessage`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, text, ...opts }),
-  })
+  try {
+    const res = await fetch(`${TG_API}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, ...opts }),
+    })
+    if (!res.ok) console.error("tgSend failed:", res.status, await res.text())
+  } catch (e) {
+    console.error("tgSend error:", e)
+  }
 }
 
 async function tgAnswer(callbackQueryId: string) {
-  await fetch(`${TG_API}/answerCallbackQuery`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ callback_query_id: callbackQueryId }),
-  })
+  try {
+    await fetch(`${TG_API}/answerCallbackQuery`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ callback_query_id: callbackQueryId }),
+    })
+  } catch {}
 }
 
 async function tgEdit(chatId: number, messageId: number, text: string, opts?: Record<string, unknown>) {
-  await fetch(`${TG_API}/editMessageText`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text, ...opts }),
-  })
+  try {
+    const res = await fetch(`${TG_API}/editMessageText`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, message_id: messageId, text, ...opts }),
+    })
+    if (!res.ok) console.error("tgEdit failed:", res.status, await res.text())
+  } catch (e) {
+    console.error("tgEdit error:", e)
+  }
 }
 
 async function getSession(telegramId: number) {
@@ -100,47 +98,15 @@ async function saveSession(telegramId: number, data: Record<string, unknown>) {
   sessionCache.set(telegramId, data)
 }
 
-function subjectKeyboard() {
-  return {
-    inline_keyboard: SUBJECTS.map((s) => [
-      { text: s.label, callback_data: `subject:${s.id}` },
-    ]),
-  }
-}
-
-function categoryKeyboard() {
-  return {
-    inline_keyboard: [
-      ...CATEGORIES.map((c) => [
-        { text: c.label, callback_data: `category:${c.id}` },
-      ]),
-      [{ text: "\uD83D\uDD19 Назад", callback_data: "back:subject" }],
-    ],
-  }
-}
-
-function backToCategoryKeyboard() {
-  return {
-    inline_keyboard: [
-      [{ text: "\uD83D\uDD19 Назад", callback_data: "back:category" }],
-    ],
-  }
-}
-
-function newTicketKeyboard() {
-  return {
-    inline_keyboard: [
-      [{ text: "\uD83D\uDCDD Создать новую заявку", callback_data: "new_ticket" }],
-    ],
-  }
-}
-
 async function getAdminDepartments(chatId: number): Promise<string[]> {
+  const cached = reverseAdminCache.get(chatId)
+  if (cached) return cached
   const depts: string[] = []
-  for (const s of SUBJECTS) {
+  for (const s of BOT_SUBJECTS) {
     const ids = await getDeptAdminChatIds(s.id)
     if (ids.includes(chatId)) depts.push(s.id)
   }
+  reverseAdminCache.set(chatId, depts)
   return depts
 }
 
@@ -149,14 +115,14 @@ async function replyToTicket(ticketId: string, replyText: string, adminChatId: n
     const db = getDb()
     const snap = await db.doc(`tickets/${ticketId}`).get()
     if (!snap.exists) {
-      await tgSend(adminChatId, `❌ Заявка #${ticketId} не найдена.`)
+      await tgSend(adminChatId, `\u274C Заявка #${ticketId} не найдена.`)
       return
     }
 
     const ticket = snap.data()!
     const adminDepts = await getAdminDepartments(adminChatId)
     if (!adminDepts.includes(ticket.department as string)) {
-      await tgSend(adminChatId, "❌ У вас нет прав отвечать на заявки этого департамента.")
+      await tgSend(adminChatId, "\u274C У вас нет прав отвечать на заявки этого департамента.")
       return
     }
 
@@ -176,17 +142,17 @@ async function replyToTicket(ticketId: string, replyText: string, adminChatId: n
     const userTgId = ticket.telegramId as number | undefined
     if (userTgId) {
       const userMsg = [
-        `📬 *Ответ от поддержки по заявке #${ticketId}*`,
+        `\uD83D\uDCCC *Ответ от поддержки по заявке #${ticketId}*`,
         "",
         replyText,
       ].join("\n")
       await tgSend(userTgId, userMsg, { parse_mode: "Markdown" })
     }
 
-    await tgSend(adminChatId, `✅ Ответ отправлен пользователю по заявке #${ticketId}.`)
+    await tgSend(adminChatId, `\u2705 Ответ отправлен пользователю по заявке #${ticketId}.`)
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : String(e)
-    await tgSend(adminChatId, `❌ Ошибка: ${errMsg}`)
+    await tgSend(adminChatId, `\u274C Ошибка: ${errMsg}`)
   }
 }
 
@@ -195,14 +161,14 @@ async function closeTicket(ticketId: string, adminChatId: number, adminTelegramI
     const db = getDb()
     const snap = await db.doc(`tickets/${ticketId}`).get()
     if (!snap.exists) {
-      await tgSend(adminChatId, `❌ Заявка #${ticketId} не найдена.`)
+      await tgSend(adminChatId, `\u274C Заявка #${ticketId} не найдена.`)
       return
     }
 
     const ticket = snap.data()!
     const adminDepts = await getAdminDepartments(adminChatId)
     if (!adminDepts.includes(ticket.department as string)) {
-      await tgSend(adminChatId, "❌ У вас нет прав закрывать заявки этого департамента.")
+      await tgSend(adminChatId, "\u274C У вас нет прав закрывать заявки этого департамента.")
       return
     }
 
@@ -215,13 +181,13 @@ async function closeTicket(ticketId: string, adminChatId: number, adminTelegramI
 
     const userTgId = ticket.telegramId as number | undefined
     if (userTgId) {
-      await tgSend(userTgId, `✅ Заявка #${ticketId} закрыта.\n\nЕсли у вас остались вопросы, создайте новую заявку через /start`)
+      await tgSend(userTgId, `\u2705 Заявка #${ticketId} закрыта.\n\nЕсли у вас остались вопросы, создайте новую заявку через /start`)
     }
 
-    await tgSend(adminChatId, `✅ Заявка #${ticketId} закрыта.`)
+    await tgSend(adminChatId, `\u2705 Заявка #${ticketId} закрыта.`)
   } catch (e) {
     const errMsg = e instanceof Error ? e.message : String(e)
-    await tgSend(adminChatId, `❌ Ошибка: ${errMsg}`)
+    await tgSend(adminChatId, `\u274C Ошибка: ${errMsg}`)
   }
 }
 
@@ -236,7 +202,7 @@ async function handleCallback(query: any) {
 
     if (data.startsWith("dept:")) {
       const dept = data.slice(5)
-      const subject = SUBJECTS.find((s) => s.id === dept)
+      const subject = BOT_SUBJECTS.find((s) => s.id === dept)
       if (!subject) return
       invalidateCache(dept)
       const db = getDb()
@@ -247,13 +213,13 @@ async function handleCallback(query: any) {
       } else {
         await ref.update({ chatIds: FieldValue.arrayUnion(chatId), updatedAt: new Date() })
       }
-      await tgEdit(chatId, messageId, `✅ Вы зарегистрированы как **${subject.label}**.\n\nВсе заявки по этому предмету будут приходить сюда.`, { parse_mode: "Markdown" })
+      await tgEdit(chatId, messageId, `\u2705 Вы зарегистрированы как **${subject.label}**.\n\nВсе заявки по этому предмету будут приходить сюда.`, { parse_mode: "Markdown" })
       return
     }
 
     if (data.startsWith("unreg:")) {
       const dept = data.slice(6)
-      const subject = SUBJECTS.find((s) => s.id === dept)
+      const subject = BOT_SUBJECTS.find((s) => s.id === dept)
       if (!subject) return
       invalidateCache(dept)
       const db = getDb()
@@ -264,42 +230,42 @@ async function handleCallback(query: any) {
       } else if (snap.exists && snap.data()!.chatId === chatId) {
         await ref.update({ chatIds: FieldValue.arrayRemove(chatId), chatId: 0, updatedAt: new Date() })
       }
-      await tgEdit(chatId, messageId, `✅ Вы отписаны от уведомлений **${subject.label}**.`, { parse_mode: "Markdown" })
+      await tgEdit(chatId, messageId, `\u2705 Вы отписаны от уведомлений **${subject.label}**.`, { parse_mode: "Markdown" })
       return
     }
 
     if (data === "new_ticket") {
-      await saveSession(telegramId, { step: STEPS.SUBJECT, updatedAt: new Date() })
+      await saveSession(telegramId, { step: BOT_STEPS.SUBJECT, updatedAt: new Date() })
       await tgEdit(chatId, messageId, "Добро пожаловать в STEM Support!\n\nВыберите предмет, по которому у вас возник вопрос.", { reply_markup: subjectKeyboard() })
       return
     }
 
     if (data === "back:subject") {
-      await saveSession(telegramId, { step: STEPS.SUBJECT, updatedAt: new Date() })
+      await saveSession(telegramId, { step: BOT_STEPS.SUBJECT, updatedAt: new Date() })
       await tgEdit(chatId, messageId, "Добро пожаловать в STEM Support!\n\nВыберите предмет, по которому у вас возник вопрос.", { reply_markup: subjectKeyboard() })
       return
     }
 
     if (data === "back:category") {
-      await saveSession(telegramId, { step: STEPS.CATEGORY, updatedAt: new Date() })
+      await saveSession(telegramId, { step: BOT_STEPS.CATEGORY, updatedAt: new Date() })
       await tgEdit(chatId, messageId, "Выберите категорию обращения:", { reply_markup: categoryKeyboard() })
       return
     }
 
     if (data.startsWith("subject:")) {
       const subjectId = data.slice(8)
-      const subject = SUBJECTS.find((s) => s.id === subjectId)
+      const subject = BOT_SUBJECTS.find((s) => s.id === subjectId)
       if (!subject) return
-      await saveSession(telegramId, { step: STEPS.CATEGORY, subject: subjectId, subjectLabel: subject.label, updatedAt: new Date() })
+      await saveSession(telegramId, { step: BOT_STEPS.CATEGORY, subject: subjectId, subjectLabel: subject.label, updatedAt: new Date() })
       await tgEdit(chatId, messageId, "Выберите категорию обращения:", { reply_markup: categoryKeyboard() })
       return
     }
 
     if (data.startsWith("category:")) {
       const categoryId = data.slice(9)
-      const category = CATEGORIES.find((c) => c.id === categoryId)
+      const category = BOT_CATEGORIES.find((c) => c.id === categoryId)
       if (!category) return
-      await saveSession(telegramId, { step: STEPS.MESSAGE, category: categoryId, categoryLabel: category.label, updatedAt: new Date() })
+      await saveSession(telegramId, { step: BOT_STEPS.MESSAGE, category: categoryId, categoryLabel: category.label, updatedAt: new Date() })
       await tgEdit(chatId, messageId, "Пожалуйста, подробно опишите ваш вопрос или проблему.\n\nПри необходимости вы можете прикрепить:\n\n• фотографии;\n• PDF-файлы;\n• документы;\n• архивы;\n• другие материалы.", { reply_markup: backToCategoryKeyboard() })
       return
     }
@@ -307,14 +273,14 @@ async function handleCallback(query: any) {
     if (data.startsWith("reply_ticket:")) {
       const ticketId = data.slice(13)
       await saveSession(telegramId, { step: "reply", replyTicketId: ticketId, updatedAt: new Date() })
-      await tgSend(chatId, `✏️ Напишите текст ответа для заявки #${ticketId}:`)
+      await tgSend(chatId, `\u270F\uFE0F Напишите текст ответа для заявки #${ticketId}:`)
       return
     }
   } catch (e) {
     console.error("handleCallback error:", e)
     const errMsg = e instanceof Error ? e.message : String(e)
     try {
-      await tgSend(chatId, `❌ Ошибка: ${errMsg}`)
+      await tgSend(chatId, `\u274C Ошибка: ${errMsg}`)
     } catch {}
   }
 }
@@ -329,23 +295,23 @@ async function handleMessage(msg: any) {
   const username: string = from.username || ""
 
   if (text === "/register") {
-    await tgSend(chatId, "Выберите ваш департамент:", { reply_markup: { inline_keyboard: SUBJECTS.map((s) => [{ text: s.label, callback_data: `dept:${s.id}` }]) } })
+    await tgSend(chatId, "Выберите ваш департамент:", { reply_markup: { inline_keyboard: BOT_SUBJECTS.map((s) => [{ text: s.label, callback_data: `dept:${s.id}` }]) } })
     return
   }
 
   if (text === "/unregister") {
     const registered: string[] = []
-    for (const s of SUBJECTS) {
+    for (const s of BOT_SUBJECTS) {
       const ids = await getDeptAdminChatIds(s.id)
       if (ids.includes(chatId)) registered.push(s.label)
     }
     if (registered.length === 0) {
-      await tgSend(chatId, "❌ Вы не зарегистрированы ни по одному предмету.")
+      await tgSend(chatId, "\u274C Вы не зарегистрированы ни по одному предмету.")
       return
     }
     await tgSend(chatId, "Выберите предмет, от которого хотите отписаться:", {
       reply_markup: {
-        inline_keyboard: SUBJECTS.filter((s) => registered.includes(s.label)).map((s) => [
+        inline_keyboard: BOT_SUBJECTS.filter((s) => registered.includes(s.label)).map((s) => [
           { text: s.label, callback_data: `unreg:${s.id}` },
         ]),
       },
@@ -354,19 +320,19 @@ async function handleMessage(msg: any) {
   }
 
   if (text === "/myid") {
-    await tgSend(chatId, `🆔 Ваш Telegram ID: \`${telegramId}\`\n\nПередайте этот ID администратору сайта, чтобы вас добавили как админа предмета.`, { parse_mode: "Markdown" })
+    await tgSend(chatId, `\uD83C\uDD94 Ваш Telegram ID: \`${telegramId}\`\n\nПередайте этот ID администратору сайта, чтобы вас добавили как админа предмета.`, { parse_mode: "Markdown" })
     return
   }
 
   if (text === "/start") {
-    await saveSession(telegramId, { step: STEPS.SUBJECT, telegramId, userName, username, updatedAt: new Date() })
+    await saveSession(telegramId, { step: BOT_STEPS.SUBJECT, telegramId, userName, username, updatedAt: new Date() })
     await tgSend(chatId, "Добро пожаловать в STEM Support!\n\nВыберите предмет, по которому у вас возник вопрос.", { reply_markup: subjectKeyboard() })
     return
   }
 
   if (text === "/help") {
     const helpText = [
-      "📋 *Команды бота:*",
+      "\uD83D\uDCCB *Команды бота:*",
       "",
       "• /start — Создать новую заявку",
       "• /register — Зарегистрироваться как администратор",
@@ -388,7 +354,7 @@ async function handleMessage(msg: any) {
     const ticketId = parts[0]
     const replyText = parts.slice(1).join(" ")
     if (!ticketId || !replyText) {
-      await tgSend(chatId, "❌ Использование: `/reply <ID заявки> <текст ответа>`", { parse_mode: "Markdown" })
+      await tgSend(chatId, "\u274C Использование: `/reply <ID заявки> <текст ответа>`", { parse_mode: "Markdown" })
       return
     }
     await replyToTicket(ticketId, replyText, chatId, telegramId, userName)
@@ -398,7 +364,7 @@ async function handleMessage(msg: any) {
   if (text?.startsWith("/close ")) {
     const ticketId = text.slice(7).trim()
     if (!ticketId) {
-      await tgSend(chatId, "❌ Использование: `/close <ID заявки>`", { parse_mode: "Markdown" })
+      await tgSend(chatId, "\u274C Использование: `/close <ID заявки>`", { parse_mode: "Markdown" })
       return
     }
     await closeTicket(ticketId, chatId, telegramId)
@@ -411,7 +377,7 @@ async function handleMessage(msg: any) {
     return
   }
 
-  if (session.step === STEPS.MESSAGE) {
+  if (session.step === BOT_STEPS.MESSAGE) {
     const hasFiles = (msg.photo && msg.photo.length > 0) || msg.document || msg.voice || msg.video
 
     if (!text && !hasFiles) {
@@ -451,25 +417,24 @@ async function handleMessage(msg: any) {
 
     const adminIds = await getDeptAdminChatIds(subjectId)
     const header = [
-      `📩 Новая заявка #${ticketRef.id}`,
-      `👤 ${userName} (@${username}, ID: ${telegramId})`,
-      `📖 Предмет: ${subjectLabel}`,
-      `📂 Категория: ${session.categoryLabel || session.category}`,
-      `💬 ${text || "(без текста, только файлы)"}`,
+      `\uD83D\uDCE2 Новая заявка #${ticketRef.id}`,
+      `\uD83D\uDC64 ${userName} (@${username}, ID: ${telegramId})`,
+      `\uD83D\uDCD6 Предмет: ${subjectLabel}`,
+      `\uD83D\uDCC2 Категория: ${session.categoryLabel || session.category}`,
+      `\uD83D\uDCAC ${text || "(без текста, только файлы)"}`,
     ].join("\n")
 
     for (const adminChatId of adminIds) {
       try {
         const replyKeyboard = {
           inline_keyboard: [
-            [{ text: "✏️ Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
+            [{ text: "\u270F\uFE0F Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
           ],
         }
         await tgSend(adminChatId, header, { reply_markup: replyKeyboard })
         if (msg.document) {
           const fileId = msg.document.file_id
           const fileName = msg.document.file_name || "файл"
-          await tgSend(adminChatId, `📎 ${fileName}`)
           await fetch(`${TG_API}/sendDocument`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -479,9 +444,9 @@ async function handleMessage(msg: any) {
       } catch {}
     }
 
-    await tgSend(chatId, `✅ Ваше обращение успешно отправлено.\n\nДепартамент ${subjectLabel} получил вашу заявку.\n\nМы свяжемся с вами как можно скорее.`, { reply_markup: newTicketKeyboard() })
+    await tgSend(chatId, `\u2705 Ваше обращение успешно отправлено.\n\nДепартамент ${subjectLabel} получил вашу заявку.\n\nМы свяжемся с вами как можно скорее.`, { reply_markup: newTicketKeyboard() })
 
-    await saveSession(telegramId, { step: STEPS.DONE, updatedAt: new Date() })
+    await saveSession(telegramId, { step: BOT_STEPS.DONE, updatedAt: new Date() })
     return
   }
 
@@ -492,19 +457,19 @@ async function handleMessage(msg: any) {
       return
     }
     await replyToTicket(ticketId, text, chatId, telegramId, userName)
-    await saveSession(telegramId, { step: STEPS.DONE, replyTicketId: undefined, updatedAt: new Date() })
+    await saveSession(telegramId, { step: BOT_STEPS.DONE, replyTicketId: undefined, updatedAt: new Date() })
     return
   }
 
-  if (session.step === STEPS.DONE) {
-    await saveSession(telegramId, { step: STEPS.SUBJECT, updatedAt: new Date() })
+  if (session.step === BOT_STEPS.DONE) {
+    await saveSession(telegramId, { step: BOT_STEPS.SUBJECT, updatedAt: new Date() })
     await tgSend(chatId, "Добро пожаловать в STEM Support!\n\nВыберите предмет, по которому у вас возник вопрос.", { reply_markup: subjectKeyboard() })
     return
   }
 
-  if (session.step === STEPS.SUBJECT) {
+  if (session.step === BOT_STEPS.SUBJECT) {
     await tgSend(chatId, "Пожалуйста, выберите предмет, используя кнопки выше.")
-  } else if (session.step === STEPS.CATEGORY) {
+  } else if (session.step === BOT_STEPS.CATEGORY) {
     await tgSend(chatId, "Пожалуйста, выберите категорию обращения, используя кнопки выше.")
   }
 }
@@ -517,7 +482,6 @@ export async function POST(req: Request) {
 
 async function processUpdate(update: any) {
   try {
-    console.log("Processing update:", update.callback_query ? "callback" : update.message ? "message" : "unknown")
     if (update.callback_query) {
       await handleCallback(update.callback_query)
     } else if (update.message) {

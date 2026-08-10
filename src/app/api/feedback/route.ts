@@ -1,27 +1,22 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
 import { FieldValue } from "firebase-admin/firestore"
+import { BOT_SUBJECTS } from "@/lib/bot-constants"
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
 
-const SUBJECT_IDS: Record<string, string> = {
-  biology: "biology",
-  physics: "physics",
-  chemistry: "chemistry",
-  math: "math",
-  cs: "cs",
-}
-
-async function getDeptAdminChatId(department: string): Promise<number | null> {
+async function getDeptAdminChatIds(department: string): Promise<number[]> {
   try {
     const db = getDb()
     const snap = await db.doc(`admin_config/${department}`).get()
-    if (snap.exists) return snap.data()!.chatId as number
-  } catch {
-    /* ignore */
-  }
-  return null
+    if (snap.exists) {
+      const data = snap.data()!
+      if (Array.isArray(data.chatIds)) return data.chatIds as number[]
+      if (data.chatId) return [data.chatId as number]
+    }
+  } catch {}
+  return []
 }
 
 export async function POST(req: Request) {
@@ -41,7 +36,7 @@ export async function POST(req: Request) {
       username: "",
       subject,
       subjectLabel: subject,
-      department: SUBJECT_IDS[subject] || subject,
+      department: subject,
       category,
       message,
       fileIds: [] as string[],
@@ -52,35 +47,35 @@ export async function POST(req: Request) {
 
     const ticketRef = await db.collection("tickets").add(ticket)
 
-    const deptId = SUBJECT_IDS[subject]
-    const adminChatId = deptId ? await getDeptAdminChatId(deptId) : null
-    if (adminChatId) {
+    const adminIds = await getDeptAdminChatIds(subject)
+    if (adminIds.length > 0) {
       const header = [
-        `📩 Новая заявка #${ticketRef.id}`,
-        "🌐 Источник: сайт",
-        `👤 ${userName || "Гость"}`,
-        `📖 Предмет: ${subject}`,
-        `📂 Категория: ${category}`,
-        `💬 ${message}`,
+        `\uD83D\uDCE2 Новая заявка #${ticketRef.id}`,
+        "\uD83C\uDF10 Источник: сайт",
+        `\uD83D\uDC64 ${userName || "Гость"}`,
+        `\uD83D\uDCD6 Предмет: ${subject}`,
+        `\uD83D\uDCC2 Категория: ${category}`,
+        `\uD83D\uDCAC ${message}`,
       ].join("\n")
 
-      await fetch(`${TG_API}/sendMessage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: adminChatId,
-          text: header,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "✏️ Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
-            ],
-          },
-        }),
-      })
+      for (const adminChatId of adminIds) {
+        await fetch(`${TG_API}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            chat_id: adminChatId,
+            text: header,
+            reply_markup: {
+              inline_keyboard: [
+                [{ text: "\u270F\uFE0F Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
+              ],
+            },
+          }),
+        })
+      }
     }
 
-    const departmentName = subject
-    return NextResponse.json({ success: true, ticketId: ticketRef.id, department: departmentName })
+    return NextResponse.json({ success: true, ticketId: ticketRef.id, department: subject })
   } catch (error) {
     console.error("Feedback error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

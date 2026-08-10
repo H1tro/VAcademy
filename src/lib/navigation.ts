@@ -6,7 +6,6 @@ import {
   IconClipboard,
   IconBook,
   IconGraduation,
-
   IconTrophy,
   IconCalendar,
   IconSigma,
@@ -15,6 +14,7 @@ import {
   IconCode,
   IconDna,
   IconCodeforces,
+  IconSend,
 } from "@/components/icons";
 import type { SubjectKey } from "./types";
 
@@ -36,6 +36,7 @@ export const CABINET_NAV: CabinetNavItem[] = [
   { name: "Codeforces", href: "/codeforces", icon: IconCodeforces },
   { name: "Рейтинг", href: "/leaderboard", icon: IconTrophy },
   { name: "Олимпиады", href: "/olympiads", icon: IconCalendar },
+  { name: "Обратная связь", href: "https://t.me/VAcademi_Support_Bot", icon: IconSend },
 ];
 
 export interface SubjectMeta {

@@ -65,26 +65,39 @@ export function MainNav() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="px-2">
-              {CABINET_NAV.map((item) => (
+              {CABINET_NAV.map((item) => {
+                const isExternal = item.href.startsWith("http");
+                const linkProps = isExternal
+                  ? { href: item.href, target: "_blank", rel: "noopener noreferrer" }
+                  : { href: item.href };
+                return (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild
-                    isActive={isActive(item.href)}
+                    isActive={!isExternal && isActive(item.href)}
                     tooltip={item.name}
                     className={cn(
                       "transition-all duration-200",
-                      isActive(item.href)
+                      !isExternal && isActive(item.href)
                         ? "bg-v-grad-soft text-foreground"
                         : "text-sidebar-foreground hover:bg-white/5"
                     )}
                   >
-                    <Link href={item.href}>
-                      <item.icon className="h-4 w-4" />
-                      <span className="font-medium">{item.name}</span>
-                    </Link>
+                    {isExternal ? (
+                      <a {...linkProps}>
+                        <item.icon className="h-4 w-4" />
+                        <span className="font-medium">{item.name}</span>
+                      </a>
+                    ) : (
+                      <Link {...linkProps}>
+                        <item.icon className="h-4 w-4" />
+                        <span className="font-medium">{item.name}</span>
+                      </Link>
+                    )}
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              ))}
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
