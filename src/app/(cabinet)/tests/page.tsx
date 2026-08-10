@@ -29,11 +29,19 @@ const tests: TestItem[] = [
   },
   {
     id: "phys-1",
-    title: "Физика",
+    title: "Практика 10-11 класс",
     subject: "physics",
-    description: "Тесты по механике, электродинамике, оптике и термодинамике",
-    href: "#",
-    isPdf: false,
+    description: "Задачи по физике для 10-11 класса",
+    href: "/tests/fizika/practika_10_11.pdf",
+    isPdf: true,
+  },
+  {
+    id: "phys-2",
+    title: "Задачи для практики",
+    subject: "physics",
+    description: "Сборник задач для отработки навыков",
+    href: "/tests/fizika/zadachi_dlya_praktiki.pdf",
+    isPdf: true,
   },
   {
     id: "inf-1",
