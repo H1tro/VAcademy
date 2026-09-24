@@ -24,11 +24,13 @@ import {
   SidebarGroupContent,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useTranslations } from "next-intl";
 
 export function MainNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
+  const t = useTranslations("nav");
 
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Гость";
   const initials =
@@ -61,7 +63,7 @@ export function MainNav() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Меню
+            {t("menu")}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="px-2">
@@ -75,7 +77,7 @@ export function MainNav() {
                   <SidebarMenuButton
                     asChild
                     isActive={!isExternal && isActive(item.href)}
-                    tooltip={item.name}
+                    tooltip={t(item.name)}
                     className={cn(
                       "transition-all duration-200",
                       !isExternal && isActive(item.href)
@@ -86,12 +88,12 @@ export function MainNav() {
                     {isExternal ? (
                       <a {...linkProps}>
                         <item.icon className="h-4 w-4" />
-                        <span className="font-medium">{item.name}</span>
+                        <span className="font-medium">{t(item.name)}</span>
                       </a>
                     ) : (
                       <Link {...linkProps}>
                         <item.icon className="h-4 w-4" />
-                        <span className="font-medium">{item.name}</span>
+                        <span className="font-medium">{t(item.name)}</span>
                       </Link>
                     )}
                   </SidebarMenuButton>
@@ -104,7 +106,7 @@ export function MainNav() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="px-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Предметы
+            {t("subjects")}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="px-2">
@@ -119,7 +121,7 @@ export function MainNav() {
                       <div className={cn("flex h-5 w-5 items-center justify-center rounded-md text-[10px] font-bold", subject.bubble)}>
                         <subject.icon className="h-3.5 w-3.5" />
                       </div>
-                      <span>{subject.name}</span>
+                      <span>{t(subject.key)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -142,7 +144,7 @@ export function MainNav() {
               <div className="flex flex-1 flex-col overflow-hidden">
                 <span className="truncate text-sm font-semibold">{displayName}</span>
                 <span className="font-mono text-[10px] uppercase tracking-tight text-muted-foreground">
-                  Редактировать профиль
+                  {t("editProfile")}
                 </span>
               </div>
               <IconSettings className="h-4 w-4 text-muted-foreground" />
@@ -153,7 +155,7 @@ export function MainNav() {
               className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-sm font-semibold text-destructive transition-colors hover:bg-destructive/10"
             >
               <IconLogout className="h-4 w-4" />
-              Выйти
+              {t("logout")}
             </button>
           </div>
         ) : (
@@ -162,13 +164,13 @@ export function MainNav() {
               href="/login"
               className="inline-flex items-center justify-center rounded-full border border-border bg-background px-3 py-2 text-sm font-semibold text-foreground hover:border-cyan/60 hover:text-cyan"
             >
-              Войти
+              {t("login")}
             </Link>
             <Link
               href="/register"
               className="inline-flex items-center justify-center rounded-full bg-gradient-brand px-3 py-2 text-sm font-semibold text-white shadow-glow-sm hover:shadow-glow"
             >
-              Регистрация
+              {t("register")}
             </Link>
           </div>
         )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
 import { problemsData } from "@/lib/problems-data";
 import type { Problem, ProblemDifficulty } from "@/lib/problems-data";
@@ -131,6 +132,7 @@ const subjectBadge: Record<string, string> = {
 };
 
 export default function TestsPage() {
+  const t = useTranslations('cabinet.tests')
   const { uid } = useAuth();
   const [subject, setSubject] = useState<SubjectFilter>("all");
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
@@ -179,9 +181,9 @@ export default function TestsPage() {
     <div className="animate-fade-up space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Тесты и задачи</h1>
+          <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            PDF-тесты для скачивания и интерактивные задачи · Решено {solvedCount} из {problemsData.length}
+            {t('description', {solved: solvedCount, total: problemsData.length})}
           </p>
         </div>
       </div>
@@ -189,29 +191,29 @@ export default function TestsPage() {
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по типу">
           {([
-            { value: "all", label: "Все" },
-            { value: "pdf", label: "PDF-тесты" },
-            { value: "interactive", label: "Задачи" },
-          ] as const).map((t) => (
+            { value: "all", label: t('all') },
+            { value: "pdf", label: t('pdfTests') },
+            { value: "interactive", label: t('interactive') },
+          ] as const).map((tabItem) => (
             <button
-              key={t.value}
+              key={tabItem.value}
               type="button"
-              aria-pressed={tab === t.value}
-              onClick={() => setTab(t.value)}
+              aria-pressed={tab === tabItem.value}
+              onClick={() => setTab(tabItem.value)}
               className={cn(
                 "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
-                tab === t.value
+                tab === tabItem.value
                   ? "border-cyan/60 bg-cyan/10 text-cyan"
                   : "border-border text-muted-foreground hover:border-white/20 hover:text-foreground"
               )}
             >
-              {t.label}
+              {tabItem.label}
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по предмету">
-          {[{ value: "all", label: "Все предметы" }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name }))].map((s) => (
+          {[{ value: "all", label: t('allSubjects') }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name }))].map((s) => (
             <button
               key={s.value}
               type="button"
@@ -232,29 +234,32 @@ export default function TestsPage() {
         {showInteractive && (
           <div className="flex flex-wrap items-center gap-2">
             <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по сложности">
-              {DIFFICULTIES.map((d) => (
-                <button
-                  key={d.value}
-                  type="button"
-                  aria-pressed={difficulty === d.value}
-                  onClick={() => setDifficulty(d.value)}
-                  className={cn(
-                    "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
-                    difficulty === d.value
-                      ? "border-white/20 bg-white/10 text-foreground"
-                      : "border-border text-muted-foreground hover:border-white/20 hover:text-foreground"
-                  )}
-                >
-                  {d.label}
-                </button>
-              ))}
+              {DIFFICULTIES.map((d) => {
+                  const label = d.value === "all" ? t('allLevels') : d.label
+                  return (
+                    <button
+                      key={d.value}
+                      type="button"
+                      aria-pressed={difficulty === d.value}
+                      onClick={() => setDifficulty(d.value)}
+                      className={cn(
+                        "rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors",
+                        difficulty === d.value
+                          ? "border-white/20 bg-white/10 text-foreground"
+                          : "border-border text-muted-foreground hover:border-white/20 hover:text-foreground"
+                      )}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
             </div>
 
             <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по статусу">
               {[
-                { value: "all", label: "Все" },
-                { value: "solved", label: "Решённые" },
-                { value: "unsolved", label: "Не решённые" },
+                { value: "all", label: t('all') },
+                { value: "solved", label: t('solved') },
+                { value: "unsolved", label: t('unsolved') },
               ].map((s) => (
                 <button
                   key={s.value}
@@ -293,7 +298,7 @@ export default function TestsPage() {
               <p className="mt-2 flex-1 text-sm text-muted-foreground">{test.description}</p>
               <Button variant="gradient" size="sm" className="mt-5 w-full" asChild>
                 <a href={test.href} download>
-                  Открыть тест
+                  {t('openTest')}
                   <IconArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
@@ -314,8 +319,8 @@ export default function TestsPage() {
             </div>
           ) : filteredProblems.length === 0 ? (
             <div className="rounded-2xl border border-border bg-panel/40 p-12 text-center">
-              <p className="font-headline text-lg font-semibold">Ничего не найдено</p>
-              <p className="mt-1 text-sm text-muted-foreground">Попробуйте изменить фильтры.</p>
+              <p className="font-headline text-lg font-semibold">{t('nothingFound')}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t('tryFilters')}</p>
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

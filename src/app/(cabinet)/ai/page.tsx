@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,7 @@ import { IconSparkles, IconSend, IconAlertTriangle } from "@/components/icons";
 export const dynamic = "force-dynamic";
 
 export default function AiAssistantPage() {
+  const t = useTranslations('cabinet.ai')
   const [aiEnabled, setAiEnabled] = useState<boolean | null>(null);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -28,7 +30,7 @@ export default function AiAssistantPage() {
     const text = question.trim();
 
     if (!text) {
-      setError("Пожалуйста, задайте вопрос.");
+      setError(t('pleaseAsk'));
       return;
     }
 
@@ -43,12 +45,12 @@ export default function AiAssistantPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        setError(data?.error || "Ошибка сервера. Попробуйте позже.");
+        setError(data?.error || t('serverError'));
       } else {
         setAnswer(data.answer || "К сожалению, ответ не получен.");
       }
     } catch {
-      setError("Не удалось получить ответ. Проверьте подключение и ключ Groq.");
+      setError(t('aiError'));
     } finally {
       setIsLoading(false);
     }
@@ -69,9 +71,9 @@ export default function AiAssistantPage() {
         <div className="rounded-full border border-amber/30 bg-amber/10 p-4 text-amber">
           <IconAlertTriangle className="mx-auto h-8 w-8" />
         </div>
-        <h1 className="mt-6 font-headline text-2xl font-bold tracking-tight">AI временно недоступен</h1>
+        <h1 className="mt-6 font-headline text-2xl font-bold tracking-tight">{t('aiUnavailable')}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Администратор отключил AI-ассистента. Загляните позже.
+          {t('aiUnavailableDesc')}
         </p>
       </div>
     );
@@ -80,32 +82,32 @@ export default function AiAssistantPage() {
   return (
     <div className="animate-fade-up mx-auto max-w-3xl space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">AI-помощник</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Задавайте вопросы по олимпиадам, подготовке и стратегии.
+          {t('description')}
         </p>
       </div>
 
       <section className="card-surface p-6">
         <div className="inline-flex items-center gap-2 rounded-full bg-gradient-brand px-4 py-1.5 text-sm font-semibold text-white">
           <IconSparkles className="h-4 w-4" />
-          AI для олимпиад
+          {t('aiForOlympiads')}
         </div>
         <h2 className="mt-4 font-headline text-xl font-bold sm:text-2xl">
-          Спросите нашего интеллектуального ассистента
+          {t('askAssistant')}
         </h2>
 
         <div className="mt-5 space-y-4">
           <Textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
-            placeholder="Например: Как готовиться к олимпиаде по информатике?"
+            placeholder={t('placeholder')}
             rows={6}
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <Button onClick={askAssistant} disabled={isLoading} variant="gradient">
               <IconSend className="mr-2 h-4 w-4" />
-              {isLoading ? "Жду ответа..." : "Спросить AI"}
+              {isLoading ? t('waiting') : t('ask')}
             </Button>
             <Button
               variant="outline"
@@ -115,7 +117,7 @@ export default function AiAssistantPage() {
                 setError(null);
               }}
             >
-              Очистить
+              {t('clear')}
             </Button>
           </div>
 
@@ -125,7 +127,7 @@ export default function AiAssistantPage() {
             <div className="rounded-2xl border border-border bg-panel/40 p-5">
               <h3 className="flex items-center gap-2 font-headline text-lg font-semibold">
                 <IconSparkles className="h-4 w-4 text-amber" />
-                Ответ AI
+                {t('answerAI')}
               </h3>
               <p className="mt-3 whitespace-pre-line text-sm leading-7 text-muted-foreground">{answer}</p>
             </div>

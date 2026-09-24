@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const t = useTranslations("auth.register");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,12 +33,12 @@ export default function RegisterPage() {
     setSuccess("");
 
     if (!email || !password || !displayName) {
-      setError("Пожалуйста, заполните имя, email и пароль.");
+      setError(t("fillFields"));
       return;
     }
 
     if (password.length < 6) {
-      setError("Пароль должен быть не менее 6 символов.");
+      setError(t("passwordMin"));
       return;
     }
 
@@ -77,10 +79,10 @@ export default function RegisterPage() {
         }),
       });
 
-      setSuccess("Регистрация прошла успешно!");
+      setSuccess(t("success"));
       router.push("/profile/edit");
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Не удалось зарегистрироваться.";
+      const message = err instanceof Error ? err.message : t("error");
       setError(message);
     } finally {
       setLoading(false);
@@ -91,65 +93,65 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-background px-6 py-10 md:px-10 lg:px-12">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="space-y-3 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Добро пожаловать</p>
-          <h1 className="text-4xl font-headline font-black tracking-tight">Создать аккаунт</h1>
+          <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{t("welcome")}</p>
+          <h1 className="text-4xl font-headline font-black tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Зарегистрируйтесь в VAcademi, чтобы сохранять прогресс, редактировать профиль и продолжить подготовку.
+            {t("subtitle")}
           </p>
         </div>
 
         <Card className="border-border/40 bg-card/50 shadow-xl">
           <CardHeader className="space-y-1 p-6">
-            <CardTitle className="text-2xl">Регистрация</CardTitle>
+            <CardTitle className="text-2xl">{t("register")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 p-6">
             {error ? <div className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div> : null}
             {success ? <div className="rounded-xl bg-emerald-500/10 p-4 text-sm text-emerald-500">{success}</div> : null}
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="displayName">Имя пользователя</Label>
+                <Label htmlFor="displayName">{t("name")}</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(event) => setDisplayName(event.target.value)}
-                  placeholder="Иван Иванов"
+                  placeholder={t("namePlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" />
+                <Label htmlFor="email">{t("email")}</Label>
+                <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={t("emailPlaceholder")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Пароль</Label>
+                <Label htmlFor="password">{t("password")}</Label>
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
-                  placeholder="Минимум 6 символов"
+                  placeholder={t("passwordPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="photoURL">Фото профиля (URL)</Label>
-                <Input id="photoURL" value={photoURL} onChange={(event) => setPhotoURL(event.target.value)} placeholder="https://..." />
+                <Label htmlFor="photoURL">{t("photoUrl")}</Label>
+                <Input id="photoURL" value={photoURL} onChange={(event) => setPhotoURL(event.target.value)} placeholder={t("photoUrlPlaceholder")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="school">Организация / школа</Label>
-                <Input id="school" value={school} onChange={(event) => setSchool(event.target.value)} placeholder="Школа №123" />
+                <Label htmlFor="school">{t("school")}</Label>
+                <Input id="school" value={school} onChange={(event) => setSchool(event.target.value)} placeholder={t("schoolPlaceholder")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="about">О себе</Label>
-                <Textarea id="about" value={about} onChange={(event) => setAbout(event.target.value)} placeholder="Кратко о целях и планах" />
+                <Label htmlFor="about">{t("about")}</Label>
+                <Textarea id="about" value={about} onChange={(event) => setAbout(event.target.value)} placeholder={t("aboutPlaceholder")} rows={3} />
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Сохранение..." : "Зарегистрироваться"}
+                {loading ? t("submitting") : t("submit")}
               </Button>
             </form>
             <div className="text-sm text-muted-foreground">
-              Уже есть аккаунт?{' '}
+              {t("haveAccount")}{' '}
               <Link href="/login" className="font-medium text-primary hover:underline">
-                Войти
+                {t("login")}
               </Link>
             </div>
           </CardContent>

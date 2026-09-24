@@ -17,6 +17,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { IconCamera, IconSave, IconShield, IconUser, IconSpinner, IconEye, IconEyeOff } from "@/components/icons"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 
 const GRADES = [
   { value: "1", label: "1 класс" },
@@ -95,7 +96,8 @@ export default function ProfileEditPage() {
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-
+  const t = useTranslations("cabinet.profile")
+  const errT = useTranslations("errors")
   const [userEmail, setUserEmail] = useState("")
   const [displayName, setDisplayName] = useState("")
   const [photoURL, setPhotoURL] = useState("")
@@ -325,9 +327,9 @@ export default function ProfileEditPage() {
   return (
     <div className="animate-fade-up space-y-8">
       <div className="space-y-3">
-        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Профиль</p>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Настройки профиля</h1>
-        <p className="text-muted-foreground">Управляйте личными данными и безопасностью аккаунта.</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{t('section')}</p>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('subtitle')}</p>
       </div>
 
       {error ? (
@@ -341,11 +343,11 @@ export default function ProfileEditPage() {
           <TabsList>
             <TabsTrigger value="profile" className="flex items-center gap-2">
               <IconUser className="h-4 w-4" />
-              Личные данные
+              {t('personalData')}
             </TabsTrigger>
             <TabsTrigger value="security" className="flex items-center gap-2">
               <IconShield className="h-4 w-4" />
-              Безопасность
+              {t('security')}
             </TabsTrigger>
           </TabsList>
 

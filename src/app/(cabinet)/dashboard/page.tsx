@@ -2,6 +2,7 @@
 
 export const dynamic = "force-dynamic"
 
+import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -36,6 +37,7 @@ const zeroStats: UserStats = {
 }
 
 export default function DashboardPage() {
+  const t = useTranslations('cabinet.dashboard')
   const { uid, user } = useAuth()
   const [displayName, setDisplayName] = useState("Гость")
   const [goal, setGoal] = useState("Подготовка к олимпиадам")
@@ -107,30 +109,30 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">
-            Привет, {displayName}! 👋
+            {t('greeting', {name: displayName})} 👋
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">Ваша текущая цель: {goal}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('yourGoal')}: {goal}</p>
           {displayName !== "Гость" && (
             <Link href="/profile/edit" className="mt-1 inline-block text-sm font-medium text-cyan hover:underline">
-              Редактировать профиль
+              {t('editProfile')}
             </Link>
           )}
         </div>
         <Button variant="gradient" asChild>
           <Link href="/courses">
             <IconBook className="mr-2 h-4 w-4" />
-            Перейти к курсам
+            {t('goToCourses')}
           </Link>
         </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard icon={<IconFlame className="text-amber" />} label="Дни подряд" value={`${stats.streakDays}`} sub={`Рекорд: ${stats.maxStreakDays}`} />
-        <StatCard icon={<IconTarget className="text-cyan" />} label="Решено задач" value={`${stats.tasksSolved}`} sub="Всего решено" />
-        <StatCard icon={<IconTrophy className="text-amber" />} label="Ранг" value={rank ? `#${rank}` : "—"} sub={rank ? `Место ${rank} из ${usersCount}` : "Нет данных"} />
-        <StatCard icon={<IconClock className="text-sky" />} label="Время обучения" value={formatStudyTime(stats.studyTimeMinutes)} sub="Всего минут" />
+        <StatCard icon={<IconFlame className="text-amber" />} label={t('daysStreak')} value={`${stats.streakDays}`} sub={`Рекорд: ${stats.maxStreakDays}`} />
+        <StatCard icon={<IconTarget className="text-cyan" />} label={t('problemsSolved')} value={`${stats.tasksSolved}`} sub="Всего решено" />
+        <StatCard icon={<IconTrophy className="text-amber" />} label={t('rank')} value={rank ? `#${rank}` : "—"} sub={rank ? `Место ${rank} из ${usersCount}` : "Нет данных"} />
+        <StatCard icon={<IconClock className="text-sky" />} label={t('studyTime')} value={formatStudyTime(stats.studyTimeMinutes)} sub={t('totalMinutes')} />
         <Link href="/codeforces" className="block">
-          <StatCard icon={<IconCodeforces className="text-sky" />} label="Codeforces" value={`${cfCompleted}/${cfTotal}`} sub={cfTotal > 0 ? "Решено" : "Нет задач"} />
+          <StatCard icon={<IconCodeforces className="text-sky" />} label={t('codeforces')} value={`${cfCompleted}/${cfTotal}`} sub={cfTotal > 0 ? t('noSolved') : t('noSolved')} />
         </Link>
       </div>
 
@@ -138,8 +140,8 @@ export default function DashboardPage() {
         <Card className="card-surface lg:col-span-2">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="font-headline text-lg font-bold">Ваш прогресс по предметам</CardTitle>
-              <CardDescription>Освоение учебных тем</CardDescription>
+              <CardTitle className="font-headline text-lg font-bold">{t('yourProgress')}</CardTitle>
+              <CardDescription>{t('progressDescription')}</CardDescription>
             </div>
             <IconSparkles className="h-5 w-5 text-cyan" />
           </CardHeader>
@@ -161,7 +163,7 @@ export default function DashboardPage() {
 
         <Card className="card-surface">
           <CardHeader>
-            <CardTitle className="font-headline text-lg font-bold">Быстрые действия</CardTitle>
+            <CardTitle className="font-headline text-lg font-bold">{t('quickActions')}</CardTitle>
             <CardDescription>Начните прямо сейчас</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -169,7 +171,7 @@ export default function DashboardPage() {
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-cyan/10 text-cyan">
                 <IconTarget className="h-4 w-4" />
               </span>
-              Решать задачи
+              {t('solveProblems')}
             </Link>
             <Link href="/codeforces" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky/10 text-sky">
@@ -181,13 +183,13 @@ export default function DashboardPage() {
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet/10 text-violet">
                 <IconBook className="h-4 w-4" />
               </span>
-              Смотреть курсы
+              {t('viewCourses')}
             </Link>
             <Link href="/leaderboard" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber/10 text-amber">
                 <IconTrophy className="h-4 w-4" />
               </span>
-              Рейтинг
+              {t('leaderboard')}
             </Link>
           </CardContent>
         </Card>
@@ -196,15 +198,14 @@ export default function DashboardPage() {
       <div className="bg-v-grad-soft relative overflow-hidden rounded-3xl border border-border/20 p-8">
         <div className="relative z-10 max-w-2xl space-y-4">
           <h2 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">
-            Библиотека материалов
+            {t('materialsLibrary')}
           </h2>
           <p className="text-sm text-muted-foreground sm:text-base">
-            Вам доступно более 500 видеоуроков и задач по всем STEM предметам. Начните с разделов, которые вызывают
-            наибольшие трудности.
+            {t('materialsDescription')}
           </p>
           <Button size="lg" variant="gradient" className="rounded-full" asChild>
             <Link href="/courses">
-              Каталог курсов <IconChevronRight className="ml-2 h-4 w-4" />
+              {t('catalogCourses')} <IconChevronRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>

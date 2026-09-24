@@ -1,0 +1,228 @@
+{
+  "app": {
+    "title": "VAcademy",
+    "tagline": "learn at the speed of thought"
+  },
+  "nav": {
+    "dashboard": "Overview",
+    "ai": "AI",
+    "tests": "Tests & Tasks",
+    "courses": "Courses",
+    "strategy": "Strategy",
+    "codeforces": "Codeforces",
+    "leaderboard": "Rating",
+    "olympiads": "Olympiads",
+    "feedback": "Feedback",
+    "menu": "Menu",
+    "subjects": "Subjects",
+    "editProfile": "Edit Profile",
+    "signOut": "Sign Out",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "dashboardLink": "Dashboard"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Olympic platform of a new generation",
+      "title": "VAcademy — learn at the speed of thought",
+      "subtitle": "Personal trajectories, adaptive courses, and measurable progress. We turn STEM olympiad preparation into a system.",
+      "startLearning": "Start Learning",
+      "howItWorks": "How It Works",
+      "stats": {
+        "students": "students growing",
+        "courses": "courses and materials",
+        "achieve": "achieve the target score"
+      }
+    },
+    "advantages": {
+      "measurableGrowth": "Growth is Measurable",
+      "measurableGrowthText": "Progress in numbers: statistics, scores, and delta to the goal in every solution.",
+      "speedOfThought": "Speed of Thought",
+      "speedOfThoughtText": "Adaptive challenges catch your level and accelerate with you.",
+      "personalTrajectory": "Personal Trajectory",
+      "personalTrajectoryText": "A plan from your level to a prize place — no extras, no gaps.",
+      "feedback": "Feedback",
+      "feedbackText": "Every solution is checked: you see the mistake, the review, and how to avoid it again."
+    },
+    "courses": {
+      "title": "Courses That Lead to Victory",
+      "subtitle": "From foundation to olympiad level — with progress, problems, and feedback.",
+      "free": "Free",
+      "goToCourse": "To Course",
+      "viewAll": "View Full Catalog"
+    },
+    "trajectories": {
+      "title": "Path from Start to Prize Place",
+      "subtitle": "Transparent stages: you always know your level and what's next.",
+      "eachStageMeasured": "Each stage ends with a result measurement — no fluff"
+    },
+    "cta": {
+      "startNow": "Start Now",
+      "title": "Your Growth Starts with the First Step",
+      "description": "Take the diagnostic, get a personal plan — and see how fast you can learn at the speed of thought.",
+      "startLearning": "Start Learning",
+      "login": "Sign In"
+    },
+    "footer": {
+      "platform": "Platform",
+      "subjects": "Subjects",
+      "help": "Help",
+      "copyright": "All rights reserved",
+      "tagline": "V-GROWTH · learn at the speed of thought"
+    },
+    "header": {
+      "courses": "Courses",
+      "trajectories": "Trajectories",
+      "dashboard": "Dashboard",
+      "signOut": "Sign Out",
+      "signIn": "Sign In",
+      "startLearning": "Start Learning"
+    }
+  },
+  "auth": {
+    "welcome": "Welcome",
+    "loginTitle": "Sign In",
+    "loginDescription": "Sign in to view your personal profile, courses, and recommendations.",
+    "loginButton": "Sign In",
+    "loggingIn": "Signing in...",
+    "registerTitle": "Create Account",
+    "registerDescription": "Register at VAcademy to track your progress, edit your profile, and continue preparing.",
+    "registerButton": "Sign Up",
+    "registering": "Saving...",
+    "alreadyHaveAccount": "Already have an account?",
+    "goToLogin": "Sign In",
+    "name": "Username",
+    "email": "Email",
+    "password": "Password",
+    "photoUrl": "Profile Photo (URL)",
+    "school": "Organization / School",
+    "about": "About You",
+    "placeholderName": "John Doe",
+    "placeholderEmail": "name@example.com",
+    "placeholderPassword": "Minimum 6 characters",
+    "placeholderSchool": "School #123",
+    "placeholderAbout": "Briefly about your goals and plans",
+    "requiredFields": "Please fill in name, email, and password.",
+    "passwordMinLength": "Password must be at least 6 characters.",
+    "registerSuccess": "Registration successful!",
+    "loginError": "Failed to sign in.",
+    "registerError": "Failed to register.",
+    "goal": "Olympiad Preparation"
+  },
+  "cabinet": {
+    "dashboard": {
+      "greeting": "Hello, {{name}}!",
+      "yourGoal": "Your current goal:",
+      "editProfile": "Edit Profile",
+      "goToCourses": "Go to Courses",
+      "daysStreak": "Streak Days",
+      "problemsSolved": "Problems Solved",
+      "rank": "Rank",
+      "studyTime": "Study Time",
+      "totalMinutes": "Total Minutes",
+      "codeforces": "Codeforces",
+      "yourProgress": "Your Subject Progress",
+      "progressDescription": "Mastering study topics",
+      "quickActions": "Quick Actions",
+      "solveProblems": "Solve Problems",
+      "viewCourses": "View Courses",
+      "leaderboard": "Leaderboard",
+      "materialsLibrary": "Materials Library",
+      "materialsDescription": "You have access to over 500 video lessons and problems across all STEM subjects. Start with sections that give you the most trouble.",
+      "catalogCourses": "View Full Catalog",
+      "noData": "No Data"
+    },
+    "tests": {
+      "title": "Tests & Problems",
+      "description": "PDF tests for download and interactive problems · Solved {{solved}} of {{total}}",
+      "all": "All",
+      "pdfTests": "PDF Tests",
+      "interactive": "Problems",
+      "allSubjects": "All Subjects",
+      "allLevels": "All Levels",
+      "solved": "Solved",
+      "unsolved": "Unsolved",
+      "openTest": "Open Test",
+      "nothingFound": "Nothing Found",
+      "tryFilters": "Try changing filters."
+    },
+    "courses": {
+      "title": "Courses",
+      "description": "<span class=\"font-semibold text-foreground\">{{total}}</span> videos by subject for olympiad preparation",
+      "progress": "progress",
+      "viewed": "viewed",
+      "comingSoon": "Coming soon",
+      "videosSoon": "Video lessons coming soon",
+      "watchOnYouTube": "Watch on YouTube",
+      "cfCompleted": "CF {{solved}}/{{total}}",
+      "noSolved": "No tasks"
+    },
+    "ai": {
+      "title": "AI Assistant",
+      "description": "Ask questions about olympiads, preparation, and strategy.",
+      "aiForOlympiads": "AI for Olympiads",
+      "askAssistant": "Ask our AI Assistant",
+      "placeholder": "For example: How to prepare for an informatics olympiad?",
+      "ask": "Ask AI",
+      "waiting": "Waiting for response...",
+      "clear": "Clear",
+      "aiError": "Failed to get a response. Check your connection and Groq key.",
+      "serverError": "Server error. Please try again later.",
+      "pleaseAsk": "Please ask a question.",
+      "aiUnavailable": "AI Temporarily Unavailable",
+      "aiUnavailableDesc": "The administrator has disabled the AI assistant. Check back later.",
+      "answerAI": "AI Response"
+    },
+    "strategy": {
+      "title": "Strategy",
+      "description": "Select a subject to see the preparation program and materials.",
+      "chooseSubject": "Choose Subject",
+      "materials": "Materials",
+      "books": "Books",
+      "basic": "Basic",
+      "advanced": "Advanced",
+      "pdfMaterials": "PDF Materials",
+      "download": "Download",
+      "open": "Open",
+      "olympiadProblems": "Olympiad Problems"
+    },
+    "olympiads": {
+      "title": "Olympiads",
+      "subject": "Subject",
+      "dates": "Dates",
+      "location": "Location",
+      "fee": "Fee",
+      "description": "Description",
+      "status": "Status",
+      "type": "Type",
+      "openLink": "Open"
+    },
+    "profile": {
+      "editProfile": "Edit Profile",
+      "goToLogin": "Go to Login"
+    },
+    "common": {
+      "comingSoon": "Coming soon"
+    }
+  },
+  "deleteAccount": {
+    "invalidLink": "Invalid Link",
+    "invalidLinkDesc": "The account deletion link is invalid.",
+    "goHome": "Go Home",
+    "deleteTitle": "Delete Account",
+    "deleteDesc": "This action is irreversible. All your data, profile, solutions, and progress will be permanently deleted.",
+    "confirmDelete": "Yes, Delete Account",
+    "deleting": "Deleting...",
+    "cancel": "Cancel",
+    "deletedTitle": "Account Deleted",
+    "deletedDesc": "Your account and all data have been deleted.",
+    "deleteError": "Failed to delete account"
+  },
+  "common": {
+    "loading": "Loading...",
+    "loadingMaterials": "Loading materials...",
+    "noResults": "No Results",
+    "tryDifferentFilters": "Try changing filters.",
+    "goToMain": "Go Home"
+  }
+}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -68,10 +69,11 @@ function SectionList({ sections }: { sections: { level: string; items: string[] 
 }
 
 function MaterialsList({ materials }: { materials: { name: string; url: string }[] }) {
+  const t = useTranslations('cabinet.strategy')
   if (!materials.length) return null
   return (
     <div className="space-y-2 border-t border-border pt-4">
-      <p className="font-semibold">Материалы</p>
+      <p className="font-semibold">{t('materials')}</p>
       {materials.map((m, i) => {
         const Icon = materialIcon(m.name, m.url)
         return (
@@ -92,6 +94,7 @@ function MaterialsList({ materials }: { materials: { name: string; url: string }
 }
 
 function FizikaContent() {
+  const t = useTranslations('cabinet.strategy')
   return (
     <div className="grid gap-4 lg:grid-cols-2">
       {fizikaCurriculum.map((topic) => (
@@ -105,6 +108,7 @@ function FizikaContent() {
 }
 
 function BiologyContent() {
+  const t = useTranslations('cabinet.strategy')
   const [files, setFiles] = useState<string[] | null>(null)
 
   useEffect(() => {
@@ -146,17 +150,17 @@ function BiologyContent() {
 
           {topic.books && (
             <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <p className="font-semibold">Книги</p>
+              <p className="font-semibold">{t('books')}</p>
               <div className="space-y-1 text-sm text-muted-foreground">
                 {topic.books.basic && (
                   <p>
-                    <span className="font-medium text-foreground">Basic:</span>{" "}
+                    <span className="font-medium text-foreground">{t('basic')}:</span>{" "}
                     {topic.books.basic}
                   </p>
                 )}
                 {topic.books.advanced && (
                   <p>
-                    <span className="font-medium text-foreground">Advanced:</span>{" "}
+                    <span className="font-medium text-foreground">{t('advanced')}:</span>{" "}
                     {topic.books.advanced}
                   </p>
                 )}
@@ -166,7 +170,7 @@ function BiologyContent() {
 
           {findFor(topic).length > 0 && (
             <div className="mt-4 space-y-2 border-t border-border pt-4">
-              <p className="font-semibold">PDF-материалы</p>
+              <p className="font-semibold">{t('pdfMaterials')}</p>
               {findFor(topic).map((file) => (
                 <div key={file} className="flex items-center justify-between gap-4">
                   <span className="flex min-w-0 items-center gap-2 truncate text-sm">
@@ -176,12 +180,12 @@ function BiologyContent() {
                   <div className="flex shrink-0 gap-2">
                     <Button variant="outline" size="sm" asChild>
                       <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                        <IconDownload className="mr-2 h-4 w-4" /> Скачать
+                        <IconDownload className="mr-2 h-4 w-4" /> {t('download')}
                       </a>
                     </Button>
                     <Button size="sm" variant="gradient" asChild>
                       <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                        Открыть
+                        {t('open')}
                       </a>
                     </Button>
                   </div>
@@ -195,7 +199,7 @@ function BiologyContent() {
       <div className="card-surface p-6">
         <h3 className="flex items-center gap-2 font-headline text-lg font-bold">
           <IconTrophy className="h-5 w-5 text-amber" />
-          Олимпиадные задачи
+          {t('olympiadProblems')}
         </h3>
         <div className="mt-4 flex flex-col gap-2">
           {BIOLOGY_OLYMPIAD.map((m) => {
@@ -220,6 +224,7 @@ function BiologyContent() {
 }
 
 function InformatikaContent() {
+  const t = useTranslations('cabinet.strategy')
   const [files, setFiles] = useState<string[] | null>(null)
 
   useEffect(() => {
@@ -262,12 +267,12 @@ function InformatikaContent() {
                   <div className="flex shrink-0 gap-2">
                     <Button variant="outline" size="sm" asChild>
                       <a href={`/api/informatika?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                        <IconDownload className="mr-2 h-4 w-4" /> Скачать
+                        <IconDownload className="mr-2 h-4 w-4" /> {t('download')}
                       </a>
                     </Button>
                     <Button size="sm" variant="gradient" asChild>
                       <a href={`/api/informatika?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                        Открыть
+                        {t('open')}
                       </a>
                     </Button>
                   </div>
@@ -282,6 +287,7 @@ function InformatikaContent() {
 }
 
 function MatematikaContent() {
+  const t = useTranslations('cabinet.strategy')
   const [driveUrl, setDriveUrl] = useState<string | null>(null)
 
   useEffect(() => {
@@ -315,6 +321,7 @@ function MatematikaContent() {
 }
 
 function HimiyaContent() {
+  const t = useTranslations('cabinet.strategy')
   return (
     <div className="space-y-6">
       <div className="flex justify-center">
@@ -342,15 +349,16 @@ function HimiyaContent() {
 }
 
 export default function StrategyPage() {
+  const t = useTranslations('cabinet.strategy')
   const [active, setActive] = useState<SubjectId>("biology")
   const subjectName = SUBJECTS.find((s) => s.id === active)?.name
 
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Стратегия</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Выберите предмет, чтобы увидеть программу подготовки и материалы.
+          {t('description')}
         </p>
       </div>
 

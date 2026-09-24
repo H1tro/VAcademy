@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useEffect, useState, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -33,11 +34,11 @@ const videoLessons: VideoGroup[] = [
       { name: "Walter Lewin: Projectile Motion", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Projectile+Motion", section: "Механика" },
       { name: "Павел Виктор: Законы Ньютона", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Законы+Ньютона", section: "Механика" },
       { name: "Walter Lewin: Newton's Laws", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Newton%27s+Laws", section: "Механика" },
-      { name: "Павел Виктор: Динамика на наклонной плоскости", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Наклонная+плоскость", section: "Механика" },
+      { name: "Павел Виктор: Динамика на наклонной плоскости", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Динамика+на+наклонной+плоскости", section: "Механика" },
       { name: "Walter Lewin: Friction and Inclined Planes", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Friction+Inclined+Planes", section: "Механика" },
-      { name: "Павел Виктор: Гравитация и вес", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Закон+всемирного+тяготения", section: "Механика" },
+      { name: "Павел Виктор: Гравитация и вес", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Гравитация+и+вес", section: "Механика" },
       { name: "Walter Lewin: Gravity and Orbits", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Gravity", section: "Механика" },
-      { name: "Павел Виктор: Орбитальная механика", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Космические+скорости", section: "Механика" },
+      { name: "Павел Виктор: Орбитальная механика", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Орбитальная+механика", section: "Механика" },
       { name: "Walter Lewin: Orbital Mechanics", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Central+Forces", section: "Механика" },
       { name: "Павел Виктор: Идеальный газ для начинающих", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Идеальный+газ", section: "Молекулярная физика" },
       { name: "Физика с АВ: Молекулярная физика", url: "https://www.youtube.com/results?search_query=Физика+с+АВ+МКТ", section: "Молекулярная физика" },
@@ -48,14 +49,14 @@ const videoLessons: VideoGroup[] = [
       { name: "Walter Lewin: Electric Potential", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Electric+Potential", section: "Электричество" },
       { name: "Павел Виктор: Закон Ома для начинающих", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Закон+Ома", section: "Электричество" },
       { name: "Walter Lewin: Ohm's Law", url: "https://www.youtube.com/results?search_query=Walter+Lewin+Ohm+Law", section: "Электричество" },
-      { name: "Павел Виктор: Электрические цепи", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Последовательное+параллельное+соединение", section: "Электричество" },
+      { name: "Павел Виктор: Электрические цепи", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Электрические+цепи", section: "Электричество" },
       { name: "Walter Lewin: Circuits", url: "https://www.youtube.com/results?search_query=Walter+Lewin+DC+Circuits", section: "Электричество" },
       { name: "Павел Виктор: Гармонические колебания", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Гармонические+колебания", section: "Колебания и волны" },
       { name: "Павел Виктор: Энергия колебаний", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Превращение+энергии+при+колебаниях", section: "Колебания и волны" },
       { name: "Павел Виктор: Геометрическая оптика", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Геометрическая+оптика", section: "Оптика" },
       { name: "Павел Виктор: Линзы и зеркала", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Линзы", section: "Оптика" },
       { name: "Павел Виктор: Фотоны и фотоэффект", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Фотоэффект", section: "Квантовая физика" },
-      { name: "Павел Виктор: Модель Бора", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Постулаты+Бора", section: "Квантовая физика" },
+      { name: "Павел Виктор: Модель Бора", url: "https://www.youtube.com/results?search_query=Павел+Виктор+Модель+Бора", section: "Квантовая физика" },
     ],
   },
   {
@@ -105,6 +106,7 @@ const videoLessons: VideoGroup[] = [
 ]
 
 export default function CoursesPage() {
+  const t = useTranslations('cabinet.courses')
   const { uid } = useAuth()
   const [openVideo, setOpenVideo] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState<Set<string>>(
@@ -166,15 +168,14 @@ export default function CoursesPage() {
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Курсы</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          <span className="font-semibold text-foreground">{totalVideos}</span> видео по предметам для подготовки к
-          олимпиадам
+          <span className="font-semibold text-foreground">{totalVideos}</span> {t('description')}
         </p>
         {uid && totalWatched > 0 && (
           <div className="mt-3 max-w-md">
             <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>Общий прогресс</span>
+              <span>{t('progress')}</span>
               <span>{Math.round((totalWatched / totalVideos) * 100)}%</span>
             </div>
             <ProgressBar value={(totalWatched / totalVideos) * 100} className="h-2" />
@@ -207,7 +208,7 @@ export default function CoursesPage() {
                 <div className="flex items-center gap-2">
                   {group.subjectKey === "informatics" && cfTotal > 0 ? (
                     <Badge className="gap-1 font-mono text-xs" variant="outline">
-                      CF {cfSolved}/{cfTotal}
+                      {t('cfCompleted', {solved: cfSolved, total: cfTotal})}
                     </Badge>
                   ) : (
                     <Badge className="gap-1 font-mono text-xs">
@@ -226,8 +227,8 @@ export default function CoursesPage() {
               {uid && watchedCount > 0 && (
                 <div className="px-5 pb-3">
                   <div className="flex justify-between text-[10px] text-muted-foreground mb-0.5">
-                    <span>{watchedCount}/{group.videos.length} просмотрено</span>
-                    <span>{progressPct}%</span>
+                    <span>{watchedCount}/{group.videos.length} {t('viewed')}</span>
+                    <span>{progressPct}% {t('progress')}</span>
                   </div>
                   <ProgressBar value={progressPct} className="h-1.5" />
                 </div>
@@ -235,11 +236,11 @@ export default function CoursesPage() {
               {!isCollapsed && (
                 <div className="flex flex-1 flex-col px-2 pb-2">
                   {group.videos.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
-                      <IconPlay className="mb-2 h-8 w-8 text-muted-foreground/50" />
-                      <span className="text-sm font-medium">Coming soon</span>
-                      <span className="mt-0.5 text-xs">Видео-уроки скоро появятся</span>
-                    </div>
+<div className="flex flex-col items-center justify-center py-10 text-muted-foreground">
+                       <IconPlay className="mb-2 h-8 w-8 text-muted-foreground/50" />
+                       <span className="text-sm font-medium">{t('comingSoon')}</span>
+                       <span className="mt-0.5 text-xs">{t('comingSoonText')}</span>
+                     </div>
                   ) : (
                     group.videos.map((video, i) => {
                       const key = `${group.subjectKey}-${i}`
@@ -285,7 +286,7 @@ export default function CoursesPage() {
                               <Button size="sm" variant="outline" asChild>
                                 <a href={video.url} target="_blank" rel="noopener noreferrer">
                                   <IconExternalLink className="mr-2 h-3.5 w-3.5" />
-                                  Смотреть на YouTube
+                                  {t('watchOnYouTube')}
                                 </a>
                               </Button>
                             </div>

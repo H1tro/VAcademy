@@ -1,0 +1,228 @@
+{
+  "app": {
+    "title": "VAcademy",
+    "tagline": "учись со скоростью мысли"
+  },
+  "nav": {
+    "dashboard": "Обзор",
+    "ai": "AI",
+    "tests": "Тесты & задачи",
+    "courses": "Курсы",
+    "strategy": "Стратегия",
+    "codeforces": "Codeforces",
+    "leaderboard": "Рейтинг",
+    "olympiads": "Олимпиады",
+    "feedback": "Обратная связь",
+    "menu": "Меню",
+    "subjects": "Предметы",
+    "editProfile": "Редактировать профиль",
+    "signOut": "Выйти",
+    "login": "Войти",
+    "register": "Регистрация",
+    "dashboardLink": "Дашборд"
+  },
+  "landing": {
+    "hero": {
+      "badge": "Олимпиадная платформа нового поколения",
+      "title": "VAcademy — учись со скоростью мысли",
+      "subtitle": "Персональные траектории, адаптивные курсы и измеримый прогресс. Превращаем подготовку к STEM-олимпиадам в систему.",
+      "startLearning": "Начать обучение",
+      "howItWorks": "Как это работает",
+      "stats": {
+        "students": "учеников растут",
+        "courses": "курсов и материалов",
+        "achieve": "достигают целевого балла"
+      }
+    },
+    "advantages": {
+      "measurableGrowth": "Рост измерим",
+      "measurableGrowthText": "Прогресс в цифрах: статистика, баллы и дельта до цели в каждом решении.",
+      "speedOfThought": "Скорость мысли",
+      "speedOfThoughtText": "Адаптивные задачи подхватывают твой уровень и ускоряются вместе с тобой.",
+      "personalTrajectory": "Личная траектория",
+      "personalTrajectoryText": "План от твоего уровня до призового места — без лишнего и без пропусков.",
+      "feedback": "Обратная связь",
+      "feedbackText": "Каждое решение проверяется: видно ошибку, разбор и как её больше не допускать."
+    },
+    "courses": {
+      "title": "Курсы, которые ведут к победам",
+      "subtitle": "От базы до олимпиадного уровня — с прогрессом, задачами и обратной связью.",
+      "free": "Бесплатно",
+      "goToCourse": "К курсу",
+      "viewAll": "Смотреть весь каталог"
+    },
+    "trajectories": {
+      "title": "Путь от старта до призового места",
+      "subtitle": "Прозрачные этапы: ты всегда знаешь, на каком уровне находишься и что дальше.",
+      "eachStageMeasured": "Каждый этап завершается замером результата — без «воды»"
+    },
+    "cta": {
+      "startNow": "Начни прямо сейчас",
+      "title": "Твой рост начинается с первого шага",
+      "description": "Пройди диагностику, получи личный план — и увидь, как быстро учиться со скоростью мысли.",
+      "startLearning": "Начать обучение",
+      "login": "Войти в аккаунт"
+    },
+    "footer": {
+      "platform": "Платформа",
+      "subjects": "Предметы",
+      "help": "Помощь",
+      "copyright": "Все права защищены",
+      "tagline": "V-GROWTH · учись со скоростью мысли"
+    },
+    "header": {
+      "courses": "Курсы",
+      "trajectories": "Траектории",
+      "dashboard": "Дашборд",
+      "signOut": "Выйти",
+      "login": "Войти",
+      "startLearning": "Начать обучение"
+    }
+  },
+  "auth": {
+    "welcome": "Добро пожаловать",
+    "loginTitle": "Вход в аккаунт",
+    "loginDescription": "Войдите, чтобы увидеть персональный профиль, курсы и рекомендации.",
+    "loginButton": "Войти",
+    "loggingIn": "Входим...",
+    "registerTitle": "Создать аккаунт",
+    "registerDescription": "Зарегистрируйтесь в VAcademy, чтобы сохранять прогресс, редактировать профиль и продолжить подготовку.",
+    "registerButton": "Зарегистрироваться",
+    "registering": "Сохранение...",
+    "alreadyHaveAccount": "Уже есть аккаунт?",
+    "goToLogin": "Войти",
+    "name": "Имя пользователя",
+    "email": "Email",
+    "password": "Пароль",
+    "photoUrl": "Фото профиля (URL)",
+    "school": "Организация / школа",
+    "about": "О себе",
+    "placeholderName": "Иван Иванов",
+    "placeholderEmail": "name@example.com",
+    "placeholderPassword": "Минимум 6 символов",
+    "placeholderSchool": "Школа №123",
+    "placeholderAbout": "Кратко о целях и планах",
+    "requiredFields": "Пожалуйста, заполните имя, email и пароль.",
+    "passwordMinLength": "Пароль должен быть не менее 6 символов.",
+    "registerSuccess": "Регистрация прошла успешно!",
+    "loginError": "Не удалось войти.",
+    "registerError": "Не удалось зарегистрироваться.",
+    "goal": "Подготовка к олимпиадам"
+  },
+  "cabinet": {
+    "dashboard": {
+      "greeting": "Привет, {{name}}!",
+      "yourGoal": "Ваша текущая цель:",
+      "editProfile": "Редактировать профиль",
+      "goToCourses": "Перейти к курсам",
+      "daysStreak": "Дни подряд",
+      "problemsSolved": "Решено задач",
+      "rank": "Ранг",
+      "studyTime": "Время обучения",
+      "totalMinutes": "Всего минут",
+      "codeforces": "Codeforces",
+      "yourProgress": "Ваш прогресс по предметам",
+      "progressDescription": "Освоение учебных тем",
+      "quickActions": "Быстрые действия",
+      "solveProblems": "Решать задачи",
+      "viewCourses": "Смотреть курсы",
+      "leaderboard": "Рейтинг",
+      "materialsLibrary": "Библиотека материалов",
+      "materialsDescription": "Вам доступно более 500 видеоуроков и задач по всем STEM предметам. Начните с разделов, которые вызывают наибольшие трудности.",
+      "catalogCourses": "Каталог курсов",
+      "noData": "Нет данных"
+    },
+    "tests": {
+      "title": "Тесты и задачи",
+      "description": "PDF-тесты для скачивания и интерактивные задачи · Решено {{solved}} из {{total}}",
+      "all": "Все",
+      "pdfTests": "PDF-тесты",
+      "interactive": "Задачи",
+      "allSubjects": "Все предметы",
+      "allLevels": "Все уровни",
+      "solved": "Решённые",
+      "unsolved": "Не решённые",
+      "openTest": "Открыть тест",
+      "nothingFound": "Ничего не найдено",
+      "tryFilters": "Попробуйте изменить фильтры."
+    },
+    "courses": {
+      "title": "Курсы",
+      "description": "<span class=\"font-semibold text-foreground\">{{total}}</span> видео по предметам для подготовки к олимпиадам",
+      "progress": "прогресс",
+      "viewed": "просмотрено",
+      "comingSoon": "Coming soon",
+      "videosSoon": "Видео-уроки скоро появятся",
+      "watchOnYouTube": "Смотреть на YouTube",
+      "cfCompleted": "CF {{solved}}/{{total}}",
+      "noSolved": "Нет задач"
+    },
+    "ai": {
+      "title": "AI-помощник",
+      "description": "Задавайте вопросы по олимпиадам, подготовке и стратегии.",
+      "aiForOlympiads": "AI для олимпиад",
+      "askAssistant": "Спросите нашего интеллектуального ассистента",
+      "placeholder": "Например: Как готовиться к олимпиаде по информатике?",
+      "ask": "Спросить AI",
+      "waiting": "Жду ответа...",
+      "clear": "Очистить",
+      "aiError": "Не удалось получить ответ. Проверьте подключение и ключ Groq.",
+      "serverError": "Ошибка сервера. Попробуйте позже.",
+      "pleaseAsk": "Пожалуйста, задайте вопрос.",
+      "aiUnavailable": "AI временно недоступен",
+      "aiUnavailableDesc": "Администратор отключил AI-ассистента. Загляните позже.",
+      "answerAI": "Ответ AI"
+    },
+    "strategy": {
+      "title": "Стратегия",
+      "description": "Выберите предмет, чтобы увидеть программу подготовки и материалы.",
+      "chooseSubject": "Выберите предмет",
+      "materials": "Материалы",
+      "books": "Книги",
+      "basic": "Basic",
+      "advanced": "Advanced",
+      "pdfMaterials": "PDF-материалы",
+      "download": "Скачать",
+      "open": "Открыть",
+      "olympiadProblems": "Олимпийные задачи"
+    },
+    "olympiads": {
+      "title": "Олимпиады",
+      "subject": "Предмет",
+      "dates": "Даты",
+      "location": "Место",
+      "fee": "Стоимость",
+      "description": "Описание",
+      "status": "Статус",
+      "type": "Тип",
+      "openLink": "Открыть"
+    },
+    "profile": {
+      "editProfile": "Редактировать профиль",
+      "goToLogin": "Перейти к входу"
+    },
+    "common": {
+      "comingSoon": "Coming soon"
+    }
+  },
+  "deleteAccount": {
+    "invalidLink": "Неверная ссылка",
+    "invalidLinkDesc": "Ссылка для удаления аккаунта недействительна.",
+    "goHome": "На главную",
+    "deleteTitle": "Удаление аккаунта",
+    "deleteDesc": "Это действие необратимо. Все ваши данные, профиль, решения и прогресс будут удалены навсегда.",
+    "confirmDelete": "Да, удалить аккаунт",
+    "deleting": "Удаляем...",
+    "cancel": "Отмена",
+    "deletedTitle": "Аккаунт удалён",
+    "deletedDesc": "Ваш аккаунт и все данные были удалены.",
+    "deleteError": "Не удалось удалить аккаунт"
+  },
+  "common": {
+    "loading": "Загрузка...",
+    "loadingMaterials": "Загрузка материалов...",
+    "noResults": "Ничего не найдено",
+    "tryDifferentFilters": "Попробуйте изменить фильтры.",
+    "goToMain": "На главную"
+  }
+}

@@ -2,8 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { IconArrowRight } from "./icons";
 import { Reveal } from "./reveal";
+import { useTranslations } from "next-intl";
 
 export function Cta() {
+  const t = useTranslations("landing.cta");
+
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28" aria-labelledby="cta-title">
       <Reveal>
@@ -13,17 +16,17 @@ export function Cta() {
             aria-hidden="true"
           />
           <div className="relative">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-cyan">Начни прямо сейчас</p>
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-cyan">{t("startNow")}</p>
             <h2 id="cta-title" className="mx-auto mt-4 max-w-2xl text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
-              Твой рост начинается <span className="text-gradient">с первого шага</span>
+              {t("title")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-              Пройди диагностику, получи личный план — и увидь, как быстро учиться со скоростью мысли.
+              {t("subtitle")}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Button size="lg" className="btn-primary h-14 rounded-full px-10 text-base" asChild>
                 <Link href="/register">
-                  Начать обучение
+                  {t("startLearning")}
                   <IconArrowRight className="h-5 w-5" />
                 </Link>
               </Button>
@@ -33,7 +36,7 @@ export function Cta() {
                 className="h-14 rounded-full border-border px-10 text-base hover:bg-white/5"
                 asChild
               >
-                <Link href="/login">Войти в аккаунт</Link>
+                <Link href="/login">{t("login")}</Link>
               </Button>
             </div>
           </div>

@@ -3,8 +3,8 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { useInView } from "./use-in-view";
+import { useTranslations } from "next-intl";
 
-/** Fades a section in once it enters the viewport. */
 export function Reveal({
   children,
   delay = 0,
@@ -31,7 +31,6 @@ export function Reveal({
   );
 }
 
-/** Section header (eyebrow + title + subtitle) with consistent styling. */
 export function SectionHeading({
   eyebrow,
   title,
@@ -45,6 +44,8 @@ export function SectionHeading({
   id?: string;
   align?: "center" | "left";
 }) {
+  const t = useTranslations();
+
   return (
     <Reveal
       className={cn(

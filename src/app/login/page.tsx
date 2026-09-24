@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const t = useTranslations("auth.login");
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,7 +30,7 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push("/dashboard");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось войти.");
+      setError(t("error"));
     } finally {
       setLoading(false);
     }
@@ -38,36 +40,36 @@ export default function LoginPage() {
     <div className="min-h-screen bg-background px-6 py-10 md:px-10 lg:px-12">
       <div className="mx-auto max-w-3xl space-y-6">
         <div className="space-y-3 text-center">
-          <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">Добро пожаловать</p>
-          <h1 className="text-4xl font-headline font-black tracking-tight">Вход в аккаунт</h1>
+          <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{t("welcome")}</p>
+          <h1 className="text-4xl font-headline font-black tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">
-            Войдите, чтобы увидеть персональный профиль, курсы и рекомендации.
+            {t("subtitle")}
           </p>
         </div>
 
         <Card className="border-border/40 bg-card/50 shadow-xl">
           <CardHeader className="space-y-1 p-6">
-            <CardTitle className="text-2xl">Авторизация</CardTitle>
+            <CardTitle className="text-2xl">{t("authorize")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6 p-6">
             {error ? <div className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div> : null}
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@example.com" />
+                <Label htmlFor="email">{t("email")}</Label>
+                <Input id="email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} placeholder={t("emailPlaceholder")} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Пароль</Label>
-                <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder="Ваш пароль" />
+                <Label htmlFor="password">{t("password")}</Label>
+                <Input id="password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} placeholder={t("passwordPlaceholder")} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Входим..." : "Войти"}
+                {loading ? t("submitting") : t("submit")}
               </Button>
             </form>
             <div className="text-sm text-muted-foreground">
-              Нет аккаунта?{' '}
+              {t("noAccount")}{' '}
               <Link href="/register" className="font-medium text-primary hover:underline">
-                Зарегистрироваться
+                {t("register")}
               </Link>
             </div>
           </CardContent>

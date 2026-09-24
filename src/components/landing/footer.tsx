@@ -1,36 +1,39 @@
 import Link from "next/link";
 import { VLogo } from "@/components/v-logo";
+import { useTranslations } from "next-intl";
 
 const LINK_GROUPS = [
   {
-    title: "Платформа",
+    titleKey: "platform",
     links: [
-      { href: "/courses", label: "Курсы" },
-      { href: "/dashboard", label: "Дашборд" },
-      { href: "/leaderboard", label: "Рейтинг" },
-      { href: "/register", label: "Регистрация" },
+      { href: "/courses", labelKey: "courses" },
+      { href: "/dashboard", labelKey: "dashboard" },
+      { href: "/leaderboard", labelKey: "leaderboard" },
+      { href: "/register", labelKey: "register" },
     ],
   },
   {
-    title: "Предметы",
+    titleKey: "subjects",
     links: [
-      { href: "/matematika", label: "Математика" },
-      { href: "/informatika", label: "Информатика" },
-      { href: "/fizika", label: "Физика" },
-      { href: "/himiya", label: "Химия" },
+      { href: "/matematika", labelKey: "mathematics" },
+      { href: "/informatika", labelKey: "informatika" },
+      { href: "/fizika", labelKey: "physics" },
+      { href: "/himiya", labelKey: "chemistry" },
     ],
   },
   {
-    title: "Помощь",
+    titleKey: "help",
     links: [
-      { href: "/login", label: "Вход" },
-      { href: "#advantages", label: "О платформе" },
-      { href: "#courses", label: "Курсы" },
+      { href: "/login", labelKey: "login" },
+      { href: "#advantages", labelKey: "aboutPlatform" },
+      { href: "#courses", labelKey: "courses" },
     ],
   },
 ];
 
 export function Footer() {
+  const t = useTranslations("landing.footer");
+
   return (
     <footer className="border-t border-border bg-panel/30">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
@@ -48,8 +51,8 @@ export function Footer() {
           </div>
 
           {LINK_GROUPS.map((group) => (
-            <nav key={group.title} aria-label={group.title}>
-              <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">{group.title}</h3>
+            <nav key={group.titleKey} aria-label={t(group.titleKey)}>
+              <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">{t(group.titleKey)}</h3>
               <ul className="mt-4 space-y-2.5">
                 {group.links.map((link) => (
                   <li key={link.href}>
@@ -57,7 +60,7 @@ export function Footer() {
                       href={link.href}
                       className="text-sm text-foreground/80 transition-colors hover:text-cyan"
                     >
-                      {link.label}
+                      {t(link.labelKey)}
                     </Link>
                   </li>
                 ))}
@@ -68,10 +71,10 @@ export function Footer() {
 
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            &copy; {new Date().getFullYear()} VAcademy. Все права защищены.
+            &copy; {new Date().getFullYear()} {t("copyright")}
           </p>
           <p className="font-mono text-xs text-muted-foreground">
-            V-GROWTH · <span className="text-cyan">учись со скоростью мысли</span>
+            V-GROWTH · <span className="text-cyan">{t("tagline")}</span>
           </p>
         </div>
       </div>

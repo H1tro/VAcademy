@@ -9,6 +9,7 @@ import { IconSpinner, IconRefresh, IconPlus, IconTrash } from "@/components/icon
 import { CFTaskCard, type CFTask } from "@/components/codeforces/cf-task-card"
 import { ProgressBar } from "@/components/codeforces/progress-bar"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 export const dynamic = "force-dynamic"
 
@@ -21,6 +22,8 @@ export default function CodeforcesPage() {
   const [inputId, setInputId] = useState("")
   const [error, setError] = useState("")
   const [cfHandle, setCfHandle] = useState("")
+  const t = useTranslations("cabinet.codeforces")
+  const errT = useTranslations("errors")
 
   const fetchTasks = useCallback(async () => {
     if (!uid) return
@@ -119,10 +122,10 @@ export default function CodeforcesPage() {
     <div className="animate-fade-up space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Codeforces</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Назначенные задачи и автоматическая проверка решений
-          </p>
+<h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t("title")}</h1>
+           <p className="mt-1 text-sm text-muted-foreground">
+             {t("subtitle")}
+           </p>
         </div>
       </div>
 

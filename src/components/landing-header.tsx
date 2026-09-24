@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut } from "lucide-react";
 import { VLogo } from "@/components/v-logo";
+import { useTranslations } from "next-intl";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
+import { Link as IntlLink } from "@/i18n/config";
 
 const NAV_LINKS = [
-  { href: "#courses", label: "Курсы" },
-  { href: "#trajectories", label: "Траектории" },
+  { href: "#courses", labelKey: "courses" },
+  { href: "#trajectories", labelKey: "trajectories" },
 ];
 
 export function LandingHeader() {
@@ -20,6 +23,7 @@ export function LandingHeader() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const t = useTranslations("landing.header");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -63,13 +67,14 @@ export function LandingHeader() {
                 href={link.href}
                 className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             </li>
           ))}
         </ul>
 
         <div className="hidden items-center gap-3 md:flex">
+          <LocaleSwitcher />
           {loading ? null : user ? (
             <>
               <Link
@@ -82,13 +87,13 @@ export function LandingHeader() {
                 {displayName}
               </Link>
               <Button className="btn-primary" asChild>
-                <Link href="/dashboard">Дашборд</Link>
+                <Link href="/dashboard">{t("dashboard")}</Link>
               </Button>
               <button
                 type="button"
                 onClick={handleSignOut}
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
-                title="Выйти"
+                title={t('signOut')}
                 aria-label="Выйти из аккаунта"
               >
                 <LogOut className="h-4 w-4" />
@@ -97,10 +102,10 @@ export function LandingHeader() {
           ) : (
             <>
               <Button variant="ghost" asChild>
-                <Link href="/login">Войти</Link>
+                <Link href="/login">{t("login")}</Link>
               </Button>
               <Button className="btn-primary" asChild>
-                <Link href="/register">Начать обучение</Link>
+                <Link href="/register">{t("register")}</Link>
               </Button>
             </>
           )}
@@ -132,7 +137,7 @@ export function LandingHeader() {
                   onClick={() => setMenuOpen(false)}
                   className="block rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-white/5 hover:text-foreground"
                 >
-                  {link.label}
+                  {t(link.labelKey)}
                 </Link>
               </li>
             ))}
@@ -141,19 +146,17 @@ export function LandingHeader() {
             {loading ? null : user ? (
               <>
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)}>
-                  <Button className="btn-primary w-full">Дашборд</Button>
+                  <Button className="btn-primary w-full">{t("dashboard")}</Button>
                 </Link>
-                <Button variant="outline" onClick={handleSignOut}>
-                  Выйти
-                </Button>
+                <Button variant="outline" onClick={handleSignOut}>{t("signOut")}</Button>
               </>
             ) : (
               <>
                 <Link href="/register" onClick={() => setMenuOpen(false)}>
-                  <Button className="btn-primary w-full">Начать обучение</Button>
+                  <Button className="btn-primary w-full">{t("register")}</Button>
                 </Link>
                 <Link href="/login" onClick={() => setMenuOpen(false)}>
-                  <Button variant="outline" className="w-full">Войти</Button>
+                  <Button variant="outline" className="w-full">{t("login")}</Button>
                 </Link>
               </>
             )}

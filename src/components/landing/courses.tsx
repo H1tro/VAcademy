@@ -6,6 +6,7 @@ import { IconArrowRight } from "./icons";
 import { Reveal, SectionHeading } from "./reveal";
 import { useInView } from "./use-in-view";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type Course = {
   title: string;
@@ -58,6 +59,7 @@ const COURSES: Course[] = [
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
   const { ref, inView } = useInView<HTMLElement>(0.3);
+  const t = useTranslations("landing.courses");
 
   return (
     <Reveal delay={index * 90} className="h-full">
@@ -78,7 +80,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 
           <div className="mt-5">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">{course.lessons} уроков</span>
+              <span className="text-muted-foreground">{course.lessons} {t("lessons")}</span>
               <span className="font-mono text-cyan">{course.progress}%</span>
             </div>
             <div
@@ -87,7 +89,7 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
               aria-valuenow={course.progress}
               aria-valuemin={0}
               aria-valuemax={100}
-              aria-label={`Прогресс курса «${course.title}»`}
+              aria-label={`Progress for ${course.title}`}
             >
               <div
                 className="h-full rounded-full bg-gradient-brand transition-[width] duration-1000 ease-out"
@@ -98,11 +100,11 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 
           <div className="mt-auto flex items-center justify-between pt-6">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-mint/30 bg-mint/10 px-3 py-1 font-mono text-sm font-semibold text-mint">
-              Бесплатно
+              {t("free")}
             </span>
             <Button variant="outline" size="sm" className="rounded-full border-border hover:bg-white/5" asChild>
               <Link href="/courses">
-                К курсу
+                {t("goToCourse")}
                 <IconArrowRight className="h-4 w-4" />
               </Link>
             </Button>
@@ -114,17 +116,19 @@ function CourseCard({ course, index }: { course: Course; index: number }) {
 }
 
 export function Courses() {
+  const t = useTranslations("landing.courses");
+
   return (
     <section id="courses" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28" aria-labelledby="courses-title">
       <SectionHeading
-        eyebrow="Каталог курсов"
+        eyebrow={t("eyebrow")}
         id="courses-title"
         title={
           <>
-            Курсы, которые <span className="text-gradient">ведут к победам</span>
+            {t("title")}
           </>
         }
-        subtitle="От базы до олимпиадного уровня — с прогрессом, задачами и обратной связью."
+        subtitle={t("subtitle")}
       />
 
       <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -136,7 +140,7 @@ export function Courses() {
       <Reveal className="mt-10 text-center">
         <Button variant="outline" className="h-12 rounded-full border-border px-8 hover:bg-white/5" asChild>
           <Link href="/courses">
-            Смотреть весь каталог
+            {t("viewAll")}
             <IconArrowRight className="h-5 w-5" />
           </Link>
         </Button>

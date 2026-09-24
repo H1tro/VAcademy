@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, Suspense } from "react"
+import { useTranslations } from "next-intl"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -1216,6 +1217,7 @@ const statusColors: Record<string, string> = {
 }
 
 function OlympiadsPageContent() {
+  const t = useTranslations('cabinet.olympiads')
   const router = useRouter()
   const searchParams = useSearchParams()
   const subjectParam = searchParams.get("subject") as OlympiadSubject | null
@@ -1280,7 +1282,7 @@ function OlympiadsPageContent() {
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Олимпиады</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{t('title')}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Ваш навигатор в мире олимпиад и интеллектуальных соревнований
         </p>
