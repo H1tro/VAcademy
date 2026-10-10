@@ -116,6 +116,10 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
             "Google Firebase Authentication provides sign-in; Firestore stores profiles, results, support requests, and assignments. Vercel hosts the site and uploaded files. Groq processes AI questions. Resend sends service emails, including account-deletion confirmation. Telegram is used for the support bot and notifications."
           ],
           [
+            "Подключение Supabase используется для функций работы с его базой данных и сессиями. Пример списка задач показывает записи, доступные текущей сессии по правилам доступа базы. Существующие аккаунты и учебные результаты продолжают храниться в Firebase; автоматического переноса в Supabase нет.",
+            "The Supabase integration supports features using its database and sessions. The task-list example displays records accessible to the current session under database access rules. Existing accounts and learning results remain in Firebase; they are not automatically migrated to Supabase."
+          ],
+          [
             "При привязке Codeforces сайт обращается к его API, используя указанный вами публичный ник, чтобы проверить решения. Google Fonts получает запросы при загрузке шрифтов. Изображения по внешнему URL загружаются у их поставщика. YouTube-плеер подключается после отдельного нажатия кнопки загрузки видео.",
             "When you link Codeforces, the site uses its API and your public handle to check solutions. Google Fonts receives requests when fonts load. Images hosted at external URLs are loaded from their providers. The YouTube player connects only after you separately choose to load the video."
           ],
@@ -427,6 +431,10 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
           [
             "Firebase Authentication использует браузерное хранилище, например IndexedDB или local storage, для поддержания входа. Конкретные ключи и сроки зависят от SDK и режима сессии. Выход из аккаунта прекращает текущую сессию; очистка только cookie языка не выполняет выход.",
             "Firebase Authentication uses browser storage, such as IndexedDB or local storage, to maintain sign-in. Specific keys and lifetimes depend on the SDK and session mode. Signing out ends the current session; clearing only the language cookie does not sign you out."
+          ],
+          [
+            "Функции Supabase используют cookie сессии, обычно с префиксом sb-, если вы вошли через Supabase. Они могут содержать токены доступа и обновления и вспомогательные данные входа. Конкретные ключи и сроки зависят от SDK и настроек сессии; кнопка очистки предпочтений ниже их не удаляет. Основная форма входа VAcademy по-прежнему использует Firebase.",
+            "Supabase features use session cookies, typically prefixed with sb-, if you sign in through Supabase. They may contain access and refresh tokens and sign-in support data. Specific keys and lifetimes depend on the SDK and session settings; the preferences button below does not remove them. VAcademy's main sign-in form still uses Firebase."
           ]
         ]
       ],
@@ -500,6 +508,7 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
 
 export const providerPolicies = [
   {name: "Firebase / Google", url: "https://firebase.google.com/support/privacy"},
+  {name: "Supabase", url: "https://supabase.com/privacy"},
   {name: "Vercel", url: "https://vercel.com/legal/privacy-notice"},
   {name: "Groq", url: "https://groq.com/privacy-policy"},
   {name: "Resend", url: "https://resend.com/legal/privacy-policy"},

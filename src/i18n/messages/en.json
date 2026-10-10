@@ -883,5 +883,12 @@
     "guardianRequired": "Minors need permission from a parent or legal guardian.",
     "storageRequired": "Allow session storage in your browser for age screening.",
     "guardianAdult": "I am an adult under applicable law, or I have permission from my parent or legal guardian."
+  },
+  "supabase": {
+    "title": "Supabase: data example",
+    "description": "A server-rendered todos example using the current session's access permissions.",
+    "empty": "No accessible records.",
+    "notConfigured": "Set the Supabase environment variables to connect.",
+    "loadError": "Could not load the list. Check the connection, the todos table with id and name fields, and access permissions."
   }
 }

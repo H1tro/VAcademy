@@ -35,6 +35,19 @@
 
 Проверка словарей, подстановок и ключей интерфейса: `npm run check:i18n`. Проверка типов: `npm run typecheck`.
 
+## Подключение Supabase
+
+Пакеты `@supabase/supabase-js` и `@supabase/ssr` установлены. В `.env.local` задайте `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` из настроек проекта Supabase. `.env.local` исключён из Git. На хостинге задайте эти две переменные отдельно и выполните новую сборку.
+
+- Браузер: `import { createClient } from '@/utils/supabase/client'`.
+- Сервер: `import { createClient } from '@/utils/supabase/server'`, затем `const supabase = createClient(await cookies())`, импортировав `cookies` из `next/headers`.
+- `src/middleware.ts` обновляет сессии Supabase и передаёт cookies серверу и браузеру; он сохраняет заголовки запрета кеширования при обновлении. Middleware не меняет маршруты RU/EN и не перенаправляет пользователей Firebase.
+- `/supabase` — пример серверного чтения до 100 записей из `todos` (поля `id`, `name`). Таблица и её политики доступа должны быть настроены в вашем проекте Supabase; схема автоматически не создаётся. Пустой результат также возможен, если RLS не даёт доступ текущей сессии.
+
+Текущие регистрация, вход, профили и результаты продолжают использовать Firebase. Перенос пользователей и данных в Supabase — отдельная задача. Используйте только publishable key в публичных переменных; права на строки таблиц определяются RLS. Серверные защищённые функции должны проверять `auth.getClaims()` или `auth.getUser()`, а не доверять `getSession()`.
+
+Основа интеграции: [официальное руководство Supabase для SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client?queryGroups=framework&framework=nextjs). Для Next.js 15 используется `middleware.ts`; имя `proxy.ts` относится к Next.js 16. Проверка передачи cookies: `npm run check:supabase`.
+
 ## Настройка Groq AI
 1. Скопируйте ключ из https://console.groq.com/keys.
 2. Создайте файл `.env` рядом с `package.json`.

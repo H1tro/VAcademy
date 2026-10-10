@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "check:i18n": "node scripts/check-i18n.cjs",
     "check:legal": "node scripts/check-legal.cjs",
+    "check:supabase": "node scripts/check-supabase.cjs",
     "tg:webhook": "node scripts/set-telegram-webhook.js",
     "tg:polling": "node scripts/bot-polling.js"
   },
@@ -37,6 +38,8 @@
     "@radix-ui/react-tabs": "^1.1.3",
     "@radix-ui/react-toast": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.117.3",
     "@vercel/blob": "^2.4.0",
     "@vercel/functions": "^3.7.6",
     "class-variance-authority": "^0.7.1",
