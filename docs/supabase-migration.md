@@ -23,10 +23,12 @@ NEXT_PUBLIC_APP_URL=http://localhost:9002
 
 ## 3. Авторизация и письма
 
-В Authentication → Sign In / Providers включите Email. Для опубликованного сайта оставьте подтверждение email включённым. В Authentication → URL Configuration задайте Site URL и разрешённые Redirect URLs:
+В Authentication → Sign In / Providers включите Email. Для опубликованного сайта оставьте подтверждение email включённым. В Authentication → URL Configuration задайте **Site URL** равным адресу реально опубликованной версии с Supabase (не оставляйте `localhost:3000`). Настройка `NEXT_PUBLIC_APP_URL` в Vercel не меняет Site URL в Supabase. Добавьте разрешённые Redirect URLs:
 
 - `http://localhost:9002/auth/callback` для разработки;
-- `https://ваш-домен/auth/callback` для публикации.
+- `https://ваш-домен/auth/callback` для публикации;
+- `https://ваш-домен/auth/callback?next=/reset-password` для сброса пароля;
+- `http://localhost:9002/auth/callback?next=/reset-password` для локальной проверки сброса.
 
 Регистрация создаёт профиль через транзакционный триггер, включая возрастную группу, версию документов и время принятия. Возраст младше 13 лет отклоняется также на уровне базы. Поле роли из пользовательских metadata игнорируется: новый аккаунт всегда ученический. Преподаватель подаёт заявку, администратор подтверждает её.
 
@@ -34,6 +36,14 @@ NEXT_PUBLIC_APP_URL=http://localhost:9002
 
 ```html
 <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Подтвердить email / Confirm email</a>
+```
+
+Вход содержит ссылки «Забыли пароль?» и «Письмо подтверждения не пришло?». После регистрации без активной сессии появляется повторная отправка. Формы используют Supabase Auth, показывают паузу 60 секунд и ошибки лимита доставки. Успешный запрос не гарантирует доставки и не раскрывает наличие аккаунта. Истёкшая ссылка ведёт на форму нового запроса. Для сброса открывается `/reset-password`; новый пароль записывается через Supabase только в действующей сессии, затем выполняется локальный выход.
+
+Стандартный шаблон Reset password должен использовать `{{ .ConfirmationURL }}`, чтобы Supabase сохранил адрес возврата из запроса. Если используете подтверждение через хеш в другом браузере, шаблон Reset password может содержать:
+
+```html
+<a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Сбросить пароль / Reset password</a>
 ```
 
 Для доставки писем реальным пользователям настройте собственный SMTP в Supabase. Подтверждения удаления аккаунта отправляются через Resend: нужны `RESEND_API_KEY` и разрешённый адрес отправителя в `RESEND_FROM_EMAIL`. Без них эта функция не настроена.

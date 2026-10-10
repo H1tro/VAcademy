@@ -76,3 +76,18 @@ export async function updatePassword(_user: User, password: string) {
   const { error } = await createClient().auth.updateUser({ password });
   if (error) throw error;
 }
+
+export async function sendPasswordResetEmail(email: string) {
+  const { error } = await createClient().auth.resetPasswordForEmail(email.trim(), {
+    redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+  });
+  if (error) throw error;
+}
+
+export async function resendConfirmationEmail(email: string) {
+  const { error } = await createClient().auth.resend({
+    type: "signup", email: email.trim(),
+    options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+  });
+  if (error) throw error;
+}

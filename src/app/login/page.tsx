@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const t = useTranslations("auth.login");
+  const emailRequests = useTranslations("auth.emailRequests");
   useEffect(() => { if (new URLSearchParams(window.location.search).get("confirmation") === "failed") setError(t("confirmationFailed")); }, [t]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -37,7 +38,7 @@ export default function LoginPage() {
       const profile = response.ok ? await response.json() : {};
       router.push(profile.role === 'teacher' ? '/teacher' : '/dashboard');
     } catch (err) {
-      setError(t("error"));
+      setError(t((err as { code?: string }).code === "email_not_confirmed" ? "confirmEmail" : "error"));
     } finally {
       setLoading(false);
     }
@@ -74,6 +75,10 @@ export default function LoginPage() {
                 {loading ? t("submitting") : t("submit")}
               </Button>
             </form>
+            <div className="flex flex-wrap justify-between gap-3 text-sm text-primary">
+              <Link href="/forgot-password" className="hover:underline">{emailRequests("forgotTitle")}</Link>
+              <Link href="/resend-confirmation" className="hover:underline">{emailRequests("missingEmail")}</Link>
+            </div>
             <div className="text-sm text-muted-foreground">
               {t("noAccount")}{' '}
               <Link href="/register" className="font-medium text-primary hover:underline">

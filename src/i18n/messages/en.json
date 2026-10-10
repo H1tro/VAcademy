@@ -223,7 +223,8 @@
       "noAccount": "New to VAcademy?",
       "register": "Sign Up",
       "notConfigured": "Supabase setup is required for sign-in and registration. Contact the administrator.",
-      "confirmationFailed": "The confirmation link is invalid or expired. Try signing in or contact support for a new link."
+      "confirmationFailed": "The confirmation link is invalid or expired. Try signing in or contact support for a new link.",
+      "confirmEmail": "Confirm your email. If the email has not arrived, request it again using the link below."
     },
     "register": {
       "welcome": "Welcome",
@@ -253,6 +254,40 @@
       "goal": "Olympiad Preparation",
       "notConfigured": "Supabase setup is required for sign-in and registration. Contact the administrator.",
       "checkEmail": "Check your inbox and confirm your email using the link, then sign in."
+    },
+    "emailRequests": {
+      "forgotTitle": "Forgot password?",
+      "confirmationTitle": "Confirm your email",
+      "missingEmail": "Confirmation email not received?",
+      "recoveryDescription": "Enter your account email. We will send a link to set a new password.",
+      "confirmationDescription": "Enter the email you used to register to request a new confirmation email.",
+      "recoverySent": "If an account with this email exists, a password reset link will be sent. Check your inbox and spam folder.",
+      "confirmationSent": "If this address is awaiting confirmation, a new email will be sent. Open the most recent link.",
+      "email": "Email",
+      "sending": "Sending…",
+      "wait": "Send again in {seconds}s",
+      "sendReset": "Send reset link",
+      "resend": "Send email again",
+      "deliveryHint": "Check your spam folder and email spelling. Delivery depends on the email service; contact support if needed.",
+      "rateLimited": "The email sending limit has been reached. Wait and try again later. Another request does not bypass the email service limit.",
+      "deliveryNotConfigured": "Email delivery to this address is unavailable. The administrator needs to configure Supabase email delivery.",
+      "sendError": "Could not send the request. Try again later or contact support.",
+      "invalidLink": "This link is invalid or expired. Request a new email and open the most recent link.",
+      "notConfigured": "Email requests are not configured yet. Contact the administrator.",
+      "backToLogin": "Back to sign in",
+      "resetTitle": "New password",
+      "checkingLink": "Checking your session…",
+      "newPasswordDescription": "Enter a new password and repeat it to confirm.",
+      "newPassword": "New password",
+      "confirmPassword": "Repeat password",
+      "passwordMin": "Use at least 6 characters.",
+      "passwordMismatch": "Passwords do not match.",
+      "samePassword": "Your new password must differ from the current password.",
+      "weakPassword": "This password does not meet the requirements. Choose a stronger one.",
+      "saving": "Saving…",
+      "savePassword": "Save new password",
+      "resetSuccess": "Your password was changed. Sign in with your new password.",
+      "updateError": "Could not change your password. Try again or request a new link."
     }
   },
   "cabinet": {
@@ -841,7 +876,7 @@
       "tryPractice": "Try practice",
       "trySimulators": "Open simulators",
       "team": "Our team",
-      "teamDescription": "We are developing VAcademy around learning materials, mentoring and useful tools. Member names and photos will be added once the team list is ready.",
+      "teamDescription": "The VAcademy team: leadership, subject departments, platform development and mentors.",
       "education": "Learning materials",
       "educationDescription": "STEM curricula, exercises and clear explanations.",
       "mentors": "Mentoring",
@@ -851,6 +886,53 @@
       "teachers": "Tools for teachers",
       "teachersDescription": "Apply for teacher access and create exercise collections for your classes after approval.",
       "join": "Join us"
+    },
+    "team": {
+      "title": "Our team",
+      "description": "The VAcademy team: leadership, subject departments, platform development and mentors.",
+      "vacancy": "Open position",
+      "groups": {
+        "leadership": "Leadership",
+        "departments": "Subject Departments",
+        "platform": "Development & Communications",
+        "mentorsEn": "English-speaking Mentors",
+        "mentorsRu": "Russian-speaking Mentors"
+      },
+      "roles": {
+        "founder": "Founder / CEO",
+        "coFounder": "Co-Founder / COO",
+        "mathHead": "Heads of Mathematics",
+        "chemistryHead": "Head of Chemistry",
+        "physicsHead": "Head of Physics",
+        "biologyHead": "Heads of Biology",
+        "csHead": "Head of Computer Science",
+        "tech": "Tech Department",
+        "ai": "AI Integration Lead / AI Engineer",
+        "design": "Head of Design & PR",
+        "video": "Video Lessons Maker",
+        "mathMentor": "Mathematics Mentor",
+        "physicsMentor": "Physics Mentor",
+        "chemistryMentor": "Chemistry Mentor",
+        "ictMentor": "ICT Mentor",
+        "biologyMentor": "Biology Mentor"
+      },
+      "members": {
+        "emmett": "Emmett Nealy",
+        "owen": "Owen Sexton",
+        "rilee": "Rilee Gordon",
+        "addison": "Addison Corcoma",
+        "eldar": "Beishenkulov Eldar",
+        "ashat": "Alybaev Ashat",
+        "arstanbek": "Anarbekov Arstanbek",
+        "barsbek": "Uraimov Barsbek",
+        "zhalal": "Turusov Zhalal",
+        "ismail": "Ibragimov Ismail",
+        "lira": "Iskenderova Lira",
+        "elkhan": "Akimov Elkhan",
+        "amantai": "Suyunbekov Amantai",
+        "bermet": "Bermet",
+        "tolgonai": "Tolgonai"
+      }
     }
   },
   "legal": {

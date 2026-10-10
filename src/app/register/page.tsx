@@ -16,6 +16,7 @@ import Link from "next/link";
 import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
 import { useTranslations } from "next-intl";
 import { AGE_RESTRICTION_KEY, LEGAL_VERSION } from "@/lib/legal-config";
+import { AuthEmailRequest } from "@/components/auth/auth-email-request";
 
 export default function RegisterPage() {
   const ui = useUITranslations("ui");
@@ -31,6 +32,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [awaitingConfirmation, setAwaitingConfirmation] = useState(false);
   const t = useTranslations("auth.register");
   const legal = useTranslations("legal");
   const [ageRange, setAgeRange] = useState("");
@@ -83,7 +85,7 @@ export default function RegisterPage() {
         displayName, photoURL, school, about, goal: ui("olympiadPreparation"),
         legalAcknowledgement: { version: LEGAL_VERSION, termsAccepted: true, privacyRead: true, ageRange, guardianPermission },
       });
-      if (!userCredential.session) { setSuccess(t("checkEmail")); return; }
+      if (!userCredential.session) { setPassword(""); setAwaitingConfirmation(true); setSuccess(t("checkEmail")); return; }
 
       setSuccess(t("success"));
       router.push(role === 'teacher' ? '/teacher' : '/dashboard');
@@ -114,7 +116,7 @@ export default function RegisterPage() {
           <CardContent className="space-y-6 p-6">
             {error ? <div className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div> : null}
             {success ? <div className="rounded-xl bg-emerald-500/10 p-4 text-sm text-emerald-500">{success}</div> : null}
-            <form className="space-y-5" onSubmit={handleSubmit}>
+            {awaitingConfirmation ? <AuthEmailRequest mode="confirmation" initialEmail={email} initiallySent /> : <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="ageRange">{legal("age")}</Label>
                 <select id="ageRange" value={ageRange} onChange={event => selectAge(event.target.value)} disabled={!ageReady || ageBlocked || loading}
@@ -173,7 +175,7 @@ export default function RegisterPage() {
                 {loading ? t("submitting") : t("submit")}
               </Button>
               </>}
-            </form>
+            </form>}
             <nav aria-label={legal("navigation")} className="flex flex-wrap gap-4 text-xs text-muted-foreground">
               <Link href="/privacy" className="hover:underline">{legal("privacy")}</Link><Link href="/terms" className="hover:underline">{legal("terms")}</Link><Link href="/cookies" className="hover:underline">{legal("cookies")}</Link>
             </nav>
