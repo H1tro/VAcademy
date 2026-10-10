@@ -345,6 +345,11 @@
       "comingSoonText": "Video lessons are coming soon"
     },
     "ai": {
+      "configurationError": "AI is not configured correctly. The administrator needs to check the Groq key and model.",
+      "keyError": "The AI API key is invalid. Contact the administrator.",
+      "permissionError": "Access to the AI model is denied. Contact the administrator.",
+      "rateLimited": "The AI request limit has been reached. Try again later.",
+      "timeoutError": "AI did not respond in time. Please try again.",
       "title": "AI Assistant",
       "description": "Ask questions about olympiads, preparation, and strategy.",
       "aiForOlympiads": "AI for Olympiads",

@@ -11,11 +11,13 @@ interface GroqCompletionResponse {
 }
 
 export async function POST(req: Request) {
-  const locale = await getLocale();
-  const t = await getTranslations("cabinet.ai");
+  let body: Record<string, unknown>
+  try { body = await req.json(); if (!body || typeof body !== "object" || Array.isArray(body)) throw new Error() }
+  catch { return NextResponse.json({ code: "invalid_request" }, { status: 400 }) }
+  const locale = body.locale === "en" || body.locale === "ru" ? body.locale : await getLocale();
+  const t = await getTranslations({ locale, namespace: "cabinet.ai" });
   try {
-    const body = await req.json()
-    const question = String(body.question || "").trim()
+    const question = typeof body.question === "string" ? body.question.trim() : ""
 
     if (!question || question.length > 6000) {
       return NextResponse.json({ error: t("pleaseAsk") }, { status: 400 })
@@ -23,12 +25,12 @@ export async function POST(req: Request) {
 
     const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: t("aiUnavailable") }, { status: 503 })
+      return NextResponse.json({ error: t("configurationError"), code: "not_configured" }, { status: 503 })
     }
 
     // Обновленный payload под формат Chat Completions и модель LLaMA
     const payload = {
-      model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+      model: process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-20b",
       messages: [
         {
           role: "system",
@@ -55,7 +57,13 @@ export async function POST(req: Request) {
     })
 
     if (!response.ok) {
-      return NextResponse.json({ error: t("serverError") }, { status: 502 })
+      // Never log the prompt, API key, or provider body (which can echo input).
+      console.error("AI provider rejected request", { provider: "groq", status: response.status })
+      if (response.status === 401) return NextResponse.json({ error: t("keyError"), code: "invalid_key" }, { status: 503 })
+      if (response.status === 403) return NextResponse.json({ error: t("permissionError"), code: "permission_denied" }, { status: 503 })
+      if (response.status === 400 || response.status === 404) return NextResponse.json({ error: t("configurationError"), code: "configuration_error" }, { status: 503 })
+      if (response.status === 429) return NextResponse.json({ error: t("rateLimited"), code: "rate_limited" }, { status: 429 })
+      return NextResponse.json({ error: t("serverError"), code: "provider_unavailable" }, { status: 502 })
     }
 
     const data = (await response.json()) as GroqCompletionResponse
@@ -69,6 +77,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ answer })
   } catch (error) {
-    return NextResponse.json({ error: t("serverError") }, { status: 500 })
+    const timedOut = error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")
+    console.error("AI request failed", { provider: "groq", reason: timedOut ? "timeout" : "network_or_invalid_response" })
+    return NextResponse.json({ error: t(timedOut ? "timeoutError" : "serverError"), code: timedOut ? "timeout" : "provider_unavailable" }, { status: timedOut ? 504 : 502 })
   }
 }
