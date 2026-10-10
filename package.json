@@ -16,7 +16,9 @@
     "check:database": "node scripts/check-database.cjs",
     "check:access": "node scripts/check-teacher-access.cjs",
     "check:submissions": "node scripts/check-submissions.cjs",
-    "check:auth": "node scripts/check-auth.cjs"
+    "check:auth": "node scripts/check-auth.cjs",
+    "check:deletion-email": "node scripts/check-deletion-email.cjs",
+    "check:password-deletion": "node scripts/check-password-deletion.cjs"
   },
   "dependencies": {
     "@dietrichgebert/ponytail": "^4.8.4",

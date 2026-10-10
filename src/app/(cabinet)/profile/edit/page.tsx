@@ -37,10 +37,39 @@ const GRADES = [
 
 function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
   const ui = useUITranslations("ui");
+  const deletion = useTranslations("deleteAccount")
   const router = useRouter()
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
   const [error, setError] = useState("")
+  const [password, setPassword] = useState("")
+  const [deleting, setDeleting] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
+
+  const handlePasswordDeletion = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (deleting || sending || !confirmed) return
+    setDeleting(true)
+    setError("")
+    try {
+      const res = await authFetch("/api/account/delete-with-password", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }),
+      })
+      setPassword("")
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.code === "invalid_password" ? deletion("invalidPassword")
+          : data.code === "rate_limited" ? deletion("passwordRateLimited")
+          : res.status === 401 ? deletion("signInAgain") : deletion("deleteError"))
+      }
+      // Deletion is already complete, even if clearing local auth state fails.
+      try { await signOut(auth) } catch { /* Server no longer accepts this account. */ }
+      router.replace("/login?accountDeleted=1")
+    } catch (err) {
+      setPassword("")
+      setError(err instanceof Error ? err.message : deletion("deleteError"))
+    } finally { setDeleting(false) }
+  }
 
   const handleRequest = async () => {
     setSending(true)
@@ -57,7 +86,12 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || ui("failedToSend"))
+        const message = data.code === "mail_not_configured" || data.code === "mail_configuration_error"
+          ? deletion("mailNotConfigured")
+          : data.code === "mail_rate_limited"
+            ? deletion("mailRateLimited")
+            : res.status === 401 ? deletion("signInAgain") : deletion("mailDeliveryFailed")
+        throw new Error(message)
       }
 
       setSent(true)
@@ -81,7 +115,7 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
       {error && (
         <div className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">{error}</div>
       )}
-      <Button variant="destructive" onClick={handleRequest} disabled={sending}>
+      <Button variant="destructive" onClick={handleRequest} disabled={sending || deleting}>
         {sending ? (
           <>
             <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
@@ -91,6 +125,20 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
           ui("deleteAccount")
         )}
       </Button>
+      <form onSubmit={handlePasswordDeletion} className="space-y-3 border-t pt-4">
+        <p className="text-sm font-medium">{deletion("passwordMethod")}</p>
+        <p className="text-sm text-muted-foreground">{deletion("passwordMethodDesc")}</p>
+        <Label htmlFor="deletion-password">{ui("currentPassword")}</Label>
+        <Input id="deletion-password" type="password" autoComplete="current-password" value={password}
+          onChange={event => setPassword(event.target.value)} required disabled={deleting || sending} />
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" checked={confirmed} onChange={event => setConfirmed(event.target.checked)} required disabled={deleting || sending} className="mt-1" />
+          <span>{deletion("passwordConfirmation")}</span>
+        </label>
+        <Button type="submit" variant="destructive" disabled={deleting || sending || !password || !confirmed}>
+          {deleting ? ui("deleting") : deletion("passwordDeleteButton")}
+        </Button>
+      </form>
     </div>
   )
 }
