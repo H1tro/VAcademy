@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
+import { auth, firebaseConfigured } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -11,11 +11,11 @@ import { LogOut } from "lucide-react";
 import { VLogo } from "@/components/v-logo";
 import { useTranslations } from "next-intl";
 import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
-import { Link as IntlLink } from "@/i18n/config";
 
 const NAV_LINKS = [
   { href: "#courses", labelKey: "courses" },
   { href: "#trajectories", labelKey: "trajectories" },
+  { href: "#team", labelKey: "team" },
 ];
 
 export function LandingHeader() {
@@ -23,9 +23,11 @@ export function LandingHeader() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
+  const common = useTranslations("common");
   const t = useTranslations("landing.header");
 
   useEffect(() => {
+    if (!firebaseConfigured) { setLoading(false); return; }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -33,7 +35,7 @@ export function LandingHeader() {
     return () => unsubscribe();
   }, []);
 
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Гость";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || common("guest");
   const initials =
     displayName
       .split(" ")
@@ -51,9 +53,9 @@ export function LandingHeader() {
     <header className="sticky top-0 z-50 glass border-b border-border">
       <nav
         className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6"
-        aria-label="Основная навигация"
+        aria-label={common("navigation")}
       >
-        <Link href="/" className="flex items-center gap-2.5 rounded-full" aria-label="VAcademy — на главную">
+        <Link href="/" className="flex items-center gap-2.5 rounded-full" aria-label={common("homeLabel")}>
           <VLogo className="h-9 w-9" />
           <span className="text-xl font-bold tracking-tight">
             <span className="text-gradient">VAcademy</span>
@@ -94,7 +96,7 @@ export function LandingHeader() {
                 onClick={handleSignOut}
                 className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-colors"
                 title={t('signOut')}
-                aria-label="Выйти из аккаунта"
+                aria-label={t("signOut")}
               >
                 <LogOut className="h-4 w-4" />
               </button>
@@ -116,7 +118,7 @@ export function LandingHeader() {
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-border md:hidden"
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
-          aria-label="Открыть меню"
+          aria-label={common("openMenu")}
           onClick={() => setMenuOpen((v) => !v)}
         >
           <span className="flex flex-col gap-1.5" aria-hidden="true">
@@ -143,6 +145,7 @@ export function LandingHeader() {
             ))}
           </ul>
           <div className="mt-3 flex flex-col gap-2">
+            <LocaleSwitcher />
             {loading ? null : user ? (
               <>
                 <Link href="/dashboard" onClick={() => setMenuOpen(false)}>

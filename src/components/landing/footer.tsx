@@ -25,28 +25,31 @@ const LINK_GROUPS = [
     titleKey: "help",
     links: [
       { href: "/login", labelKey: "login" },
-      { href: "#advantages", labelKey: "aboutPlatform" },
-      { href: "#courses", labelKey: "courses" },
+      { href: "/feedback", labelKey: "feedback" },
+      { href: "/#advantages", labelKey: "aboutPlatform" },
+      { href: "/#courses", labelKey: "courses" },
     ],
   },
 ];
 
 export function Footer() {
+  const common = useTranslations("common");
   const t = useTranslations("landing.footer");
+  const legal = useTranslations("legal");
 
   return (
     <footer className="border-t border-border bg-panel/30">
       <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
         <div className="grid gap-10 md:grid-cols-[1.5fr_1fr_1fr_1fr]">
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2.5" aria-label="VAcademy — на главную">
+            <Link href="/" className="flex items-center gap-2.5" aria-label={common("homeLabel")}>
               <VLogo className="h-9 w-9" />
               <span className="text-xl font-bold tracking-tight">
                 <span className="text-gradient">VAcademy</span>
               </span>
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Премиальная платформа подготовки к STEM-олимпиадам. Рост измерим — с первого дня.
+              {t("description")}
             </p>
           </div>
 
@@ -69,7 +72,12 @@ export function Footer() {
           ))}
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
+        <nav aria-label={legal("navigation")} className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-xs text-muted-foreground">
+          <Link href="/privacy" className="hover:text-cyan">{legal("privacy")}</Link>
+          <Link href="/terms" className="hover:text-cyan">{legal("terms")}</Link>
+          <Link href="/cookies" className="hover:text-cyan">{legal("cookies")}</Link>
+        </nav>
+        <div className="mt-6 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} {t("copyright")}
           </p>

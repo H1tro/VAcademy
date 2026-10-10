@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -34,6 +35,7 @@ async function findMaterials() {
 }
 
 export default async function InformatikaPage() {
+  const ui = await getTranslations("ui");
   const materials = await findMaterials()
 
   const findFor = (topic: (typeof curriculum)[number]) => {
@@ -43,10 +45,9 @@ export default async function InformatikaPage() {
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Информатика</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("informatics")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Подготовка к олимпиадам по спортивному программированию. Три уровня: Junior → Middle → Senior.
-        </p>
+          {ui("competitiveProgrammingOlympiadPreparationThreeLevelsJuniorMiddleSenior")} </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -73,7 +74,7 @@ export default async function InformatikaPage() {
               </div>
 
               <div className="pt-4 border-t border-border/20">
-                <h4 className="font-semibold mb-2">Материалы</h4>
+                <h4 className="font-semibold mb-2">{ui("materials")}</h4>
                 <div className="flex flex-col gap-2">
                   {topic.materials.map((m, i) => (
                     <a
@@ -91,9 +92,9 @@ export default async function InformatikaPage() {
               </div>
 
               <div className="pt-4 border-t border-border/20">
-                <h4 className="font-semibold mb-2">PDF-ресурсы</h4>
+                <h4 className="font-semibold mb-2">{ui("pdfResources")}</h4>
                 {findFor(topic).length === 0 && (
-                  <div className="text-sm text-muted-foreground">Нет PDF для этого блока.</div>
+                  <div className="text-sm text-muted-foreground">{ui("noPdfsForThisSection")}</div>
                 )}
                 {findFor(topic).map((file) => (
                   <div key={file} className="flex items-center justify-between gap-4 mb-2">
@@ -103,10 +104,10 @@ export default async function InformatikaPage() {
                     </span>
                     <div className="flex gap-2 shrink-0">
                       <Link href={`/api/informatika?file=${encodeURIComponent(file)}`} target="_blank">
-                        <Button variant="outline" className="h-9">Скачать</Button>
+                        <Button variant="outline" className="h-9">{ui("download")}</Button>
                       </Link>
                       <Link href={`/api/informatika?file=${encodeURIComponent(file)}`} target="_blank">
-                        <Button variant="gradient" className="h-9">Открыть</Button>
+                        <Button variant="gradient" className="h-9">{ui("open")}</Button>
                       </Link>
                     </div>
                   </div>
@@ -121,8 +122,7 @@ export default async function InformatikaPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconExternalLink className="h-5 w-5 text-cyan" />
-            Онлайн-платформы
-          </CardTitle>
+            {ui("onlinePlatforms")} </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           {ONLINE_PLATFORMS.map((m) => {
@@ -147,8 +147,7 @@ export default async function InformatikaPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconSparkles className="h-5 w-5 text-amber" />
-            Олимпиадные ресурсы
-          </CardTitle>
+            {ui("olympiadResources")} </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {INFORMATIKA_OLYMPIADS.map((category) => {

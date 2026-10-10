@@ -1,8 +1,12 @@
 "use client"
 
+import { translateLabel } from "@/i18n/labels";
+import { authFetch } from '@/lib/auth-fetch';
+import Link from 'next/link';
+import { useTranslations as useUITranslations } from "next-intl";
 import { useEffect, useState } from "react"
 import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "@/lib/firebase"
+import { auth, firebaseConfigured } from "@/lib/firebase"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +28,9 @@ type AdminConfig = {
 }
 
 export default function AdminPage() {
+  const ui = useUITranslations("ui");
+  const access = useUITranslations('features.roles.approval');
+  const [allowed, setAllowed] = useState(false);
   const [user, setUser] = useState<any>(null)
   const [configs, setConfigs] = useState<AdminConfig[]>([])
   const [loading, setLoading] = useState(true)
@@ -33,6 +40,7 @@ export default function AdminPage() {
   const [success, setSuccess] = useState("")
 
   useEffect(() => {
+    if (!firebaseConfigured) return;
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u)
       if (!u) setLoading(false)
@@ -47,11 +55,13 @@ export default function AdminPage() {
 
   async function fetchConfigs() {
     try {
-      const res = await fetch("/api/admin/config")
+      const res = await authFetch("/api/admin/config")
+      if (!res.ok) { setAllowed(false); setError(access('adminOnly')); return; }
+      setAllowed(true);
       const data = await res.json()
       setConfigs(Array.isArray(data) ? data : [])
     } catch {
-      setError("Не удалось загрузить конфигурацию")
+      setError(ui("couldNotLoadConfiguration"))
     } finally {
       setLoading(false)
     }
@@ -62,25 +72,25 @@ export default function AdminPage() {
     setSuccess("")
     const chatId = Number(newChatId)
     if (!chatId || isNaN(chatId)) {
-      setError("Введите корректный Telegram ID (число)")
+      setError(ui("enterAValidNumericTelegramId"))
       return
     }
     try {
-      const res = await fetch("/api/admin/config", {
+      const res = await authFetch("/api/admin/config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subject: newSubject, chatId }),
       })
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error || "Ошибка")
+        setError(data.error || ui("error"))
         return
       }
-      setSuccess("Администратор добавлен")
+      setSuccess(ui("administratorAdded"))
       setNewChatId("")
       await fetchConfigs()
     } catch {
-      setError("Ошибка при добавлении")
+      setError(ui("couldNotAddAdministrator"))
     }
   }
 
@@ -88,15 +98,16 @@ export default function AdminPage() {
     setError("")
     setSuccess("")
     try {
-      await fetch("/api/admin/config", {
+      const res = await authFetch("/api/admin/config", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ subject, chatId }),
       })
-      setSuccess("Администратор удален")
+      if (!res.ok) throw new Error();
+      setSuccess(ui("administratorRemoved"))
       await fetchConfigs()
     } catch {
-      setError("Ошибка при удалении")
+      setError(ui("couldNotRemoveAdministrator"))
     }
   }
 
@@ -106,7 +117,7 @@ export default function AdminPage() {
         <Card className="w-full max-w-md">
           <CardContent className="pt-6 text-center space-y-4">
             <IconAlertTriangle className="mx-auto h-12 w-12 text-muted-foreground" />
-            <p className="text-lg font-medium">Войдите в аккаунт, чтобы управлять администраторами</p>
+            <p className="text-lg font-medium">{ui("signInToManageAdministrators")}</p>
           </CardContent>
         </Card>
       </div>
@@ -116,16 +127,18 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <p className="text-muted-foreground">Загрузка...</p>
+        <p className="text-muted-foreground">{ui("loading")}</p>
       </div>
     )
   }
 
+  if (!allowed) return <p role="alert">{error || access('adminOnly')}</p>;
   return (
     <div className="animate-fade-up space-y-8">
+      <Button asChild><Link href="/dashboard/admin/teachers">{access('reviewTitle')}</Link></Button>
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Управление администраторами</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Добавляйте и удаляйте администраторов Telegram для каждого предмета</p>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("manageAdministrators")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{ui("addOrRemoveTelegramAdministratorsForEachSubject")}</p>
       </div>
 
       {error && (
@@ -143,11 +156,9 @@ export default function AdminPage() {
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             <IconUser className="h-5 w-5 text-cyan" />
-            Администраторы предметов
-          </CardTitle>
+            {ui("subjectAdministrators")} </CardTitle>
           <CardDescription>
-            Администраторы получают уведомления о новых заявках через Telegram бота
-          </CardDescription>
+            {ui("administratorsReceiveNewRequestsThroughTheTelegramBot")} </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {configs.map((config) => {
@@ -155,13 +166,13 @@ export default function AdminPage() {
             return (
               <div key={config.subject} className="flex flex-col gap-2 p-4 rounded-xl bg-secondary/30 border border-border/20">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-lg">{subject?.label || config.subject}</span>
+                  <span className="font-semibold text-lg">{translateLabel(subject?.label || config.subject, ui)}</span>
                   <span className="text-sm text-muted-foreground">
-                    {config.chatIds.length} {config.chatIds.length === 1 ? "администратор" : "администраторов"}
+                    {config.chatIds.length} {config.chatIds.length === 1 ? ui("administrator") : ui("administrators")}
                   </span>
                 </div>
                 {config.chatIds.length === 0 ? (
-                  <p className="text-sm text-muted-foreground italic">Нет администраторов</p>
+                  <p className="text-sm text-muted-foreground italic">{ui("noAdministrators")}</p>
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     {config.chatIds.map((id) => (
@@ -188,52 +199,50 @@ export default function AdminPage() {
 
       <Card className="card-surface">
         <CardHeader>
-          <CardTitle className="text-xl">Добавить администратора</CardTitle>
+          <CardTitle className="text-xl">{ui("addAdministrator")}</CardTitle>
           <CardDescription>
-            Попросите администратора написать боту /myid и введите полученный ID
-          </CardDescription>
+            {ui("askTheAdministratorToSendMyidToTheBot")} </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col sm:flex-row gap-4 items-end">
             <div className="space-y-2 flex-1">
               <Label>Telegram ID</Label>
               <Input
-                placeholder="Например: 123456789"
+                placeholder={ui("forExample123456789")}
                 value={newChatId}
                 onChange={(e) => setNewChatId(e.target.value)}
                 type="number"
               />
             </div>
             <div className="space-y-2">
-              <Label>Предмет</Label>
+              <Label>{ui("subject")}</Label>
               <Select value={newSubject} onValueChange={setNewSubject}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {SUBJECTS.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>{s.label}</SelectItem>
+                    <SelectItem key={s.id} value={s.id}>{translateLabel(s.label, ui)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <Button onClick={addAdmin} variant="gradient" className="shrink-0">
-              Добавить администратора
-            </Button>
+              {ui("addAdministrator")} </Button>
           </div>
         </CardContent>
       </Card>
 
       <Card className="card-surface">
         <CardHeader>
-          <CardTitle className="text-xl">Как это работает</CardTitle>
+          <CardTitle className="text-xl">{ui("howItWorks")}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground space-y-2">
-          <p>1. Администратор пишет боту команду <code className="bg-secondary px-1.5 py-0.5 rounded text-xs font-mono">/myid</code></p>
-          <p>2. Копирует свой Telegram ID (число)</p>
-          <p>3. Вы вводите этот ID на этой странице и выбираете предмет</p>
-          <p>4. Готово! Все заявки по этому предмету будут приходить администратору</p>
-          <p className="pt-2 text-xs">Также администраторы могут сами подписаться через бота командой <code className="bg-secondary px-1.5 py-0.5 rounded text-xs font-mono">/register</code></p>
+          <p>{ui("1TheAdministratorSendsTheBotTheCommand")} <code className="bg-secondary px-1.5 py-0.5 rounded text-xs font-mono">/myid</code></p>
+          <p>{ui("2CopiesTheirNumericTelegramId")}</p>
+          <p>{ui("3EnterThisIdOnThisPageAndSelect")}</p>
+          <p>{ui("4DoneRequestsForThisSubjectWillBeSent")}</p>
+          <p className="pt-2 text-xs">{ui("administratorsCanAlsoSubscribeThroughTheBotUsingThe")} <code className="bg-secondary px-1.5 py-0.5 rounded text-xs font-mono">/register</code></p>
         </CardContent>
       </Card>
     </div>

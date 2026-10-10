@@ -9,6 +9,8 @@
 
 # next.js
 /.next/
+/.next-legal/
+/.next-review-*/
 /out/
 
 # production
@@ -25,6 +27,7 @@ yarn-error.log*
 
 # env files (contains Firebase secrets - DO NOT COMMIT)
 .env*
+!.env.example
 
 # vercel
 .vercel

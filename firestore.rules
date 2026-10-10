@@ -1,0 +1,8 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // All persistence uses authenticated Next.js APIs with the Admin SDK.
+    // Client SDK writes would bypass application approval and scoring checks.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

@@ -1,24 +1,22 @@
 import type { Metadata } from 'next';
-import { cookies } from 'next/headers';
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
-export const metadata: Metadata = {
-  title: 'VAcademy — learn at the speed of thought',
-  description: 'Premium educational platform for STEM olympiad preparation. Courses, trajectories, and measurable growth.',
-  viewport: 'width=device-width, initial-scale=1',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+  return { title: t("hero.title"), description: t("footer.description") };
+}
 
 export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const cookieStore = await cookies();
-  const locale = cookieStore.get('next-intl-locale')?.value || 'ru';
-  const messages = await getMessages({ locale });
+  const locale = await getLocale();
+  const messages = await getMessages();
+  const t = await getTranslations("common");
 
   return (
     <html lang={locale} className="dark">
@@ -35,12 +33,12 @@ export default async function RootLayout({
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-full focus:bg-cyan focus:px-4 focus:py-2 focus:text-background"
         >
-          Skip to content
+          {t("skipToContent")}
         </a>
-        <NextIntlClientProvider locale={locale} messages={messages} defaultLocale="ru">
+        <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
+          <Toaster />
         </NextIntlClientProvider>
-        <Toaster />
       </body>
     </html>
   );

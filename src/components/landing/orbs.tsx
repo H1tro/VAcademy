@@ -39,10 +39,10 @@ export function Orbs() {
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
       aria-hidden="true"
     >
-      <div className="orb left-[-10%] top-[-5%] h-[38vmax] w-[38vmax] bg-violet/25 animate-float-slow" />
-      <div className="orb right-[-12%] top-[20%] h-[34vmax] w-[34vmax] bg-cyan/20 animate-float" />
-      <div className="orb bottom-[-15%] left-[20%] h-[40vmax] w-[40vmax] bg-violet/15 animate-float-slow" />
-      <div className="orb left-[40%] top-[55%] h-[28vmax] w-[28vmax] bg-cyan/10 animate-float" />
+      <div className="orb orb-violet left-[-10%] top-[-5%] h-[38vmax] w-[38vmax] animate-float-slow" />
+      <div className="orb orb-cyan right-[-12%] top-[20%] h-[34vmax] w-[34vmax] animate-float" />
+      <div className="orb orb-violet-soft bottom-[-15%] left-[20%] h-[40vmax] w-[40vmax] animate-float-slow" />
+      <div className="orb orb-cyan-soft left-[40%] top-[55%] h-[28vmax] w-[28vmax] animate-float" />
     </div>
   );
 }

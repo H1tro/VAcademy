@@ -38,7 +38,10 @@ export function isExternalProblem(
   return 'platform' in p
 }
 
+import { practiceProblems } from './practice-problems';
+
 export const problemsData: Problem[] = [
+  ...practiceProblems,
   {
     id: "math-001",
     title: "Сумма чисел",
@@ -86,8 +89,8 @@ export const problemsData: Problem[] = [
     subject: "informatics",
     difficulty: "medium",
     type: "text",
-    correctAnswer: "4",
-    explanation: "log₂(16) = 4 сравнения.",
+    correctAnswer: "5",
+    explanation: "При обычном бинарном поиске по 16 элементам в худшем случае нужны 5 проверок среднего элемента: floor(log₂(16)) + 1 = 5.",
   },
   {
     id: "chem-001",
@@ -118,13 +121,13 @@ export const problemsData: Problem[] = [
     difficulty: "hard",
     type: "choice",
     options: [
-      "3 π: CnH₂n-4; 2π+1цикл: CnH₂n-2; 2 цикла: CnH₂n-4; 2 цикла+2π: CnH₂n-8",
+      "3 π: CnH₂n-4; 2π+1цикл: CnH₂n-4; 2 цикла: CnH₂n-2; 2 цикла+2π: CnH₂n-6",
       "3 π: CnH₂n-2; 2π+1цикл: CnH₂n-4; 2 цикла: CnH₂n-6; 2 цикла+2π: CnH₂n-10",
       "3 π: CnH₂n-4; 2π+1цикл: CnH₂n-2; 2 цикла: CnH₂n-6; 2 цикла+2π: CnH₂n-10",
       "3 π: CnH₂n-6; 2π+1цикл: CnH₂n-4; 2 цикла: CnH₂n-8; 2 цикла+2π: CnH₂n-12",
     ],
-    correctAnswer: "3 π: CnH₂n-4; 2π+1цикл: CnH₂n-2; 2 цикла: CnH₂n-6; 2 цикла+2π: CnH₂n-10",
-    explanation: "Каждая π-связь уменьшает число H на 2. Каждый цикл тоже уменьшает H на 2. 3π → CnH₂n-6; 2π+1цикл → CnH₂n-6; 2 цикла → CnH₂n-4; 2 цикла+2π → CnH₂n-8.",
+    correctAnswer: "3 π: CnH₂n-4; 2π+1цикл: CnH₂n-4; 2 цикла: CnH₂n-2; 2 цикла+2π: CnH₂n-6",
+    explanation: "Начинаем с формулы ациклического насыщенного углеводорода CnH₂n+2. Каждая π-связь и каждый цикл уменьшают число H на 2. Три степени ненасыщенности дают CnH₂n-4, две — CnH₂n-2, четыре — CnH₂n-6.",
   },
   {
     id: "chem-vso-10-3",

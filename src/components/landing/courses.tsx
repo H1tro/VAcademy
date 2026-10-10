@@ -4,15 +4,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { IconArrowRight } from "./icons";
 import { Reveal, SectionHeading } from "./reveal";
-import { useInView } from "./use-in-view";
+import { problemsData, type ProblemSubject } from "@/lib/problems-data";
 import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 type Course = {
   title: string;
   level: string;
-  progress: number;
-  lessons: number;
+  subject: ProblemSubject;
   meta: string;
   cover: string;
   tag: string;
@@ -22,8 +21,7 @@ const COURSES: Course[] = [
   {
     title: "Математика: олимпиадный путь",
     level: "Начальный",
-    progress: 74,
-    lessons: 48,
+    subject: "mathematics",
     meta: "8–11 класс",
     tag: "MATH",
     cover: "from-violet to-cyan",
@@ -31,8 +29,7 @@ const COURSES: Course[] = [
   {
     title: "Информатика и алгоритмы",
     level: "Продвинутый",
-    progress: 41,
-    lessons: 36,
+    subject: "informatics",
     meta: "9–11 класс",
     tag: "INF",
     cover: "from-cyan to-mint",
@@ -40,8 +37,7 @@ const COURSES: Course[] = [
   {
     title: "Физика: от теории к решению",
     level: "Средний",
-    progress: 58,
-    lessons: 42,
+    subject: "physics",
     meta: "8–10 класс",
     tag: "PHY",
     cover: "from-mint to-violet",
@@ -49,8 +45,7 @@ const COURSES: Course[] = [
   {
     title: "Химия: структура и реакции",
     level: "Начальный",
-    progress: 12,
-    lessons: 30,
+    subject: "chemistry",
     meta: "8–10 класс",
     tag: "CHM",
     cover: "from-violet to-mint",
@@ -58,44 +53,26 @@ const COURSES: Course[] = [
 ];
 
 function CourseCard({ course, index }: { course: Course; index: number }) {
-  const { ref, inView } = useInView<HTMLElement>(0.3);
   const t = useTranslations("landing.courses");
 
   return (
     <Reveal delay={index * 90} className="h-full">
       <article
-        ref={ref}
         className="card-lift flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-panel/60"
       >
         <div className={cn("relative flex h-32 items-end justify-between bg-gradient-to-br p-5", course.cover)}>
           <span className="font-mono text-xs font-semibold tracking-[0.25em] text-white/90">{course.tag}</span>
           <span className="rounded-full bg-background/60 px-3 py-1 font-mono text-[11px] text-foreground backdrop-blur">
-            {course.level}
+            {t(`cards.${index}.level`)}
           </span>
         </div>
 
         <div className="flex flex-1 flex-col p-6">
-          <p className="font-mono text-xs text-muted-foreground">{course.meta}</p>
-          <h3 className="mt-1.5 text-lg font-bold leading-snug">{course.title}</h3>
+          <p className="font-mono text-xs text-muted-foreground">{t(`cards.${index}.meta`)}</p>
+          <h3 className="mt-1.5 text-lg font-bold leading-snug">{t(`cards.${index}.title`)}</h3>
 
-          <div className="mt-5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">{course.lessons} {t("lessons")}</span>
-              <span className="font-mono text-cyan">{course.progress}%</span>
-            </div>
-            <div
-              className="mt-2 h-2 overflow-hidden rounded-full bg-white/10"
-              role="progressbar"
-              aria-valuenow={course.progress}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label={`Progress for ${course.title}`}
-            >
-              <div
-                className="h-full rounded-full bg-gradient-brand transition-[width] duration-1000 ease-out"
-                style={{ width: inView ? `${course.progress}%` : "0%" }}
-              />
-            </div>
+          <div className="mt-5 rounded-xl border border-border bg-background/40 p-3 text-sm text-muted-foreground">
+            {t('taskCount', { count: problemsData.filter(p => p.subject === course.subject).length })}
           </div>
 
           <div className="mt-auto flex items-center justify-between pt-6">

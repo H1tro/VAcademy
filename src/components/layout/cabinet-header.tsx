@@ -5,10 +5,12 @@ import { getRouteTitle } from "@/lib/navigation";
 import { useTranslations } from "next-intl";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { VLogo } from "@/components/v-logo";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
 
 export function CabinetHeader() {
   const pathname = usePathname();
-  const title = getRouteTitle(pathname);
+  const routes = useTranslations("routes");
+  const title = routes(getRouteTitle(pathname));
   const t = useTranslations("app");
 
   return (
@@ -20,6 +22,7 @@ export function CabinetHeader() {
         <span className="text-xs text-muted-foreground/50">/</span>
         <span className="truncate text-sm font-semibold">{title}</span>
       </div>
+      <div className="ml-auto"><LocaleSwitcher /></div>
     </header>
   );
 }

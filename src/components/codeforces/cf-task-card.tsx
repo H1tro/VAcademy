@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations as useUITranslations } from "next-intl";
 import { IconCheckCircle, IconExternalLink, IconClock } from "@/components/icons"
 import { cn } from "@/lib/utils"
 
@@ -16,6 +17,7 @@ export interface CFTask {
 }
 
 export function CFTaskCard({ task }: { task: CFTask }) {
+  const ui = useUITranslations("ui");
   const completed = task.status === "completed"
   const ratingColor =
     task.rating && task.rating >= 1600
@@ -78,8 +80,7 @@ export function CFTaskCard({ task }: { task: CFTask }) {
           </span>
         ) : (
           <span className="flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1.5 font-mono text-xs text-muted-foreground">
-            ○ Не выполнено
-          </span>
+            {ui("notCompleted")} </span>
         )}
 
         <a
@@ -87,7 +88,7 @@ export function CFTaskCard({ task }: { task: CFTask }) {
           target="_blank"
           rel="noopener noreferrer"
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
-          aria-label={`Открыть ${task.contestId}${task.index} на Codeforces`}
+          aria-label={ui("openCF", {id: `${task.contestId}${task.index}`})}
         >
           <IconExternalLink className="h-4 w-4" />
         </a>

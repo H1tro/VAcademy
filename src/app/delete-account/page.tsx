@@ -1,11 +1,13 @@
 "use client"
 
+import { useTranslations as useUITranslations } from "next-intl";
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { IconSpinner, IconAlertTriangle } from "@/components/icons"
 
 function DeleteAccountContent() {
+  const ui = useUITranslations("ui");
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get("token")
@@ -20,9 +22,9 @@ function DeleteAccountContent() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md text-center space-y-4">
           <IconAlertTriangle className="h-12 w-12 mx-auto text-destructive" />
-          <h1 className="text-2xl font-bold">Неверная ссылка</h1>
-          <p className="text-muted-foreground">Ссылка для удаления аккаунта недействительна.</p>
-          <Button onClick={() => router.push("/")}>На главную</Button>
+          <h1 className="text-2xl font-bold">{ui("invalidLink")}</h1>
+          <p className="text-muted-foreground">{ui("theAccountDeletionLinkIsInvalid")}</p>
+          <Button onClick={() => router.push("/")}>{ui("goHome")}</Button>
         </div>
       </div>
     )
@@ -35,9 +37,9 @@ function DeleteAccountContent() {
           <div className="h-12 w-12 mx-auto rounded-full bg-mint/10 flex items-center justify-center">
             <span className="text-mint text-2xl">✓</span>
           </div>
-          <h1 className="text-2xl font-bold">Аккаунт удалён</h1>
-          <p className="text-muted-foreground">Ваш аккаунт и все данные были удалены.</p>
-          <Button onClick={() => router.push("/")}>На главную</Button>
+          <h1 className="text-2xl font-bold">{ui("accountDeleted")}</h1>
+          <p className="text-muted-foreground">{ui("yourAccountAndAllDataHaveBeenDeleted")}</p>
+          <Button onClick={() => router.push("/")}>{ui("goHome")}</Button>
         </div>
       </div>
     )
@@ -56,12 +58,12 @@ function DeleteAccountContent() {
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || "Ошибка удаления")
+        throw new Error(data.error || ui("couldNotDeleteAccount2"))
       }
 
       setDone(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось удалить аккаунт")
+      setError(err instanceof Error ? err.message : ui("couldNotDeleteAccount"))
     } finally {
       setLoading(false)
     }
@@ -72,9 +74,9 @@ function DeleteAccountContent() {
       <div className="max-w-md w-full space-y-6">
         <div className="text-center space-y-3">
           <IconAlertTriangle className="h-12 w-12 mx-auto text-destructive" />
-          <h1 className="text-2xl font-bold">Удаление аккаунта</h1>
+          <h1 className="text-2xl font-bold">{ui("accountDeletion")}</h1>
           <p className="text-muted-foreground">
-            Это действие необратимо. Все ваши данные, профиль, решения и прогресс будут удалены навсегда.
+            {ui("thisActionIsIrreversibleYourProfileSolutionsProgressAnd")}
           </p>
         </div>
 
@@ -92,10 +94,10 @@ function DeleteAccountContent() {
             {loading ? (
               <>
                 <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
-                Удаляем...
+                {ui("deleting")}
               </>
             ) : (
-              "Да, удалить аккаунт"
+              ui("yesDeleteAccount")
             )}
           </Button>
           <Button
@@ -104,7 +106,7 @@ function DeleteAccountContent() {
             onClick={() => router.push("/")}
             disabled={loading}
           >
-            Отмена
+            {ui("cancel")}
           </Button>
         </div>
       </div>

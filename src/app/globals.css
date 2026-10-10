@@ -190,6 +190,11 @@
     pointer-events: none;
     will-change: transform;
   }
+  /* Hex-valued color variables need an explicit alpha mix. */
+  .orb-violet { background: color-mix(in srgb, var(--violet) 25%, transparent); }
+  .orb-cyan { background: color-mix(in srgb, var(--cyan) 20%, transparent); }
+  .orb-violet-soft { background: color-mix(in srgb, var(--violet) 15%, transparent); }
+  .orb-cyan-soft { background: color-mix(in srgb, var(--cyan) 10%, transparent); }
 }
 
 @keyframes fade-up {
@@ -216,6 +221,7 @@
     transition-duration: 0.01ms !important;
   }
   .orb {
-    display: none;
+    animation: none !important;
+    will-change: auto;
   }
 }

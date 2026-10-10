@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations as useUITranslations } from "next-intl";
 import { useRef, useState } from "react";
 import type { Problem } from "@/lib/problems-data";
 import { DIFFICULTY_POINTS } from "@/lib/problems-data";
@@ -16,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { IconUpload, IconSpinner, IconAlertTriangle, IconCheckCircle } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
+import { auth } from '@/lib/firebase';
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -32,12 +34,15 @@ export function ProblemModal({
   onSolved: (problemId: string) => void;
   uid: string | null;
 }) {
+  const ui = useUITranslations("ui");
   const { toast } = useToast();
   const [answer, setAnswer] = useState("");
   const [solution, setSolution] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [state, setState] = useState<SubmitState>("idle");
+  const [explanation, setExplanation] = useState('');
+  const [correct, setCorrect] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   if (!problem) return null;
@@ -66,10 +71,10 @@ export function ProblemModal({
 
   const handleSubmit = async () => {
     if (!uid) {
-      toast({ title: "Требуется вход", description: "Войдите, чтобы отправить решение", variant: "destructive" });
+      toast({ title: ui("signInRequired"), description: ui("signInToSubmitASolution"), variant: "destructive" });
       return;
     }
-    if (problem.type === "text" && !answer.trim()) return;
+    if (!answer.trim()) return;
 
     setState("submitting");
     try {
@@ -86,11 +91,12 @@ export function ProblemModal({
 
       const res = await fetch("/api/submissions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${await auth.currentUser?.getIdToken()}` },
         body: JSON.stringify({
           uid,
           problemId: problem.id,
           platform: "internal",
+          answer,
           solution: problem.type === "text" ? answer : solution,
           imageUrl,
         }),
@@ -98,12 +104,14 @@ export function ProblemModal({
 
       if (!res.ok) throw new Error("submission failed");
 
+      const result = await res.json();
+      setCorrect(result.correct); setExplanation(result.explanation);
       setState("success");
-      onSolved(problem.id);
-      toast({ title: "Решение отправлено на проверку" });
+      if (result.correct) onSolved(problem.id);
+      toast({ title: result.correct ? ui("correctAnswer") : ui("incorrectAnswer") });
     } catch {
       setState("error");
-      toast({ title: "Ошибка", description: "Не удалось отправить решение", variant: "destructive" });
+      toast({ title: ui("error"), description: ui("couldNotSubmitSolution"), variant: "destructive" });
     }
   };
 
@@ -113,10 +121,9 @@ export function ProblemModal({
         <DialogHeader>
           <div className="mb-2 flex items-center gap-2">
             <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-muted-foreground">
-              Задача
-            </span>
+              {ui("problem")} </span>
             <span className="rounded-full border border-sky/30 bg-sky/10 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-sky">
-              {problem.difficulty === "easy" ? "Базовый" : problem.difficulty === "medium" ? "Средний" : "Олимпиадный"}
+              {problem.difficulty === "easy" ? ui("basic") : problem.difficulty === "medium" ? ui("intermediate") : ui("olympiad")}
             </span>
             <span className="font-mono text-xs text-muted-foreground">
               +{DIFFICULTY_POINTS[problem.difficulty]} XP
@@ -135,23 +142,23 @@ export function ProblemModal({
             <div className="flex items-center gap-3 rounded-2xl border border-mint/30 bg-mint/10 p-5">
               <IconCheckCircle className="h-8 w-8 shrink-0 text-mint" />
               <div>
-                <p className="font-semibold text-mint">Решение отправлено</p>
-                <p className="text-sm text-muted-foreground">Мы проверим его и добавим баллы.</p>
+                <p className="font-semibold">{correct ? ui('correct') : ui('incorrect')}</p>
+                <p className="text-sm text-muted-foreground">{explanation}</p>
               </div>
             </div>
           ) : state === "error" ? (
             <div className="flex items-center gap-3 rounded-2xl border border-red-500/30 bg-red-500/10 p-5">
               <IconAlertTriangle className="h-8 w-8 shrink-0 text-red-400" />
               <div>
-                <p className="font-semibold text-red-400">Не удалось отправить</p>
-                <p className="text-sm text-muted-foreground">Попробуйте ещё раз.</p>
+                <p className="font-semibold text-red-400">{ui("couldNotSubmit")}</p>
+                <p className="text-sm text-muted-foreground">{ui("pleaseTryAgain")}</p>
               </div>
             </div>
           ) : (
             <>
               {problem.type === "choice" && problem.options ? (
                 <div className="space-y-3">
-                  <Label>Выберите ответ:</Label>
+                  <Label>{ui("chooseAnAnswer")}</Label>
                   <RadioGroup value={answer} onValueChange={setAnswer} className="gap-2">
                     {problem.options.map((option) => (
                       <div
@@ -168,30 +175,30 @@ export function ProblemModal({
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="answer">Ваш ответ</Label>
+                  <Label htmlFor="answer">{ui("yourAnswer")}</Label>
                   <Textarea
                     id="answer"
                     value={answer}
                     onChange={(e) => setAnswer(e.target.value)}
-                    placeholder="Напишите решение..."
+                    placeholder={ui("writeYourSolution")}
                     rows={4}
                   />
                 </div>
               )}
 
               <div className="space-y-3">
-                <Label htmlFor="solution">Пояснение (опционально)</Label>
+                <Label htmlFor="solution">{ui("explanationOptional")}</Label>
                 <Textarea
                   id="solution"
                   value={solution}
                   onChange={(e) => setSolution(e.target.value)}
-                  placeholder="Опишите ход мысли..."
+                  placeholder={ui("describeYourReasoning")}
                   rows={2}
                 />
               </div>
 
               <div>
-                <Label>Изображение (опционально)</Label>
+                <Label>{ui("imageOptional")}</Label>
                 <div
                   onClick={() => fileRef.current?.click()}
                   role="button"
@@ -201,11 +208,11 @@ export function ProblemModal({
                 >
                   {imagePreview ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={imagePreview} alt="Предпросмотр загруженного решения" className="mx-auto max-h-48 rounded-lg" />
+                    <img src={imagePreview} alt={ui("uploadedSolutionPreview")} className="mx-auto max-h-48 rounded-lg" />
                   ) : (
                     <span className="flex flex-col items-center gap-2 text-sm text-muted-foreground">
                       <IconUpload className="h-7 w-7" />
-                      Нажмите, чтобы прикрепить фото решения
+                      {ui("clickToAttachAPhotoOfYourSolution")}
                     </span>
                   )}
                   <input
@@ -220,7 +227,7 @@ export function ProblemModal({
 
               <Button
                 onClick={handleSubmit}
-                disabled={state === "submitting" || (problem.type === "text" && !answer.trim())}
+                disabled={state === "submitting" || !answer.trim()}
                 variant="gradient"
                 size="lg"
                 className="w-full"
@@ -229,10 +236,10 @@ export function ProblemModal({
                 {state === "submitting" ? (
                   <>
                     <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
-                    Отправка...
+                    {ui("submitting")}
                   </>
                 ) : (
-                  "Отправить на проверку"
+                  ui("checkAnswer")
                 )}
               </Button>
             </>
@@ -240,7 +247,7 @@ export function ProblemModal({
 
           {(state === "success" || state === "error") && (
             <Button variant="outline" onClick={handleClose} className="w-full">
-              Закрыть
+              {ui("close")}
             </Button>
           )}
         </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations as useUITranslations } from "next-intl";
 import { useTranslations } from "next-intl"
 import { useState, useEffect } from "react"
 import Link from "next/link"
@@ -224,6 +225,7 @@ function BiologyContent() {
 }
 
 function InformatikaContent() {
+  const ui = useUITranslations("ui");
   const t = useTranslations('cabinet.strategy')
   const [files, setFiles] = useState<string[] | null>(null)
 
@@ -247,7 +249,7 @@ function InformatikaContent() {
   }
 
   if (files === null)
-    return <p className="text-sm text-muted-foreground">Загрузка материалов...</p>
+    return <p className="text-sm text-muted-foreground">{ui("loadingMaterials")}</p>
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -257,7 +259,7 @@ function InformatikaContent() {
           <MaterialsList materials={topic.materials} />
           {findFor(topic).length > 0 && (
             <div className="space-y-2 border-t border-border pt-4">
-              <p className="font-semibold">PDF-ресурсы</p>
+              <p className="font-semibold">{ui("pdfResources")}</p>
               {findFor(topic).map((file) => (
                 <div key={file} className="flex items-center justify-between gap-4">
                   <span className="flex min-w-0 items-center gap-2 truncate text-sm">
@@ -287,6 +289,7 @@ function InformatikaContent() {
 }
 
 function MatematikaContent() {
+  const ui = useUITranslations("ui");
   const t = useTranslations('cabinet.strategy')
   const [driveUrl, setDriveUrl] = useState<string | null>(null)
 
@@ -304,8 +307,7 @@ function MatematikaContent() {
           <a href={driveUrl} target="_blank" rel="noopener noreferrer">
             <Button size="lg" variant="gradient" className="gap-2">
               <IconExternalLink className="h-5 w-5" />
-              Открыть материалы в Google Drive
-            </Button>
+              {ui("openMaterialsInGoogleDrive")} </Button>
           </a>
         </div>
       )}
@@ -321,6 +323,7 @@ function MatematikaContent() {
 }
 
 function HimiyaContent() {
+  const ui = useUITranslations("ui");
   const t = useTranslations('cabinet.strategy')
   return (
     <div className="space-y-6">
@@ -328,8 +331,7 @@ function HimiyaContent() {
         <a href={HIMIYA_DRIVE_URL} target="_blank" rel="noopener noreferrer">
           <Button size="lg" variant="gradient" className="gap-2">
             <IconExternalLink className="h-5 w-5" />
-            Открыть материалы в Google Drive
-          </Button>
+            {ui("openMaterialsInGoogleDrive")} </Button>
         </a>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">

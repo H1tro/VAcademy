@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { IconTrophy, IconExternalLink, IconFileText, IconDownload } from "@/components/icons"
@@ -14,6 +15,7 @@ async function findMaterials() {
 }
 
 export default async function BiologyPage() {
+  const ui = await getTranslations("ui");
   const materials = await findMaterials()
 
   const findFor = (topic: (typeof curriculum)[number]) => {
@@ -23,9 +25,9 @@ export default async function BiologyPage() {
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Биология</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("biology")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Материалы и учебная программа по биологии (включая PDF-ресурсы из папки Biology).
+          {ui("biologyMaterialsAndCurriculumIncludingPdfResources")}
         </p>
       </div>
 
@@ -51,7 +53,7 @@ export default async function BiologyPage() {
             <div className="mt-4 space-y-3 border-t border-border pt-4">
               {topic.books && (
                 <div>
-                  <p className="font-semibold">Книги</p>
+                  <p className="font-semibold">{ui("books")}</p>
                   <div className="mt-1 space-y-1 text-sm text-muted-foreground">
                     {topic.books.basic && (
                       <p>
@@ -67,9 +69,9 @@ export default async function BiologyPage() {
                   </div>
                 </div>
               )}
-              <p className="font-semibold">Материалы</p>
+              <p className="font-semibold">{ui("materials")}</p>
               {findFor(topic).length === 0 && (
-                <p className="text-sm text-muted-foreground">Материалы не найдены в папке Biology.</p>
+                <p className="text-sm text-muted-foreground">{ui("noMaterialsFoundInTheBiologyFolder")}</p>
               )}
               {findFor(topic).map((file) => (
                 <div key={file} className="flex items-center justify-between gap-4">
@@ -80,12 +82,12 @@ export default async function BiologyPage() {
                   <div className="flex shrink-0 gap-2">
                     <Button variant="outline" size="sm" asChild>
                       <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                        <IconDownload className="mr-2 h-4 w-4" /> Скачать
+                        <IconDownload className="mr-2 h-4 w-4" /> {ui("download")}
                       </a>
                     </Button>
                     <Button size="sm" variant="gradient" asChild>
                       <a href={`/api/biology?file=${encodeURIComponent(file)}`} target="_blank" rel="noopener noreferrer">
-                        Открыть
+                        {ui("open")}
                       </a>
                     </Button>
                   </div>
@@ -98,7 +100,7 @@ export default async function BiologyPage() {
         <div className="card-surface p-6">
           <h2 className="flex items-center gap-2 font-headline text-lg font-bold">
             <IconTrophy className="h-5 w-5 text-amber" />
-            Олимпиадные задачи
+            {ui("olympiadProblems")}
           </h2>
           <div className="mt-4 flex flex-col gap-2">
             {BIOLOGY_OLYMPIAD.map((m) => {

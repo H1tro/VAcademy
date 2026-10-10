@@ -1,6 +1,7 @@
 "use client"
 
 import { IconSigma, IconAtom, IconCode, IconFlask, IconDna } from "@/components/icons"
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils"
 
 export type SubjectId = "matematika" | "fizika" | "informatika" | "himiya" | "biology"
@@ -20,6 +21,7 @@ export function SubjectSelector({
   active: SubjectId
   onSelect: (id: SubjectId) => void
 }) {
+  const t = useTranslations("routes");
   return (
     <div className="flex flex-wrap gap-2">
       {SUBJECTS.map(({ id, name, Icon }) => {
@@ -38,7 +40,7 @@ export function SubjectSelector({
             )}
           >
             <Icon className="h-4 w-4" />
-            {name}
+            {t(id)}
           </button>
         )
       })}

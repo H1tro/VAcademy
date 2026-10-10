@@ -2,8 +2,10 @@
 
 export const dynamic = "force-dynamic"
 
+import { authFetch } from '@/lib/auth-fetch';
+import { useTranslations as useUITranslations } from "next-intl";
 import { useEffect, useState, type FormEvent, useRef } from "react"
-import { auth } from "@/lib/firebase"
+import { auth, firebaseConfigured } from "@/lib/firebase"
 import { signOut, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -34,6 +36,7 @@ const GRADES = [
 ]
 
 function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
+  const ui = useUITranslations("ui");
   const router = useRouter()
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
@@ -44,20 +47,22 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
     setError("")
 
     try {
+      const user = auth.currentUser;
+      if (!user) throw new Error(ui("userNotFoundPleaseSignUpOrSignIn"));
       const res = await fetch("/api/account/request-deletion", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` },
         body: JSON.stringify({ uid, email }),
       })
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || "Ошибка отправки")
+        throw new Error(data.error || ui("failedToSend"))
       }
 
       setSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось отправить письмо")
+      setError(err instanceof Error ? err.message : ui("couldNotSendEmail"))
     } finally {
       setSending(false)
     }
@@ -66,7 +71,7 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
   if (sent) {
     return (
       <div className="rounded-xl bg-mint/10 p-4 text-sm text-mint">
-        Письмо с ссылкой для подтверждения отправлено на <strong>{email}</strong>. Проверьте почту.
+        {ui("aConfirmationLinkHasBeenSentTo")} <strong>{email}</strong>{ui("checkYourInbox2")}
       </div>
     )
   }
@@ -80,10 +85,10 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
         {sending ? (
           <>
             <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
-            Отправляем...
+            {ui("sending")}
           </>
         ) : (
-          "Удалить аккаунт"
+          ui("deleteAccount")
         )}
       </Button>
     </div>
@@ -91,6 +96,7 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
 }
 
 export default function ProfileEditPage() {
+  const ui = useUITranslations("ui");
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -120,6 +126,7 @@ export default function ProfileEditPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
+    if (!firebaseConfigured) { setLoading(false); return; }
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (!user) {
@@ -134,7 +141,7 @@ export default function ProfileEditPage() {
         setDisplayName(user.displayName || "")
         setPhotoURL(user.photoURL || "")
 
-        const res = await fetch(`/api/profile?uid=${user.uid}`)
+        const res = await authFetch(`/api/profile?uid=${user.uid}`)
         if (res.ok) {
           const data = await res.json()
           if (data && data.school !== undefined) {
@@ -146,7 +153,7 @@ export default function ProfileEditPage() {
           }
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Ошибка загрузки профиля")
+        setError(err instanceof Error ? err.message : ui("couldNotLoadProfile"))
       } finally {
         setLoading(false)
       }
@@ -157,11 +164,11 @@ export default function ProfileEditPage() {
 
   const handleAvatarUpload = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      setError("Можно загружать только изображения")
+      setError(ui("onlyImagesCanBeUploaded"))
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError("Размер файла не должен превышать 5MB")
+      setError(ui("fileSizeMustNotExceed5Mb"))
       return
     }
 
@@ -180,14 +187,14 @@ export default function ProfileEditPage() {
 
       if (!res.ok) {
         const err = await res.json()
-        throw new Error(err.error || "Ошибка загрузки")
+        throw new Error(err.error || ui("uploadFailed"))
       }
 
       const { url } = await res.json()
       setPhotoURL(url)
-      setSuccess("Аватар загружен")
+      setSuccess(ui("avatarUploaded"))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось загрузить аватар")
+      setError(err instanceof Error ? err.message : ui("couldNotUploadAvatar"))
     } finally {
       setUploading(false)
     }
@@ -207,7 +214,7 @@ export default function ProfileEditPage() {
 
     const user = auth.currentUser
     if (!user) {
-      setError("Пользователь не найден. Пожалуйста, зарегистрируйтесь или войдите.")
+      setError(ui("userNotFoundPleaseSignUpOrSignIn"))
       return
     }
 
@@ -221,7 +228,7 @@ export default function ProfileEditPage() {
 
       const res = await fetch("/api/profile", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` },
         body: JSON.stringify({
           uid: user.uid,
           displayName,
@@ -237,12 +244,12 @@ export default function ProfileEditPage() {
 
       if (!res.ok) {
         const errData = await res.json()
-        throw new Error(errData.error || "Не удалось сохранить профиль")
+        throw new Error(errData.error || ui("couldNotSaveProfile"))
       }
 
-      setSuccess("Профиль успешно обновлен.")
+      setSuccess(ui("profileUpdatedSuccessfully"))
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось сохранить профиль.")
+      setError(err instanceof Error ? err.message : ui("couldNotSaveProfile2"))
     } finally {
       setSaving(false)
     }
@@ -254,18 +261,18 @@ export default function ProfileEditPage() {
     setSuccess("")
 
     if (newPassword.length < 6) {
-      setError("Новый пароль должен содержать минимум 6 символов")
+      setError(ui("newPasswordMustContainAtLeast6Characters"))
       return
     }
 
     if (newPassword !== confirmPassword) {
-      setError("Пароли не совпадают")
+      setError(ui("passwordsDoNotMatch"))
       return
     }
 
     const user = auth.currentUser
     if (!user || !user.email) {
-      setError("Пользователь не найден")
+      setError(ui("userNotFound"))
       return
     }
 
@@ -276,14 +283,14 @@ export default function ProfileEditPage() {
       await reauthenticateWithCredential(user, credential)
       await updatePassword(user, newPassword)
 
-      setSuccess("Пароль успешно изменен")
+      setSuccess(ui("passwordChangedSuccessfully"))
       setCurrentPassword("")
       setNewPassword("")
       setConfirmPassword("")
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Не удалось изменить пароль"
+      const message = err instanceof Error ? err.message : ui("couldNotChangePassword")
       if (message.includes("wrong-password") || message.includes("invalid-credential")) {
-        setError("Неверный текущий пароль")
+        setError(ui("incorrectCurrentPassword"))
       } else {
         setError(message)
       }
@@ -297,7 +304,7 @@ export default function ProfileEditPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex items-center gap-3 text-muted-foreground">
           <IconSpinner className="h-5 w-5 animate-spin" />
-          Загрузка профиля...
+          {ui("loadingProfile")}
         </div>
       </div>
     )
@@ -307,16 +314,16 @@ export default function ProfileEditPage() {
     return (
       <div className="animate-fade-up py-10 text-center">
         <div className="mx-auto max-w-3xl space-y-6">
-          <h1 className="text-4xl font-headline font-black tracking-tight">Профиль недоступен</h1>
+          <h1 className="text-4xl font-headline font-black tracking-tight">{ui("profileUnavailable")}</h1>
           <p className="text-muted-foreground">
-            Вам нужно зарегистрироваться или войти, чтобы редактировать профиль.
+            {ui("signUpOrSignInToEditYourProfile")}
           </p>
           <div className="flex justify-center gap-4">
             <Link href="/register">
-              <Button>Регистрация</Button>
+              <Button>{ui("registration")}</Button>
             </Link>
             <Link href="/dashboard">
-              <Button variant="outline">На дашборд</Button>
+              <Button variant="outline">{ui("goToDashboard")}</Button>
             </Link>
           </div>
         </div>
@@ -354,7 +361,7 @@ export default function ProfileEditPage() {
           <TabsContent value="profile" className="space-y-6">
             <Card className="card-surface">
               <CardHeader className="space-y-1 p-6">
-                <CardTitle className="text-2xl">Личные данные</CardTitle>
+                <CardTitle className="text-2xl">{ui("personalDetails")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 p-6">
                 <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
@@ -388,10 +395,10 @@ export default function ProfileEditPage() {
                     />
                   </div>
                   <div className="flex-1 space-y-1 text-center sm:text-left">
-                    <p className="text-lg font-semibold">{displayName || "Без имени"}</p>
+                    <p className="text-lg font-semibold">{displayName || ui("unnamed")}</p>
                     <p className="text-sm text-muted-foreground">{userEmail}</p>
                     <p className="text-xs text-muted-foreground">
-                      Нажмите на иконку камеры, чтобы загрузить фото
+                      {ui("clickTheCameraIconToUploadAPhoto")}
                     </p>
                   </div>
                 </div>
@@ -401,12 +408,12 @@ export default function ProfileEditPage() {
                 <form className="space-y-5" onSubmit={handleSaveProfile}>
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="displayName">Имя пользователя</Label>
+                      <Label htmlFor="displayName">{ui("username")}</Label>
                       <Input
                         id="displayName"
                         value={displayName}
                         onChange={(e) => setDisplayName(e.target.value)}
-                        placeholder="Иван Иванов"
+                        placeholder={ui("johnDoe")}
                       />
                     </div>
                     <div className="space-y-2">
@@ -414,24 +421,24 @@ export default function ProfileEditPage() {
                       <Input id="email" value={userEmail} disabled />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="school">Организация / школа</Label>
+                      <Label htmlFor="school">{ui("organizationSchool")}</Label>
                       <Input
                         id="school"
                         value={school}
                         onChange={(e) => setSchool(e.target.value)}
-                        placeholder="Школа №123"
+                        placeholder={ui("school123")}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="grade">Класс</Label>
+                      <Label htmlFor="grade">{ui("grade")}</Label>
                       <Select value={grade} onValueChange={setGrade}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Выберите класс" />
+                          <SelectValue placeholder={ui("selectYourGrade")} />
                         </SelectTrigger>
                         <SelectContent>
                           {GRADES.map((g) => (
                             <SelectItem key={g.value} value={g.value}>
-                              {g.label}
+                              {ui("grade", {grade: g.value})}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -440,19 +447,19 @@ export default function ProfileEditPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="about">О себе</Label>
+                    <Label htmlFor="about">{ui("aboutYou")}</Label>
                     <Textarea
                       id="about"
                       value={about}
                       onChange={(e) => setAbout(e.target.value)}
-                      placeholder="Кратко о целях и планах"
+                      placeholder={ui("brieflyDescribeYourGoalsAndPlans")}
                       rows={3}
                     />
                   </div>
 
                   <Separator />
 
-                  <p className="text-sm font-medium text-muted-foreground">Соревновательные платформы</p>
+                  <p className="text-sm font-medium text-muted-foreground">{ui("competitivePlatforms")}</p>
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">
@@ -461,7 +468,7 @@ export default function ProfileEditPage() {
                         id="codeforces"
                         value={codeforces}
                         onChange={(e) => setCodeforces(e.target.value)}
-                        placeholder="Ник на Codeforces"
+                        placeholder={ui("codeforcesHandle")}
                       />
                     </div>
                     <div className="space-y-2">
@@ -470,7 +477,7 @@ export default function ProfileEditPage() {
                         id="leetcode"
                         value={leetcode}
                         onChange={(e) => setLeetcode(e.target.value)}
-                        placeholder="Ник на LeetCode"
+                        placeholder={ui("leetcodeUsername")}
                       />
                     </div>
                   </div>
@@ -480,12 +487,12 @@ export default function ProfileEditPage() {
                       {saving ? (
                         <>
                           <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
-                          Сохраняем...
+                          {ui("saving")}
                         </>
                       ) : (
                         <>
                           <IconSave className="mr-2 h-4 w-4" />
-                          Сохранить профиль
+                          {ui("saveProfile")}
                         </>
                       )}
                     </Button>
@@ -498,19 +505,19 @@ export default function ProfileEditPage() {
           <TabsContent value="security" className="space-y-6">
             <Card className="card-surface">
               <CardHeader className="space-y-1 p-6">
-                <CardTitle className="text-2xl">Смена пароля</CardTitle>
+                <CardTitle className="text-2xl">{ui("changePassword")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6 p-6">
                 <form className="space-y-5" onSubmit={handleChangePassword}>
                   <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Текущий пароль</Label>
+                    <Label htmlFor="currentPassword">{ui("currentPassword")}</Label>
                     <div className="relative">
                       <Input
                         id="currentPassword"
                         type={showCurrent ? "text" : "password"}
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
-                        placeholder="Введите текущий пароль"
+                        placeholder={ui("enterCurrentPassword")}
                         required
                       />
                       <button
@@ -527,14 +534,14 @@ export default function ProfileEditPage() {
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">Новый пароль</Label>
+                      <Label htmlFor="newPassword">{ui("newPassword")}</Label>
                       <div className="relative">
                         <Input
                           id="newPassword"
                           type={showNew ? "text" : "password"}
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Минимум 6 символов"
+                          placeholder={ui("atLeast6Characters")}
                           required
                         />
                         <button
@@ -547,14 +554,14 @@ export default function ProfileEditPage() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Подтвердите пароль</Label>
+                      <Label htmlFor="confirmPassword">{ui("confirmPassword")}</Label>
                       <div className="relative">
                         <Input
                           id="confirmPassword"
                           type={showConfirm ? "text" : "password"}
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Повторите новый пароль"
+                          placeholder={ui("repeatNewPassword")}
                           required
                         />
                         <button
@@ -573,12 +580,12 @@ export default function ProfileEditPage() {
                       {changingPassword ? (
                         <>
                           <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
-                          Изменяем...
+                          {ui("changing")}
                         </>
                       ) : (
                         <>
                           <IconShield className="mr-2 h-4 w-4" />
-                          Изменить пароль
+                          {ui("changePassword2")}
                         </>
                       )}
                     </Button>
@@ -589,13 +596,11 @@ export default function ProfileEditPage() {
 
             <Card className="card-surface border-destructive/20">
               <CardHeader className="space-y-1 p-6">
-                <CardTitle className="text-2xl text-destructive">Удаление аккаунта</CardTitle>
+                <CardTitle className="text-2xl text-destructive">{ui("accountDeletion")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4 p-6">
                 <p className="text-sm text-muted-foreground">
-                  Вы запросите удаление аккаунта. На вашу почту придёт ссылка для подтверждения.
-                  После подтверждения аккаунт и все данные будут удалены навсегда.
-                </p>
+                  {ui("requestAccountDeletionAConfirmationLinkWillBeSent")} </p>
                 <DeleteAccountSection email={userEmail} uid={uid} />
               </CardContent>
             </Card>

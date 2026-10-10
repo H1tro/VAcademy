@@ -32,7 +32,7 @@ export function MainNav() {
   const { user, loading } = useAuth();
   const t = useTranslations("nav");
 
-  const displayName = user?.displayName || user?.email?.split("@")[0] || "Гость";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || t("guest");
   const initials =
     displayName
       .split(" ")
@@ -52,7 +52,7 @@ export function MainNav() {
   return (
     <Sidebar variant="sidebar" className="border-r border-border bg-sidebar">
       <SidebarHeader className="p-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5" aria-label="VAcademy — кабинет">
+        <Link href="/dashboard" className="flex items-center gap-2.5" aria-label={t("dashboardLink")}>
           <VLogo className="h-9 w-9" />
           <span className="font-headline text-lg font-bold tracking-tight">
             <span className="text-gradient">VAcademy</span>

@@ -8,6 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "check:i18n": "node scripts/check-i18n.cjs",
+    "check:legal": "node scripts/check-legal.cjs",
     "tg:webhook": "node scripts/set-telegram-webhook.js",
     "tg:polling": "node scripts/bot-polling.js"
   },

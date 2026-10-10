@@ -1,83 +1,39 @@
-import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase-server"
-import { FieldValue } from "firebase-admin/firestore"
-import { BOT_SUBJECTS } from "@/lib/bot-constants"
+import { NextResponse } from 'next/server';
+import { getDb } from '@/lib/firebase-server';
+import { FieldValue } from 'firebase-admin/firestore';
+import { BOT_SUBJECTS, BOT_CATEGORIES } from '@/lib/bot-constants';
+import { z } from 'zod';
 
-const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
-const TG_API = `https://api.telegram.org/bot${BOT_TOKEN}`
-
-async function getDeptAdminChatIds(department: string): Promise<number[]> {
-  try {
-    const db = getDb()
-    const snap = await db.doc(`admin_config/${department}`).get()
-    if (snap.exists) {
-      const data = snap.data()!
-      if (Array.isArray(data.chatIds)) return data.chatIds as number[]
-      if (data.chatId) return [data.chatId as number]
-    }
-  } catch {}
-  return []
-}
+const schema = z.object({
+  subject: z.string().refine(v => BOT_SUBJECTS.some(s => s.id === v)),
+  category: z.string().refine(v => BOT_CATEGORIES.some(c => c.id === v)),
+  message: z.string().trim().min(10).max(3000),
+  userName: z.string().trim().min(1).max(100), email: z.string().trim().email().max(254),
+});
 
 export async function POST(req: Request) {
+  let body: unknown;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: 'Некорректный запрос.' }, { status: 400 }); }
+  const parsed = schema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: 'Проверьте имя, email, предмет и сообщение (10–3000 символов).' }, { status: 400 });
   try {
-    const body = await req.json()
-    const { subject, category, message, userName } = body
-
-    if (!subject || !category || !message) {
-      return NextResponse.json({ error: "subject, category, message are required" }, { status: 400 })
+    const data = parsed.data; const db = getDb();
+    const subjectLabel = BOT_SUBJECTS.find(s => s.id === data.subject)!.label;
+    const ticket = await db.collection('tickets').add({ ...data, source: 'web', userId: '', username: '', subjectLabel, department: data.subject, fileIds: [], replies: [], status: 'open', createdAt: FieldValue.serverTimestamp() });
+    // Failure to notify must not discard an already saved ticket.
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      try {
+        const config = (await db.doc(`admin_config/${data.subject}`).get()).data();
+        const ids: number[] = Array.isArray(config?.chatIds) ? config.chatIds : config?.chatId ? [config.chatId] : [];
+        await Promise.allSettled(ids.map(async chatId => {
+          const response = await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(5000),
+            body: JSON.stringify({ chat_id: chatId, text: `Новая заявка #${ticket.id}\n${data.userName}\nEmail: ${data.email}\n${subjectLabel}\n${data.category}\n${data.message}` }),
+          });
+          if (!response.ok) console.error('Ticket notification failed', response.status);
+        }));
+      } catch { console.error('Ticket notification unavailable'); }
     }
-
-    const db = getDb()
-    const ticket = {
-      source: "web",
-      userId: "",
-      userName: userName || "Гость",
-      username: "",
-      subject,
-      subjectLabel: subject,
-      department: subject,
-      category,
-      message,
-      fileIds: [] as string[],
-      status: "open",
-      replies: [],
-      createdAt: FieldValue.serverTimestamp(),
-    }
-
-    const ticketRef = await db.collection("tickets").add(ticket)
-
-    const adminIds = await getDeptAdminChatIds(subject)
-    if (adminIds.length > 0) {
-      const header = [
-        `\uD83D\uDCE2 Новая заявка #${ticketRef.id}`,
-        "\uD83C\uDF10 Источник: сайт",
-        `\uD83D\uDC64 ${userName || "Гость"}`,
-        `\uD83D\uDCD6 Предмет: ${subject}`,
-        `\uD83D\uDCC2 Категория: ${category}`,
-        `\uD83D\uDCAC ${message}`,
-      ].join("\n")
-
-      for (const adminChatId of adminIds) {
-        await fetch(`${TG_API}/sendMessage`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chat_id: adminChatId,
-            text: header,
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: "\u270F\uFE0F Ответить", callback_data: `reply_ticket:${ticketRef.id}` }],
-              ],
-            },
-          }),
-        })
-      }
-    }
-
-    return NextResponse.json({ success: true, ticketId: ticketRef.id, department: subject })
-  } catch (error) {
-    console.error("Feedback error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
-  }
+    return NextResponse.json({ success: true, ticketId: ticket.id });
+  } catch { return NextResponse.json({ error: 'Не удалось сохранить обращение. Попробуйте позже.' }, { status: 503 }); }
 }

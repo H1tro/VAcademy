@@ -1,16 +1,24 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations as useUITranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconSparkles, IconSend, IconAlertTriangle } from "@/components/icons";
+import { SUBJECTS } from '@/lib/navigation';
 
 export const dynamic = "force-dynamic";
 
 export default function AiAssistantPage() {
+  const ui = useUITranslations("ui");
   const t = useTranslations('cabinet.ai')
+  const features = useTranslations('features.ai');
+  const nav = useTranslations('nav'); const locale = useLocale();
+  const [subject, setSubject] = useState('mathematics');
+  const [mode, setMode] = useState('hint');
+  const [configured, setConfigured] = useState<boolean | null>(null);
   const [aiEnabled, setAiEnabled] = useState<boolean | null>(null);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
@@ -18,7 +26,10 @@ export default function AiAssistantPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    fetch("/api/admin/config?global=true")
+    const initial = new URLSearchParams(window.location.search).get('question');
+    if (initial) setQuestion(initial.slice(0, 6000));
+    fetch('/api/ai/olympiad').then(r => r.json()).then(data => setConfigured(data.configured)).catch(() => setConfigured(false));
+    fetch("/api/admin/config?global=true", { signal: AbortSignal.timeout(5000) })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => setAiEnabled(data?.aiEnabled ?? true))
       .catch(() => setAiEnabled(true));
@@ -40,14 +51,14 @@ export default function AiAssistantPage() {
       const res = await fetch("/api/ai/olympiad", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: text }),
+        body: JSON.stringify({ question: text, subject, mode, locale }),
       });
 
       const data = await res.json();
       if (!res.ok) {
         setError(data?.error || t('serverError'));
       } else {
-        setAnswer(data.answer || "К сожалению, ответ не получен.");
+        setAnswer(data.answer || ui("noAnswerWasReceived"));
       }
     } catch {
       setError(t('aiError'));
@@ -98,14 +109,17 @@ export default function AiAssistantPage() {
         </h2>
 
         <div className="mt-5 space-y-4">
+          {configured === false && <p role="status" className="rounded-xl bg-amber/10 p-4 text-amber">{features('notConfigured')}</p>}
+          <div className="grid gap-3 sm:grid-cols-2"><label className="space-y-2"><span>{features('subject')}</span><select className="w-full rounded-lg border border-border bg-background p-3" value={subject} onChange={e => setSubject(e.target.value)}>{SUBJECTS.map(s => <option key={s.key} value={s.key}>{nav(s.key)}</option>)}</select></label><label className="space-y-2"><span>{features('mode')}</span><select className="w-full rounded-lg border border-border bg-background p-3" value={mode} onChange={e => setMode(e.target.value)}>{['hint', 'review', 'plan'].map(m => <option key={m} value={m}>{features(m)}</option>)}</select></label></div>
           <Textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={t('placeholder')}
             rows={6}
+            maxLength={6000}
           />
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Button onClick={askAssistant} disabled={isLoading} variant="gradient">
+            <Button onClick={askAssistant} disabled={isLoading || configured !== true} variant="gradient">
               <IconSend className="mr-2 h-4 w-4" />
               {isLoading ? t('waiting') : t('ask')}
             </Button>

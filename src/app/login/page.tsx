@@ -2,15 +2,18 @@
 
 export const dynamic = "force-dynamic"
 
+import { authFetch } from '@/lib/auth-fetch';
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { auth, firebaseConfigured } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { LocaleSwitcher } from "@/i18n/LocaleSwitcher";
+import { LegalLinks } from "@/components/legal/legal-links";
 import { useTranslations } from "next-intl";
 
 export default function LoginPage() {
@@ -23,12 +26,15 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (!firebaseConfigured) { setError(t('notConfigured')); return; }
     setError("");
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
+      const credentials = await signInWithEmailAndPassword(auth, email, password);
+      const response = await authFetch(`/api/profile?uid=${encodeURIComponent(credentials.user.uid)}`);
+      const profile = response.ok ? await response.json() : {};
+      router.push(profile.role === 'teacher' ? '/teacher' : '/dashboard');
     } catch (err) {
       setError(t("error"));
     } finally {
@@ -39,6 +45,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-background px-6 py-10 md:px-10 lg:px-12">
       <div className="mx-auto max-w-3xl space-y-6">
+        <div className="flex justify-end"><LocaleSwitcher /></div>
         <div className="space-y-3 text-center">
           <p className="text-sm uppercase tracking-[0.3em] text-muted-foreground">{t("welcome")}</p>
           <h1 className="text-4xl font-headline font-black tracking-tight">{t("title")}</h1>
@@ -74,6 +81,7 @@ export default function LoginPage() {
             </div>
           </CardContent>
         </Card>
+        <LegalLinks />
       </div>
     </div>
   );

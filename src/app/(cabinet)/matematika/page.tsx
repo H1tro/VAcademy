@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { IconExternalLink } from "@/components/icons"
@@ -5,20 +6,21 @@ import curriculum from "@/lib/matematika-curriculum"
 import { getMatematikaDriveUrl } from "@/lib/matematika-blob"
 
 export default async function MatematikaPage() {
+  const ui = await getTranslations("ui");
   const driveUrl = await getMatematikaDriveUrl()
 
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Математика</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Материалы и учебная программа по математике.</p>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("mathematics")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{ui("mathematicsMaterialsAndCurriculum")}</p>
       </div>
 
       <div className="flex justify-center">
         <a href={driveUrl} target="_blank" rel="noopener noreferrer">
           <Button size="lg" variant="gradient" className="gap-2">
             <IconExternalLink className="h-5 w-5" />
-            Открыть материалы в Google Drive
+            {ui("openMaterialsInGoogleDrive")}
           </Button>
         </a>
       </div>

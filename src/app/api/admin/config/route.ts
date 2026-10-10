@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getDb } from "@/lib/firebase-server"
 import { FieldValue } from "firebase-admin/firestore"
+import { requestAdmin } from '@/lib/server-auth'
 
 const SUBJECTS = ["biology", "physics", "chemistry", "math", "cs"]
 
@@ -30,6 +31,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ aiEnabled })
     }
 
+    if (!await requestAdmin(req)) return NextResponse.json({ error: 'Доступ только администратору.' }, { status: 403 })
     if (subject) {
       if (!SUBJECTS.includes(subject)) {
         return NextResponse.json({ error: "Invalid subject" }, { status: 400 })
@@ -45,6 +47,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  if (!await requestAdmin(req)) return NextResponse.json({ error: 'Доступ только администратору.' }, { status: 403 })
   try {
     const { subject, chatId } = await req.json()
     if (!subject || !chatId) {
@@ -70,6 +73,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  if (!await requestAdmin(req)) return NextResponse.json({ error: 'Доступ только администратору.' }, { status: 403 })
   try {
     const { subject, chatId } = await req.json()
     if (!subject || !chatId) {

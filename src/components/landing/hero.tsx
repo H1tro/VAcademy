@@ -6,26 +6,28 @@ import { VLogo } from "@/components/v-logo";
 import { IconArrowRight, IconPlay } from "./icons";
 import { useCountUp, useInView } from "./use-in-view";
 import { Reveal } from "./reveal";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { problemsData } from '@/lib/problems-data';
 
 const STATS = [
-  { value: 24000, suffix: "+", key: "students" },
-  { value: 120, suffix: "+", key: "courses" },
-  { value: 92, suffix: "%", key: "target" },
+  { value: 5, suffix: "", labelKey: "subjects" },
+  { value: problemsData.length, suffix: "", labelKey: "problems" },
+  { value: 3, suffix: "", labelKey: "simulators" },
 ];
 
-function Stat({ value, suffix, key }: { value: number; suffix: string; key: string }) {
+function Stat({ value, suffix, labelKey }: { value: number; suffix: string; labelKey: string }) {
   const t = useTranslations("landing.hero.stats");
   const { ref, inView } = useInView<HTMLDivElement>(0.3);
+  const locale = useLocale();
   const count = useCountUp(value, inView);
 
   return (
     <div ref={ref} className="text-center">
       <p className="font-mono text-3xl font-semibold text-gradient sm:text-4xl">
-        {count.toLocaleString("ru-RU")}
+        {count.toLocaleString(locale)}
         {suffix}
       </p>
-      <p className="mt-1.5 text-sm text-muted-foreground">{t(key)}</p>
+      <p className="mt-1.5 text-sm text-muted-foreground">{t(labelKey)}</p>
     </div>
   );
 }
@@ -80,7 +82,7 @@ export function Hero() {
       <Reveal delay={320}>
         <dl className="mt-16 grid w-full max-w-3xl grid-cols-3 gap-6 rounded-3xl border border-border bg-panel/50 p-6 sm:p-8">
           {STATS.map((s) => (
-            <Stat key={s.key} {...s} />
+            <Stat key={s.labelKey} {...s} />
           ))}
         </dl>
       </Reveal>

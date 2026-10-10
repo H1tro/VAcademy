@@ -1,5 +1,7 @@
 "use client"
 
+import { translateLabel } from "@/i18n/labels";
+import { useTranslations as useUITranslations } from "next-intl";
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { IconTrophy, IconBook, IconExternalLink, IconMapPin } from "@/components/icons"
@@ -30,6 +32,7 @@ function materialIcon(name: string, url: string) {
 }
 
 export default function FizikaPage() {
+  const ui = useUITranslations("ui");
   const [level, setLevel] = useState<Level | "all">("all")
 
   const filtered = level === "all" ? curriculum : curriculum.filter((t) => t.level === level)
@@ -37,13 +40,12 @@ export default function FizikaPage() {
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Физика</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("physics")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Учебная программа и олимпиадные ресурсы · {curriculum.length} тем
-        </p>
+          {ui("curriculumAndOlympiadResources")} {curriculum.length}  {ui("topics")} </p>
       </div>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по уровню">
+      <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterByLevel")}>
         {LEVELS.map((l) => (
           <button
             key={l.value}
@@ -57,7 +59,7 @@ export default function FizikaPage() {
                 : "border-border text-muted-foreground hover:border-white/20 hover:text-foreground"
             )}
           >
-            {l.label}
+            {translateLabel(l.label, ui)}
           </button>
         ))}
       </div>
@@ -71,7 +73,7 @@ export default function FizikaPage() {
                   {topic.id}. {topic.title}
                 </CardTitle>
                 <span className={cn("rounded-full border px-2 py-0.5 text-xs font-medium", levelColors[topic.level])}>
-                  {topic.level}
+                  {translateLabel(topic.level, ui)}
                 </span>
               </div>
             </CardHeader>
@@ -90,7 +92,7 @@ export default function FizikaPage() {
 
               {topic.mathPrerequisites.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-border/20">
-                  <h4 className="font-semibold text-xs text-violet mb-1">Математика перед изучением</h4>
+                  <h4 className="font-semibold text-xs text-violet mb-1">{ui("mathPrerequisites")}</h4>
                   <div className="flex flex-wrap gap-1.5">
                     {topic.mathPrerequisites.map((m, i) => (
                       <span key={i} className="rounded-full bg-violet/10 border border-violet/20 px-2 py-0.5 text-xs text-violet">
@@ -102,7 +104,7 @@ export default function FizikaPage() {
               )}
 
               <div className="pt-3 border-t border-border/20">
-                <h4 className="font-semibold mb-2">Материалы</h4>
+                <h4 className="font-semibold mb-2">{ui("materials")}</h4>
                 <div className="flex flex-col gap-2">
                   {topic.materials.map((m, i) => {
                     const Icon = materialIcon(m.name, m.url)
@@ -130,7 +132,7 @@ export default function FizikaPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconTrophy className="h-5 w-5 text-amber" />
-            Олимпиадные задачи
+            {ui("olympiadProblems")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">

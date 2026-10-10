@@ -1,5 +1,8 @@
 "use client";
 
+import { authFetch } from '@/lib/auth-fetch';
+import { useTranslations as useUITranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { SUBJECTS } from "@/lib/navigation";
@@ -36,6 +39,8 @@ const MEDAL: Record<number, { className: string; label: string }> = {
 };
 
 export default function LeaderboardPage() {
+  const ui = useUITranslations("ui");
+  const subjects = useTranslations("nav");
   const { uid, user } = useAuth();
   const [subject, setSubject] = useState<string>("all");
   const [data, setData] = useState<LeaderboardEntry[]>([]);
@@ -44,7 +49,7 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     if (!uid) return;
-    fetch(`/api/profile?uid=${uid}`)
+    authFetch(`/api/profile?uid=${uid}`)
       .then((r) => (r.ok ? r.json() : null))
       .then(setProfile);
   }, [uid]);
@@ -91,26 +96,26 @@ export default function LeaderboardPage() {
 
   const stats = [
     {
-      label: "Решено задач",
+      label: ui("problemsSolved"),
       value: profile?.solvedProblems?.length ?? "—",
       icon: IconTarget,
       tint: "text-cyan",
     },
     {
-      label: "Набрано XP",
+      label: ui("xpEarned"),
       value: profile?.totalScore ?? "—",
       icon: IconFlame,
       tint: "text-amber",
     },
     {
-      label: "Место в топе",
+      label: ui("leaderboardRank"),
       value: myRank ? `#${myRank}` : "—",
       icon: IconTrophy,
       tint: "text-mint",
     },
     {
-      label: "Сильный предмет",
-      value: bestSubject?.name ?? "—",
+      label: ui("strongestSubject"),
+      value: bestSubject ? subjects(bestSubject.key) : "—",
       icon: IconUser,
       tint: "text-sky",
     },
@@ -122,9 +127,9 @@ export default function LeaderboardPage() {
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Рейтинг</h1>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("leaderboard")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Соревнуйтесь с учениками академии · обновляется после каждой задачи
+          {ui("competeWithAcademyStudentsUpdatedAfterEveryProblem")}
         </p>
       </div>
 
@@ -138,8 +143,8 @@ export default function LeaderboardPage() {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Рейтинг по предметам">
-        {[{ value: "all", label: "Общий" }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name })), { value: "codeforces", label: "Codeforces" }].map((s) => (
+      <div className="flex flex-wrap gap-2" role="group" aria-label={ui("leaderboardBySubject")}>
+        {[{ value: "all", label: ui("overall") }, ...SUBJECTS.map((s) => ({ value: s.key, label: subjects(s.key) })), { value: "codeforces", label: "Codeforces" }].map((s) => (
           <button
             key={s.value}
             type="button"
@@ -165,9 +170,9 @@ export default function LeaderboardPage() {
         </div>
       ) : sorted.length === 0 ? (
         <div className="rounded-2xl border border-border bg-panel/40 p-12 text-center">
-          <p className="font-headline text-lg font-semibold">Пока пусто</p>
+          <p className="font-headline text-lg font-semibold">{ui("nothingHereYet")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Решите первую задачу, чтобы попасть в рейтинг.
+            {ui("solveYourFirstProblemToJoinTheLeaderboard")}
           </p>
         </div>
       ) : (
@@ -193,14 +198,14 @@ export default function LeaderboardPage() {
                   </Avatar>
                   <p className="mt-3 font-semibold leading-tight">
                     {entry.displayName}
-                    {isMe && <span className="ml-1.5 text-xs text-cyan">(вы)</span>}
+                    {isMe && <span className="ml-1.5 text-xs text-cyan">{ui("you")}</span>}
                   </p>
                   <p className="mt-1 font-mono text-xs text-muted-foreground">
                     {subject === "codeforces"
-                      ? `${entry.cfCompleted ?? 0} решено`
+                      ? ui("solvedCount", {count: entry.cfCompleted ?? 0})
                       : subject === "all"
                         ? `${entry.totalScore} XP`
-                        : `${entry.subjectScore} задач`}
+                        : ui("problemCount", {count: entry.subjectScore ?? 0})}
                   </p>
                 </div>
               );
@@ -210,9 +215,9 @@ export default function LeaderboardPage() {
           <div className="card-surface overflow-hidden">
             <div className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 border-b border-border px-5 py-3 font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               <span>#</span>
-              <span>Ученик</span>
-              <span className="text-right">{subject === "codeforces" ? "CF решено" : "Задачи"}</span>
-              <span className="w-16 text-right">{subject === "codeforces" ? "Всего" : "XP"}</span>
+              <span>{ui("student")}</span>
+              <span className="text-right">{subject === "codeforces" ? ui("cfSolved") : ui("problems")}</span>
+              <span className="w-16 text-right">{subject === "codeforces" ? ui("total") : "XP"}</span>
             </div>
             {rest.map((entry, i) => {
               const rank = i + 4;
@@ -233,7 +238,7 @@ export default function LeaderboardPage() {
                     </Avatar>
                     <span className="truncate text-sm font-medium">
                       {entry.displayName}
-                      {isMe && <span className="ml-1.5 text-xs text-cyan">(вы)</span>}
+                      {isMe && <span className="ml-1.5 text-xs text-cyan">{ui("you")}</span>}
                     </span>
                   </div>
                   <span className="text-right font-mono text-sm text-muted-foreground">

@@ -1,5 +1,8 @@
 "use client";
 
+import { authFetch } from '@/lib/auth-fetch';
+import { translateLabel } from "@/i18n/labels";
+import { useTranslations as useUITranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { problemsData } from "@/lib/problems-data";
@@ -24,6 +27,7 @@ const DIFFICULTIES: { value: DifficultyFilter; label: string }[] = [
 ];
 
 export default function ProblemsPage() {
+  const ui = useUITranslations("ui");
   const { uid, user } = useAuth();
   const [subject, setSubject] = useState<SubjectFilter>("all");
   const [difficulty, setDifficulty] = useState<DifficultyFilter>("all");
@@ -37,7 +41,7 @@ export default function ProblemsPage() {
       setLoaded(true);
       return;
     }
-    fetch(`/api/profile?uid=${uid}`)
+    authFetch(`/api/profile?uid=${uid}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const ids = Array.isArray(data?.solvedProblems) ? data.solvedProblems : [];
@@ -67,16 +71,15 @@ export default function ProblemsPage() {
     <div className="animate-fade-up space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Задачи</h1>
+          <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("problems")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Решено {solvedCount} из {problemsData.length} · наберите XP за правильные решения
-          </p>
+            {ui("solved")} {solvedCount}  {ui("of")} {problemsData.length}  {ui("earnXpForCorrectSolutions")} </p>
         </div>
       </div>
 
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по предмету">
-          {[{ value: "all", label: "Все предметы" }, ...SUBJECTS.filter((s) => s.key !== "informatics").map((s) => ({ value: s.key, label: s.name }))].map((s) => (
+        <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterBySubject")}>
+          {[{ value: "all", label: ui("allSubjects") }, ...SUBJECTS.filter((s) => s.key !== "informatics").map((s) => ({ value: s.key, label: translateLabel(s.name, ui) }))].map((s) => (
             <button
               key={s.value}
               type="button"
@@ -95,7 +98,7 @@ export default function ProblemsPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по сложности">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterByDifficulty")}>
             {DIFFICULTIES.map((d) => (
               <button
                 key={d.value}
@@ -109,16 +112,16 @@ export default function ProblemsPage() {
                     : "border-border text-muted-foreground hover:border-white/20 hover:text-foreground"
                 )}
               >
-                {d.label}
+                {translateLabel(d.label, ui)}
               </button>
             ))}
           </div>
 
-          <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по статусу">
+          <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterByStatus")}>
             {[
-              { value: "all", label: "Все" },
-              { value: "solved", label: "Решённые" },
-              { value: "unsolved", label: "Не решённые" },
+              { value: "all", label: ui("all") },
+              { value: "solved", label: ui("solved2") },
+              { value: "unsolved", label: ui("unsolved2") },
             ].map((s) => (
               <button
                 key={s.value}
@@ -147,8 +150,8 @@ export default function ProblemsPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl border border-border bg-panel/40 p-12 text-center">
-          <p className="font-headline text-lg font-semibold">Ничего не найдено</p>
-          <p className="mt-1 text-sm text-muted-foreground">Попробуйте изменить фильтры.</p>
+          <p className="font-headline text-lg font-semibold">{ui("noResults")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{ui("tryChangingTheFilters")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

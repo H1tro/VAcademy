@@ -1,5 +1,7 @@
 "use client";
 
+import { translateLabel } from "@/i18n/labels";
+import { useTranslations as useUITranslations } from "next-intl";
 import type { Problem, ProblemDifficulty, ProblemSubject } from "@/lib/problems-data";
 import { DIFFICULTY_POINTS } from "@/lib/problems-data";
 import { subjectByKey } from "@/lib/navigation";
@@ -32,6 +34,7 @@ export function ProblemCard({
   solved: boolean;
   onClick: () => void;
 }) {
+  const ui = useUITranslations("ui");
   const meta = DIFFICULTY_META[problem.difficulty];
   const subject = subjectByKey(problem.subject as ProblemSubject);
 
@@ -53,7 +56,7 @@ export function ProblemCard({
             meta.badge
           )}
         >
-          {meta.label}
+          {translateLabel(meta.label, ui)}
         </span>
         <span className="font-mono text-xs text-muted-foreground">
           <span className={meta.text}>{DIFFICULTY_POINTS[problem.difficulty]} XP</span>
@@ -67,12 +70,12 @@ export function ProblemCard({
 
       <div className="mt-4 flex items-center justify-between border-t border-border pt-3">
         <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-          {SUBJECT_LABELS[problem.subject] ?? problem.subject}
+          {translateLabel(SUBJECT_LABELS[problem.subject] ?? problem.subject, ui)}
         </span>
         {solved && (
           <span className="flex items-center gap-1 font-mono text-[11px] text-mint">
             <IconCheckCircle className="h-4 w-4" />
-            Решено
+            {ui("solved")}
           </span>
         )}
       </div>

@@ -1,5 +1,7 @@
 "use client"
 
+import { authFetch } from '@/lib/auth-fetch';
+import { useTranslations as useUITranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
@@ -14,6 +16,7 @@ import { useTranslations } from "next-intl"
 export const dynamic = "force-dynamic"
 
 export default function CodeforcesPage() {
+  const ui = useUITranslations("ui");
   const { uid, user } = useAuth()
   const [tasks, setTasks] = useState<CFTask[]>([])
   const [loading, setLoading] = useState(true)
@@ -41,7 +44,7 @@ export default function CodeforcesPage() {
 
   useEffect(() => {
     if (!uid) return
-    fetch(`/api/profile?uid=${uid}`)
+    authFetch(`/api/profile?uid=${uid}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.codeforces) setCfHandle(data.codeforces)
@@ -61,7 +64,7 @@ export default function CodeforcesPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error || "Ошибка проверки")
+        setError(data.error || ui("checkFailed"))
       } else if (data.results) {
         const results: { id: string; status: string; attempts: number }[] = data.results
         setTasks((prev) => {
@@ -73,7 +76,7 @@ export default function CodeforcesPage() {
         })
       }
     } catch {
-      setError("Ошибка сети")
+      setError(ui("networkError"))
     } finally {
       setChecking(false)
     }
@@ -87,7 +90,7 @@ export default function CodeforcesPage() {
       const probe = await fetch(`/api/codeforces/problem?id=${encodeURIComponent(inputId.trim())}`)
       if (!probe.ok) {
         const d = await probe.json()
-        setError(d.error || "Задача не найдена")
+        setError(d.error || ui("problemNotFound"))
         return
       }
       const info = await probe.json()
@@ -99,13 +102,13 @@ export default function CodeforcesPage() {
       })
       if (!res.ok) {
         const d = await res.json()
-        setError(d.error || "Не удалось добавить")
+        setError(d.error || ui("couldNotAddProblem"))
         return
       }
       setInputId("")
       await fetchTasks()
     } catch {
-      setError("Ошибка сети")
+      setError(ui("networkError"))
     } finally {
       setAdding(false)
     }
@@ -133,12 +136,10 @@ export default function CodeforcesPage() {
 
       {!cfHandle && (
         <div className="rounded-xl bg-amber/10 p-4 text-sm text-amber">
-          Укажите ваш <strong>Codeforces Handle</strong> в{" "}
+          {ui("enterYour")} <strong>Codeforces Handle</strong>  {ui("inYour")}{" "}
           <a href="/profile/edit" className="underline">
-            профиле
-          </a>
-          , чтобы автоматическая проверка работала.
-        </div>
+            {ui("profile")} </a>
+          {ui("toEnableAutomaticSolutionChecking")} </div>
       )}
 
       {error && <div className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{error}</div>}
@@ -146,7 +147,7 @@ export default function CodeforcesPage() {
       <div className="flex flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <Label htmlFor="cf-id" className="sr-only">
-            ID задачи
+            {ui("problemId")}
           </Label>
           <Input
             id="cf-id"
@@ -158,20 +159,18 @@ export default function CodeforcesPage() {
           />
           <Button onClick={handleAdd} disabled={adding || !inputId.trim()} size="sm" variant="gradient">
             {adding ? <IconSpinner className="h-4 w-4 animate-spin" /> : <IconPlus className="h-4 w-4" />}
-            Добавить
-          </Button>
+            {ui("add")} </Button>
         </div>
 
         <Button onClick={handleCheck} disabled={checking || !uid} size="sm" variant="outline">
           {checking ? (
             <>
               <IconSpinner className="mr-2 h-4 w-4 animate-spin" />
-              Проверяем...
-            </>
+              {ui("checking")} </>
           ) : (
             <>
               <IconRefresh className="mr-2 h-4 w-4" />
-              Проверить решения
+              {ui("checkSolutions")}
             </>
           )}
         </Button>
@@ -185,9 +184,9 @@ export default function CodeforcesPage() {
         </div>
       ) : tasks.length === 0 ? (
         <div className="rounded-2xl border border-border bg-panel/40 p-12 text-center">
-          <p className="font-headline text-lg font-semibold">Нет назначенных задач</p>
+          <p className="font-headline text-lg font-semibold">{ui("noAssignedProblems")}</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Добавьте задачу, введя ID в формате <span className="font-mono">520A</span>
+            {ui("addAProblemUsingAnIdSuchAs")} <span className="font-mono">520A</span>
           </p>
         </div>
       ) : (
@@ -199,7 +198,7 @@ export default function CodeforcesPage() {
                 type="button"
                 onClick={() => handleDelete(task.id)}
                 className="absolute right-12 top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-lg text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
-                aria-label="Удалить задачу"
+                aria-label={ui("deleteProblem")}
               >
                 <IconTrash className="h-3.5 w-3.5" />
               </button>
@@ -211,8 +210,7 @@ export default function CodeforcesPage() {
       {checking && (
         <div className="flex items-center justify-center gap-2 py-4 text-sm text-muted-foreground">
           <IconSpinner className="h-4 w-4 animate-spin" />
-          Проверяем Codeforces...
-        </div>
+          {ui("checkingCodeforces")} </div>
       )}
     </div>
   )

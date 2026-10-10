@@ -18,4 +18,12 @@ function getApp() {
 }
 
 export const app = getApp();
-export const auth: Auth = getAuth(app);
+export const firebaseConfigured = Boolean(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.authDomain);
+// Defer Auth until it is actually used, so public learning pages can render without credentials.
+export const auth: Auth = firebaseConfigured ? getAuth(app) : new Proxy({} as Auth, {
+  get(_target, key) {
+    const instance = getAuth(app);
+    const value = Reflect.get(instance, key, instance);
+    return typeof value === 'function' ? value.bind(instance) : value;
+  },
+});

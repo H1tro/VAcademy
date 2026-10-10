@@ -1,68 +1,33 @@
-import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase-server"
-import { FieldValue } from "firebase-admin/firestore"
-import { problemsData, DIFFICULTY_POINTS } from "@/lib/problems-data"
-import type { ProblemSubject } from "@/lib/problems-data"
-
-const SUBJECT_PREFIX: Record<string, ProblemSubject> = {
-  math: "mathematics",
-  phys: "physics",
-  inf: "informatics",
-  chem: "chemistry",
-  bio: "biology",
-}
-
-function getSubject(problemId: string): ProblemSubject | null {
-  const prefix = problemId.split("-")[0]
-  return SUBJECT_PREFIX[prefix] ?? null
-}
+import { NextResponse } from 'next/server';
+import { getDb } from '@/lib/firebase-server';
+import { FieldValue } from 'firebase-admin/firestore';
+import { problemsData, DIFFICULTY_POINTS } from '@/lib/problems-data';
+import { checkAnswer } from '@/lib/practice-problems';
+import { requestUser } from '@/lib/server-auth';
 
 export async function POST(req: Request) {
+  const uid = await requestUser(req);
+  if (!uid) return NextResponse.json({ error: 'Требуется вход.' }, { status: 401 });
+  let body;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: 'Некорректный запрос.' }, { status: 400 }); }
+  const problem = problemsData.find(p => p.id === body.problemId);
+  if (!problem || typeof body.answer !== 'string' || body.answer.length > 2000 || !body.answer.trim()) return NextResponse.json({ error: 'Выберите задачу и введите ответ.' }, { status: 400 });
+  const correct = checkAnswer(body.answer, problem.correctAnswer);
   try {
-    const body = await req.json()
-    const { uid, problemId, platform, solution, imageUrl } = body
-    if (!uid || !problemId) return NextResponse.json({ error: "uid and problemId required" }, { status: 400 })
-
-    const db = getDb()
-
-    await db.collection("submissions").add({
-      uid,
-      problemId,
-      platform: platform || "internal",
-      solution: solution || "",
-      imageUrl: imageUrl || "",
-      status: "pending",
-      createdAt: FieldValue.serverTimestamp(),
-    })
-
-    const problem = problemsData.find((p) => p.id === problemId)
-    if (problem) {
-      const userRef = db.doc(`users/${uid}`)
-      const userSnap = await userRef.get()
-      const userData = userSnap.data() || {}
-
-      const solved: string[] = userData.solvedProblems || []
-      if (!solved.includes(problemId)) {
-        const xp = DIFFICULTY_POINTS[problem.difficulty] || 1
-        const subject = getSubject(problemId)
-        const subjectField = subject ? `subjectProgress.${subject}` : null
-
-        const updates: Record<string, unknown> = {
-          solvedProblems: FieldValue.arrayUnion(problemId),
-          tasksSolved: FieldValue.increment(1),
-          totalScore: FieldValue.increment(xp),
-        }
-
-        if (subjectField) {
-          updates[subjectField] = FieldValue.increment(1)
-        }
-
-        await userRef.set(updates, { merge: true })
-      }
-    }
-
-    return NextResponse.json({ success: true })
-  } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 500 })
-  }
+    const db = getDb(); const userRef = db.doc(`users/${uid}`);
+    await db.runTransaction(async transaction => {
+      const snapshot = await transaction.get(userRef);
+      const solved: string[] = snapshot.data()?.solvedProblems || [];
+      transaction.set(db.collection('submissions').doc(), {
+        uid, problemId: problem.id, platform: 'internal', answer: body.answer,
+        solution: String(body.solution || '').slice(0, 5000), imageUrl: String(body.imageUrl || '').slice(0, 2000),
+        status: correct ? 'accepted' : 'incorrect', createdAt: FieldValue.serverTimestamp(),
+      });
+      if (correct && !solved.includes(problem.id)) transaction.set(userRef, {
+        solvedProblems: FieldValue.arrayUnion(problem.id), tasksSolved: FieldValue.increment(1), totalScore: FieldValue.increment(DIFFICULTY_POINTS[problem.difficulty]),
+        subjectProgress: { [problem.subject]: FieldValue.increment(1) },
+      }, { merge: true });
+    });
+    return NextResponse.json({ success: true, correct, explanation: problem.explanation });
+  } catch { return NextResponse.json({ error: 'Не удалось сохранить результат.' }, { status: 503 }); }
 }

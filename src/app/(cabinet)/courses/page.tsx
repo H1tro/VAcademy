@@ -1,5 +1,7 @@
 "use client"
 
+import { authFetch } from '@/lib/auth-fetch';
+import { useTranslations as useUITranslations } from "next-intl";
 import { useTranslations } from "next-intl"
 import { useEffect, useState, useCallback } from "react"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +11,10 @@ import { SUBJECTS } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
 import { chemistryVideos } from "@/lib/himiya-videos"
 import { useAuth } from "@/hooks/use-auth"
+import { auth } from '@/lib/firebase'
 import { ProgressBar } from "@/components/progress-bar"
+import { VideoLibrary } from '@/components/video-library'
+import { ExternalVideo } from '@/components/legal/external-video'
 
 interface Video {
   name: string
@@ -106,6 +111,8 @@ const videoLessons: VideoGroup[] = [
 ]
 
 export default function CoursesPage() {
+  const ui = useUITranslations("ui");
+  const subjects = useTranslations("nav");
   const t = useTranslations('cabinet.courses')
   const { uid } = useAuth()
   const [openVideo, setOpenVideo] = useState<string | null>(null)
@@ -118,7 +125,7 @@ export default function CoursesPage() {
 
   useEffect(() => {
     if (!uid) return
-    fetch(`/api/profile?uid=${uid}`)
+    authFetch(`/api/profile?uid=${uid}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (Array.isArray(d?.watchedVideos)) setWatched(new Set(d.watchedVideos))
@@ -141,11 +148,11 @@ export default function CoursesPage() {
       if (next.has(key)) next.delete(key)
       else next.add(key)
       if (uid) {
-        fetch("/api/profile", {
+        auth.currentUser?.getIdToken().then(token => fetch("/api/profile", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
           body: JSON.stringify({ uid, watchedVideos: Array.from(next) }),
-        })
+        })).catch(() => {})
       }
       return next
     })
@@ -183,6 +190,7 @@ export default function CoursesPage() {
         )}
       </div>
 
+      <VideoLibrary />
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
         {videoLessons.map((group) => {
           const meta = SUBJECTS.find((s) => s.key === group.subjectKey)
@@ -192,7 +200,7 @@ export default function CoursesPage() {
           const progressPct = group.videos.length > 0 ? Math.round((watchedCount / group.videos.length) * 100) : 0
 
           return (
-            <div key={group.subject} className="card-surface card-hover flex flex-col overflow-hidden">
+            <div key={group.subjectKey} className="card-surface card-hover flex flex-col overflow-hidden">
               <div className={cn("h-1 bg-gradient-to-r", meta?.cover ?? "from-white/20 to-transparent")} />
               <button
                 type="button"
@@ -203,7 +211,7 @@ export default function CoursesPage() {
                   <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", meta?.bubble)}>
                     <Icon className="h-5 w-5" />
                   </span>
-                  {group.subject}
+                  {subjects(group.subjectKey)}
                 </h2>
                 <div className="flex items-center gap-2">
                   {group.subjectKey === "informatics" && cfTotal > 0 ? (
@@ -258,7 +266,7 @@ export default function CoursesPage() {
                                     ? "border-mint bg-mint text-white"
                                     : "border-muted-foreground/30 hover:border-muted-foreground/60"
                                 )}
-                                aria-label={isWatched ? "Отменить просмотр" : "Отметить как просмотренное"}
+                                aria-label={isWatched ? ui("markAsUnwatched") : ui("markAsWatched")}
                               >
                                 {isWatched && <IconCheck className="h-3 w-3" />}
                               </button>
@@ -283,6 +291,7 @@ export default function CoursesPage() {
                           </div>
                           {isOpen && (
                             <div className="px-3 pb-3 pt-1 pl-9">
+                              <ExternalVideo key={video.url} url={video.url} title={video.name} />
                               <Button size="sm" variant="outline" asChild>
                                 <a href={video.url} target="_blank" rel="noopener noreferrer">
                                   <IconExternalLink className="mr-2 h-3.5 w-3.5" />

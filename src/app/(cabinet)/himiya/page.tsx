@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { IconBook, IconTrophy, IconExternalLink, IconMapPin } from "@/components/icons"
@@ -6,20 +7,21 @@ import { HIMIYA_OLYMPIADS } from "@/lib/himiya-olympiads"
 import { getHimiyaDriveUrl } from "@/lib/himiya-blob"
 
 export default async function HimiyaPage() {
+  const ui = await getTranslations("ui");
   const driveUrl = await getHimiyaDriveUrl()
 
   return (
     <div className="animate-fade-up space-y-8">
       <div>
-        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">Химия</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Материалы и учебная программа по химии.</p>
+        <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">{ui("chemistry")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{ui("chemistryMaterialsAndCurriculum")}</p>
       </div>
 
       <div className="flex justify-center">
         <a href={driveUrl} target="_blank" rel="noopener noreferrer">
           <Button size="lg" variant="gradient" className="gap-2">
             <IconExternalLink className="h-5 w-5" />
-            Открыть материалы в Google Drive
+            {ui("openMaterialsInGoogleDrive")}
           </Button>
         </a>
       </div>
@@ -29,7 +31,7 @@ export default async function HimiyaPage() {
           <Card key={topic.id} className="card-surface card-hover">
             <CardHeader>
               <div className="flex items-start justify-between">
-                <CardTitle className="font-headline text-lg font-bold leading-snug">{topic.id <= 13 ? `Раздел ${topic.id}. ${topic.title}` : topic.title}</CardTitle>
+                <CardTitle className="font-headline text-lg font-bold leading-snug">{topic.id <= 13 ? ui("sectionTitle", {id: topic.id, title: topic.title}) : topic.title}</CardTitle>
                 <span className="text-xs text-muted-foreground whitespace-nowrap ml-4 mt-1">{topic.section}</span>
               </div>
             </CardHeader>
@@ -55,7 +57,7 @@ export default async function HimiyaPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconTrophy className="h-5 w-5 text-amber" />
-            Олимпиадные задачи
+            {ui("olympiadProblems")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -91,15 +93,14 @@ export default async function HimiyaPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <IconBook className="h-5 w-5 text-cyan" />
-            Рекомендуемая литература
-          </CardTitle>
+            {ui("recommendedReading")} </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
           <p className="text-sm">Petrucci — General Chemistry</p>
-          <p className="text-sm">Третьяков, Дорохова — ТОХ (Том 1, 2)</p>
-          <p className="text-sm">Ахметов — Неорганическая химия</p>
+          <p className="text-sm">{ui("tretyakovDorokhovaFundamentalsOfChemistryVol12")}</p>
+          <p className="text-sm">{ui("akhmetovInorganicChemistry")}</p>
           <p className="text-sm">Clayden — Organic Chemistry</p>
-          <p className="text-sm">Васильев — Аналитическая химия</p>
+          <p className="text-sm">{ui("vasilyevAnalyticalChemistry")}</p>
           <p className="text-sm">Skoog — Instrumental Analysis</p>
           <p className="text-sm">Lehninger — Principles of Biochemistry</p>
         </CardContent>

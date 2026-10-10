@@ -1,5 +1,8 @@
 "use client";
 
+import { authFetch } from '@/lib/auth-fetch';
+import { translateLabel } from "@/i18n/labels";
+import { useTranslations as useUITranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/use-auth";
@@ -132,6 +135,8 @@ const subjectBadge: Record<string, string> = {
 };
 
 export default function TestsPage() {
+  const ui = useUITranslations("ui");
+  const subjects = useTranslations("nav");
   const t = useTranslations('cabinet.tests')
   const { uid } = useAuth();
   const [subject, setSubject] = useState<SubjectFilter>("all");
@@ -144,7 +149,7 @@ export default function TestsPage() {
 
   useEffect(() => {
     if (!uid) { setLoaded(true); return; }
-    fetch(`/api/profile?uid=${uid}`)
+    authFetch(`/api/profile?uid=${uid}`)
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         const ids = Array.isArray(data?.solvedProblems) ? data.solvedProblems : [];
@@ -189,7 +194,7 @@ export default function TestsPage() {
       </div>
 
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по типу">
+        <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterByType")}>
           {([
             { value: "all", label: t('all') },
             { value: "pdf", label: t('pdfTests') },
@@ -212,8 +217,8 @@ export default function TestsPage() {
           ))}
         </div>
 
-        <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по предмету">
-          {[{ value: "all", label: t('allSubjects') }, ...SUBJECTS.map((s) => ({ value: s.key, label: s.name }))].map((s) => (
+        <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterBySubject")}>
+          {[{ value: "all", label: t('allSubjects') }, ...SUBJECTS.map((s) => ({ value: s.key, label: subjects(s.key) }))].map((s) => (
             <button
               key={s.value}
               type="button"
@@ -233,9 +238,9 @@ export default function TestsPage() {
 
         {showInteractive && (
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по сложности">
+            <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterByDifficulty")}>
               {DIFFICULTIES.map((d) => {
-                  const label = d.value === "all" ? t('allLevels') : d.label
+                  const label = d.value === "all" ? t('allLevels') : translateLabel(d.label, ui)
                   return (
                     <button
                       key={d.value}
@@ -255,7 +260,7 @@ export default function TestsPage() {
                 })}
             </div>
 
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Фильтр по статусу">
+            <div className="flex flex-wrap gap-2" role="group" aria-label={ui("filterByStatus")}>
               {[
                 { value: "all", label: t('all') },
                 { value: "solved", label: t('solved') },

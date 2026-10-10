@@ -2,6 +2,8 @@
 
 export const dynamic = "force-dynamic"
 
+import { authFetch } from '@/lib/auth-fetch';
+import { useTranslations as useUITranslations } from "next-intl";
 import { useTranslations } from "next-intl"
 import { useEffect, useState } from "react"
 import { useAuth } from "@/hooks/use-auth"
@@ -37,10 +39,13 @@ const zeroStats: UserStats = {
 }
 
 export default function DashboardPage() {
+  const ui = useUITranslations("ui");
+  const subjects = useTranslations("nav");
+  const common = useTranslations("common");
   const t = useTranslations('cabinet.dashboard')
   const { uid, user } = useAuth()
-  const [displayName, setDisplayName] = useState("Гость")
-  const [goal, setGoal] = useState("Подготовка к олимпиадам")
+  const [displayName, setDisplayName] = useState("")
+  const [goal, setGoal] = useState("")
   const [stats, setStats] = useState<UserStats>(zeroStats)
   const [rank, setRank] = useState<number | null>(null)
   const [usersCount, setUsersCount] = useState(0)
@@ -48,15 +53,15 @@ export default function DashboardPage() {
   const [cfTotal, setCfTotal] = useState(0)
 
   useEffect(() => {
-    const name = user?.displayName || user?.email?.split("@")[0] || "Гость"
+    const name = user?.displayName || user?.email?.split("@")[0] || ""
     setDisplayName(name)
     if (!uid) return
 
     const loadUserStats = async () => {
-      const profileRes = await fetch(`/api/profile?uid=${uid}`)
+      const profileRes = await authFetch(`/api/profile?uid=${uid}`)
       if (profileRes.ok) {
         const d = await profileRes.json()
-        if (d && d.goal) setGoal(d.goal || "Подготовка к олимпиадам")
+        if (d && d.goal) setGoal(d.goal || "")
         setStats({
           streakDays: Number(d?.streakDays ?? 0),
           maxStreakDays: Number(d?.maxStreakDays ?? 0),
@@ -94,12 +99,12 @@ export default function DashboardPage() {
   const formatStudyTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60)
     const remainingMinutes = minutes % 60
-    return `${hours}ч ${remainingMinutes}м`
+    return t("duration", {hours, minutes: remainingMinutes})
   }
 
   const subjectProgressPairs = SUBJECTS.map((s) => ({
     key: s.key,
-    label: s.name,
+    label: subjects(s.key),
     value: stats.subjectProgress[s.key as keyof SubjectProgress],
     tint: s.text,
   }))
@@ -109,10 +114,10 @@ export default function DashboardPage() {
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="font-headline text-2xl font-bold tracking-tight sm:text-3xl">
-            {t('greeting', {name: displayName})} 👋
+            {t('greeting', {name: displayName || common("guest")})} 👋
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t('yourGoal')}: {goal}</p>
-          {displayName !== "Гость" && (
+          <p className="mt-1 text-sm text-muted-foreground">{t('yourGoal')}: {goal || common("defaultGoal")}</p>
+          {displayName && (
             <Link href="/profile/edit" className="mt-1 inline-block text-sm font-medium text-cyan hover:underline">
               {t('editProfile')}
             </Link>
@@ -127,9 +132,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
-        <StatCard icon={<IconFlame className="text-amber" />} label={t('daysStreak')} value={`${stats.streakDays}`} sub={`Рекорд: ${stats.maxStreakDays}`} />
-        <StatCard icon={<IconTarget className="text-cyan" />} label={t('problemsSolved')} value={`${stats.tasksSolved}`} sub="Всего решено" />
-        <StatCard icon={<IconTrophy className="text-amber" />} label={t('rank')} value={rank ? `#${rank}` : "—"} sub={rank ? `Место ${rank} из ${usersCount}` : "Нет данных"} />
+        <StatCard icon={<IconFlame className="text-amber" />} label={t('daysStreak')} value={`${stats.streakDays}`} sub={t("record", {count: stats.maxStreakDays})} />
+        <StatCard icon={<IconTarget className="text-cyan" />} label={t('problemsSolved')} value={`${stats.tasksSolved}`} sub={t("totalSolved")} />
+        <StatCard icon={<IconTrophy className="text-amber" />} label={t('rank')} value={rank ? `#${rank}` : "—"} sub={rank ? t("position", {rank, total: usersCount}) : t("noData")} />
         <StatCard icon={<IconClock className="text-sky" />} label={t('studyTime')} value={formatStudyTime(stats.studyTimeMinutes)} sub={t('totalMinutes')} />
         <Link href="/codeforces" className="block">
           <StatCard icon={<IconCodeforces className="text-sky" />} label={t('codeforces')} value={`${cfCompleted}/${cfTotal}`} sub={cfTotal > 0 ? t('noSolved') : t('noSolved')} />
@@ -164,7 +169,7 @@ export default function DashboardPage() {
         <Card className="card-surface">
           <CardHeader>
             <CardTitle className="font-headline text-lg font-bold">{t('quickActions')}</CardTitle>
-            <CardDescription>Начните прямо сейчас</CardDescription>
+            <CardDescription>{ui("startRightNow")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <Link href="/tests" className="flex items-center gap-3 rounded-xl p-3 text-sm font-medium transition-colors hover:bg-white/5">
