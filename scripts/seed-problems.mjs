@@ -1,20 +1,10 @@
-import { initializeApp } from "firebase/app"
-import { getFirestore, doc, setDoc } from "firebase/firestore"
+import { createClient } from "@supabase/supabase-js"
 import { config } from "dotenv"
 import { resolve, dirname } from "path"
 import { fileURLToPath } from "url"
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 config({ path: resolve(__dirname, "..", ".env.local") })
-
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.trim() || "",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN?.trim() || "",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.trim() || "",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET?.trim() || "",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID?.trim() || "",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID?.trim() || "",
-}
 
 const problemsData = [
   {
@@ -217,15 +207,17 @@ const problemsData = [
 ]
 
 async function seed() {
-  const app = initializeApp(firebaseConfig)
-  const db = getFirestore(app)
+  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!key || !process.env.NEXT_PUBLIC_SUPABASE_URL) throw new Error("Supabase server credentials are required")
+  const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, key, { auth: { persistSession: false } })
 
   console.log(`Seeding ${problemsData.length} problems...`)
 
   let seeded = 0
   for (const problem of problemsData) {
     try {
-      await setDoc(doc(db, "problems", problem.id), problem)
+      const { error } = await db.from("app_documents").upsert({ collection: "problems", id: problem.id, data: problem })
+      if (error) throw error
       seeded++
       console.log(`  ✓ ${problem.id} — ${problem.title}`)
     } catch (err) {
@@ -234,7 +226,7 @@ async function seed() {
   }
 
   console.log(`\nDone! ${seeded}/${problemsData.length} problems seeded.`)
-  process.exit(0)
+  process.exit(seeded === problemsData.length ? 0 : 1)
 }
 
 seed().catch((err) => {

@@ -20,11 +20,10 @@ const db = {
 const originalLoad = Module._load;
 Module._load = function(name, ...args) {
   if (name === 'next/server') return { NextResponse: { json: (body, init) => Response.json(body, init) } };
-  if (name === '@/lib/firebase-server') return { getDb: () => db };
   if (name === '@/lib/server-auth') return { requestUser: async () => authenticated ? 'signed-in-user' : null };
   if (name === '@/lib/problems-data') return { problemsData, DIFFICULTY_POINTS: { easy: 1, medium: 3, hard: 5 } };
   if (name === '@/lib/practice-problems') return { checkAnswer };
-  if (name === 'firebase-admin/firestore') return { FieldValue: { serverTimestamp: () => 'timestamp', increment: n => n, arrayUnion: id => ({ id }) } };
+  if (name === "@/lib/database") return { getDb: () => db, FieldValue: { serverTimestamp: () => 'timestamp', increment: n => n, arrayUnion: id => ({ id }) } };
   return originalLoad.call(this, name, ...args);
 };
 const { POST } = require('../src/app/api/submissions/route.ts');

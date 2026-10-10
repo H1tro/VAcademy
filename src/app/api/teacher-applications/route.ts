@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requestUser } from '@/lib/server-auth';
-import { getDb } from '@/lib/firebase-server';
-import { FieldValue } from 'firebase-admin/firestore';
+import { getDb } from '@/lib/database';
+import { FieldValue } from '@/lib/database';
 import { z } from 'zod';
 
 const schema = z.object({ displayName: z.string().trim().min(2).max(120), school: z.string().trim().min(2).max(200), reason: z.string().trim().min(10).max(1500) });

@@ -1,5 +1,7 @@
 "use client"
 
+import { auth } from "@/lib/auth-client";
+import { createClient } from "@/utils/supabase/client";
 import { useTranslations as useUITranslations } from "next-intl";
 import { useSearchParams, useRouter } from "next/navigation"
 import { useState, Suspense } from "react"
@@ -61,6 +63,7 @@ function DeleteAccountContent() {
         throw new Error(data.error || ui("couldNotDeleteAccount2"))
       }
 
+      if (auth.currentUser?.uid === uid) await createClient().auth.signOut({ scope: "local" });
       setDone(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : ui("couldNotDeleteAccount"))

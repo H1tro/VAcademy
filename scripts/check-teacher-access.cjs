@@ -16,13 +16,13 @@ function write(path, data, options) { records.set(path, options?.merge ? { ...re
 const original = Module._load;
 Module._load = function(name, ...args) {
   if (name === 'next/server') return { NextResponse: { json: (body, init) => Response.json(body, init) } };
-  if (name === '@/lib/firebase-server' || name === './firebase-server') return { getDb: () => db };
-  if (name === 'firebase-admin/auth') return { getAuth: () => ({ verifyIdToken: async token => { if (token === 'invalid') throw new Error(); return { uid: token }; } }) };
+  if (name === '@supabase/supabase-js') return { createClient: () => ({ auth: { getUser: async token => ({ data: { user: token === 'invalid' ? null : { id: token } }, error: token === 'invalid' ? new Error() : null }) } }) };
+  if (name === '@/utils/supabase/config') return { getSupabaseConfig: () => ({ url: 'https://test.supabase.co', key: 'test' }) };
   if (name === '@/lib/server-auth') return require('../src/lib/server-auth.ts');
   if (name === '@/lib/teacher-access') return { isApprovedTeacher };
   if (name === '@/lib/legal-config') return require('../src/lib/legal-config.ts');
   if (name === '@/lib/problems-data') return { problemsData: [{ id: 'task-1' }] };
-  if (name === 'firebase-admin/firestore') return { FieldValue: { serverTimestamp: () => 'timestamp' } };
+  if (name === "@/lib/database") return { getDb: () => db, FieldValue: { serverTimestamp: () => 'timestamp' } };
   return original.call(this, name, ...args);
 };
 const profile = require('../src/app/api/profile/route.ts');

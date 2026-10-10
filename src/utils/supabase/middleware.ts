@@ -4,7 +4,7 @@ import { getSupabaseConfig, isSupabaseConfigured } from "./config";
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
-  // Existing Firebase pages also work on deployments without Supabase env values.
+  // Allow public pages to load before Supabase is configured.
   if (!isSupabaseConfigured()) return response;
   const { url, key } = getSupabaseConfig();
   const supabase = createServerClient(url, key, {

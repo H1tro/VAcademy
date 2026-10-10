@@ -1,6 +1,7 @@
+import { requestUser } from "@/lib/server-auth"
 import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase-server"
-import { FieldValue } from "firebase-admin/firestore"
+import { getDb } from "@/lib/database"
+import { FieldValue } from "@/lib/database"
 
 interface CFSubmission {
   contestId: number
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
     const { uid } = body
     if (!uid) return NextResponse.json({ error: "uid required" }, { status: 400 })
 
+    if (await requestUser(req) !== uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const db = getDb()
 
     const userSnap = await db.doc(`users/${uid}`).get()

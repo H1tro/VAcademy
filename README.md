@@ -3,13 +3,13 @@
 
 Этот проект представляет собой образовательную платформу для изучения STEM предметов и подготовки к олимпиадам.
 
-Описание новых разделов, настройки Firebase/AI и ограничения: [Изменения по списку](docs/improvements.md). Пример конфигурации — `.env.example`.
+Описание новых разделов, настройки Supabase/AI и ограничения: [Изменения по списку](docs/improvements.md). Пример конфигурации — `.env.example`.
 
 ## 🚀 Как запустить локально
 
-1. **Скачайте код**: Нажмите кнопку "Download" или "Export" в интерфейсе Firebase Studio, чтобы получить ZIP-архив с проектом. Распакуйте его в удобную папку.
+1. **Скачайте код**: Склонируйте репозиторий GitHub или скачайте ZIP-архив проекта.
 
-2. **Установите Node.js**: Убедитесь, что у вас установлена Node.js (версия 18 или выше).
+2. **Установите Node.js**: Убедитесь, что у вас установлена Node.js (версия 22 или выше).
 
 3. **Установка зависимостей**: Откройте терминал в папке проекта и выполните:
    ```bash
@@ -37,16 +37,11 @@
 
 ## Подключение Supabase
 
-Пакеты `@supabase/supabase-js` и `@supabase/ssr` установлены. В `.env.local` задайте `NEXT_PUBLIC_SUPABASE_URL` и `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` из настроек проекта Supabase. `.env.local` исключён из Git. На хостинге задайте эти две переменные отдельно и выполните новую сборку.
+Авторизация и база платформы переведены на Supabase. Перед запуском установите SQL-схему и серверный ключ по [пошаговой инструкции](docs/supabase-migration.md). В ней также описаны подтверждение email, настройка администратора и ограничения переноса прежних аккаунтов.
 
-- Браузер: `import { createClient } from '@/utils/supabase/client'`.
-- Сервер: `import { createClient } from '@/utils/supabase/server'`, затем `const supabase = createClient(await cookies())`, импортировав `cookies` из `next/headers`.
-- `src/middleware.ts` обновляет сессии Supabase и передаёт cookies серверу и браузеру; он сохраняет заголовки запрета кеширования при обновлении. Middleware не меняет маршруты RU/EN и не перенаправляет пользователей Firebase.
-- `/supabase` — пример серверного чтения до 100 записей из `todos` (поля `id`, `name`). Таблица и её политики доступа должны быть настроены в вашем проекте Supabase; схема автоматически не создаётся. Пустой результат также возможен, если RLS не даёт доступ текущей сессии.
+Браузерный клиент: `src/utils/supabase/client.ts`; серверный клиент с cookies: `src/utils/supabase/server.ts`; обновление сессий: `src/middleware.ts`. Защищённые API проверяют токен через Supabase `auth.getUser()`. База приложения закрыта от прямого браузерного доступа. Сервер использует секретный ключ из переменных окружения.
 
-Текущие регистрация, вход, профили и результаты продолжают использовать Firebase. Перенос пользователей и данных в Supabase — отдельная задача. Используйте только publishable key в публичных переменных; права на строки таблиц определяются RLS. Серверные защищённые функции должны проверять `auth.getClaims()` или `auth.getUser()`, а не доверять `getSession()`.
-
-Основа интеграции: [официальное руководство Supabase для SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client?queryGroups=framework&framework=nextjs). Для Next.js 15 используется `middleware.ts`; имя `proxy.ts` относится к Next.js 16. Проверка передачи cookies: `npm run check:supabase`.
+Проверка SQL, транзакций и прав доступа без обращения к облачной базе: `npm run check:database`. Основа SSR: [официальное руководство Supabase](https://supabase.com/docs/guides/auth/server-side/creating-a-client).
 
 ## Настройка Groq AI
 1. Скопируйте ключ из https://console.groq.com/keys.

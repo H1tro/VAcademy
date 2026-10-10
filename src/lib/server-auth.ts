@@ -1,10 +1,15 @@
-import { getAuth } from 'firebase-admin/auth';
-import { getDb } from './firebase-server';
+import { createClient } from '@supabase/supabase-js';
+import { getSupabaseConfig } from '@/utils/supabase/config';
 
 export async function requestUser(req: Request): Promise<string | null> {
   const token = req.headers.get('authorization')?.match(/^Bearer (.+)$/)?.[1];
   if (!token) return null;
-  try { getDb(); return (await getAuth().verifyIdToken(token, true)).uid; } catch { return null; }
+  try {
+    const { url, key } = getSupabaseConfig();
+    const client = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { data, error } = await client.auth.getUser(token);
+    return error ? null : data.user?.id ?? null;
+  } catch { return null; }
 }
 
 /** Trusted administrator IDs are configured on the server, never in a profile. */

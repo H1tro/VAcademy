@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { IconUpload, IconSpinner, IconAlertTriangle, IconCheckCircle } from "@/components/icons";
 import { useToast } from "@/hooks/use-toast";
-import { auth } from '@/lib/firebase';
+import { auth } from '@/lib/auth-client';
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 

@@ -5,8 +5,8 @@ export const dynamic = "force-dynamic"
 import { authFetch } from '@/lib/auth-fetch';
 import { useTranslations as useUITranslations } from "next-intl";
 import { useEffect, useState, type FormEvent, useRef } from "react"
-import { auth, firebaseConfigured } from "@/lib/firebase"
-import { signOut, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth"
+import { auth, authConfigured } from "@/lib/auth-client"
+import { signOut, onAuthStateChanged, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -49,7 +49,7 @@ function DeleteAccountSection({ email, uid }: { email: string; uid: string }) {
     try {
       const user = auth.currentUser;
       if (!user) throw new Error(ui("userNotFoundPleaseSignUpOrSignIn"));
-      const res = await fetch("/api/account/request-deletion", {
+      const res = await authFetch("/api/account/request-deletion", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` },
         body: JSON.stringify({ uid, email }),
@@ -126,7 +126,7 @@ export default function ProfileEditPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (!firebaseConfigured) { setLoading(false); return; }
+    if (!authConfigured) { setLoading(false); return; }
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       try {
         if (!user) {
@@ -289,7 +289,7 @@ export default function ProfileEditPage() {
       setConfirmPassword("")
     } catch (err) {
       const message = err instanceof Error ? err.message : ui("couldNotChangePassword")
-      if (message.includes("wrong-password") || message.includes("invalid-credential")) {
+      if (message.includes("Invalid login credentials")) {
         setError(ui("incorrectCurrentPassword"))
       } else {
         setError(message)

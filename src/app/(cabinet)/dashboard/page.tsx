@@ -85,7 +85,7 @@ export default function DashboardPage() {
         setRank(position === -1 ? null : position + 1)
       }
 
-      const cfRes = await fetch(`/api/codeforces/tasks?uid=${uid}`)
+      const cfRes = await authFetch(`/api/codeforces/tasks?uid=${uid}`)
       if (cfRes.ok) {
         const tasks = await cfRes.json()
         setCfTotal(tasks.length)

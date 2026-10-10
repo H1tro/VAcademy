@@ -1,6 +1,7 @@
+import { requestUser } from "@/lib/server-auth"
 import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase-server"
-import { FieldValue } from "firebase-admin/firestore"
+import { getDb } from "@/lib/database"
+import { FieldValue } from "@/lib/database"
 
 export async function GET(req: Request) {
   try {
@@ -8,6 +9,7 @@ export async function GET(req: Request) {
     const uid = searchParams.get("uid")
     if (!uid) return NextResponse.json({ error: "uid required" }, { status: 400 })
 
+    if (await requestUser(req) !== uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const db = getDb()
     const snap = await db.collection("cf_tasks").where("uid", "==", uid).get()
     const tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
@@ -26,6 +28,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "uid, contestId, index required" }, { status: 400 })
     }
 
+    if (await requestUser(req) !== uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const db = getDb()
 
     const existing = await db
@@ -65,8 +68,12 @@ export async function DELETE(req: Request) {
     const id = searchParams.get("id")
     if (!id) return NextResponse.json({ error: "id required" }, { status: 400 })
 
+    const uid = await requestUser(req)
+    if (!uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const db = getDb()
-    await db.doc(`cf_tasks/${id}`).delete()
+    const ref = db.doc(`cf_tasks/${id}`)
+    if ((await ref.get()).data()?.uid !== uid) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+    await ref.delete()
 
     return NextResponse.json({ success: true })
   } catch (error) {

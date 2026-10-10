@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase-server"
+import { getDb } from "@/lib/database"
 
 const SUBJECT_PREFIXES: Record<string, string> = {
   math: "mathematics",
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     const cfTasksSnap = await db.collection("cf_tasks").get()
     const cfByUser: Record<string, { total: number; completed: number }> = {}
     for (const doc of cfTasksSnap.docs) {
-      const d = doc.data()
+      const d = doc.data()!
       const uid = d.uid as string
       if (!cfByUser[uid]) cfByUser[uid] = { total: 0, completed: 0 }
       cfByUser[uid].total++
@@ -34,7 +34,7 @@ export async function GET(request: Request) {
 
     const leaderboard: Record<string, unknown>[] = []
     for (const doc of usersSnap.docs) {
-      const data = doc.data()
+      const data = doc.data()!
       const solvedProblems: string[] = (data.solvedProblems as string[]) || []
       const solvedSubjects: Record<string, number> = {}
 

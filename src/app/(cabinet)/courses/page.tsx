@@ -11,7 +11,7 @@ import { SUBJECTS } from "@/lib/navigation"
 import { cn } from "@/lib/utils"
 import { chemistryVideos } from "@/lib/himiya-videos"
 import { useAuth } from "@/hooks/use-auth"
-import { auth } from '@/lib/firebase'
+import { auth } from '@/lib/auth-client'
 import { ProgressBar } from "@/components/progress-bar"
 import { VideoLibrary } from '@/components/video-library'
 import { ExternalVideo } from '@/components/legal/external-video'
@@ -130,7 +130,7 @@ export default function CoursesPage() {
       .then((d) => {
         if (Array.isArray(d?.watchedVideos)) setWatched(new Set(d.watchedVideos))
       })
-    fetch(`/api/codeforces/tasks?uid=${uid}`)
+    authFetch(`/api/codeforces/tasks?uid=${uid}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((tasks) => {
         setCfTotal(tasks.length)

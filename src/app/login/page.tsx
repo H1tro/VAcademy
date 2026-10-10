@@ -3,10 +3,10 @@
 export const dynamic = "force-dynamic"
 
 import { authFetch } from '@/lib/auth-fetch';
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { auth, firebaseConfigured } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, authConfigured } from "@/lib/auth-client";
+import { signInWithEmailAndPassword } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -23,10 +23,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const t = useTranslations("auth.login");
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("confirmation") === "failed") setError(t("confirmationFailed")); }, [t]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!firebaseConfigured) { setError(t('notConfigured')); return; }
+    if (!authConfigured) { setError(t('notConfigured')); return; }
     setError("");
     setLoading(true);
 

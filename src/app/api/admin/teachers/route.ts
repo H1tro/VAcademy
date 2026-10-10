@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requestAdmin } from '@/lib/server-auth';
-import { getDb } from '@/lib/firebase-server';
-import { FieldValue } from 'firebase-admin/firestore';
+import { getDb } from '@/lib/database';
+import { FieldValue } from '@/lib/database';
 import { z } from 'zod';
 
 export async function GET(req: Request) {

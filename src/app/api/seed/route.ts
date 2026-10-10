@@ -1,7 +1,9 @@
-import { getDb } from "@/lib/firebase-server"
+import { requestAdmin } from "@/lib/server-auth"
+import { getDb } from "@/lib/database"
 import { problemsData } from "@/lib/problems-data"
 
-export async function GET() {
+export async function POST(req: Request) {
+  if (!await requestAdmin(req)) return Response.json({ error: "Forbidden" }, { status: 403 })
   const db = getDb()
 
   let seeded = 0

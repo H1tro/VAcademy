@@ -222,7 +222,8 @@
       "error": "Failed to sign in.",
       "noAccount": "New to VAcademy?",
       "register": "Sign Up",
-      "notConfigured": "Firebase setup is required for sign-in and registration. Contact the administrator."
+      "notConfigured": "Supabase setup is required for sign-in and registration. Contact the administrator.",
+      "confirmationFailed": "The confirmation link is invalid or expired. Try signing in or contact support for a new link."
     },
     "register": {
       "welcome": "Welcome",
@@ -250,7 +251,8 @@
       "aboutPlaceholder": "Briefly about your goals and plans",
       "photoUrlPlaceholder": "https://example.com/avatar.jpg",
       "goal": "Olympiad Preparation",
-      "notConfigured": "Firebase setup is required for sign-in and registration. Contact the administrator."
+      "notConfigured": "Supabase setup is required for sign-in and registration. Contact the administrator.",
+      "checkEmail": "Check your inbox and confirm your email using the link, then sign in."
     }
   },
   "cabinet": {
@@ -550,7 +552,7 @@
     "deleting": "Deleting...",
     "cancel": "Cancel",
     "accountDeleted": "Account deleted",
-    "yourAccountAndAllDataHaveBeenDeleted": "Your account and all data have been deleted.",
+    "yourAccountAndAllDataHaveBeenDeleted": "Your account and related learning records were deleted. For files, support messages and previous-version data, contact the address in the privacy policy.",
     "couldNotDeleteAccount": "Could not delete account",
     "yourGuideToOlympiadsAndIntellectualCompetitions": "Your guide to olympiads and intellectual competitions",
     "filterBySubject": "Filter by subject",

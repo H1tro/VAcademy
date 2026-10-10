@@ -5,8 +5,8 @@ export const dynamic = "force-dynamic"
 import { useTranslations as useUITranslations } from "next-intl";
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { auth, firebaseConfigured } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, updateProfile, deleteUser } from "firebase/auth";
+import { auth, authConfigured } from "@/lib/auth-client";
+import { createUserWithEmailAndPassword } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -62,7 +62,7 @@ export default function RegisterPage() {
     if (!ageReady || ageBlocked || (ageRange !== "13-17" && ageRange !== "18+")) { setError(legal("acceptanceRequired")); return; }
     if (!termsAccepted || !privacyRead) { setError(legal("acceptanceRequired")); return; }
     if (!guardianPermission) { setError(legal("guardianRequired")); return; }
-    if (!firebaseConfigured) { setError(t('notConfigured')); return; }
+    if (!authConfigured) { setError(t('notConfigured')); return; }
     setError("");
     setSuccess("");
 
@@ -79,45 +79,11 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-
-      await updateProfile(user, {
-        displayName,
-        photoURL: photoURL || undefined,
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password, {
+        displayName, photoURL, school, about, goal: ui("olympiadPreparation"),
+        legalAcknowledgement: { version: LEGAL_VERSION, termsAccepted: true, privacyRead: true, ageRange, guardianPermission },
       });
-
-      const profileResponse = await fetch("/api/profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${await user.getIdToken()}` },
-        body: JSON.stringify({
-          uid: user.uid,
-          displayName,
-          email: user.email,
-          photoURL: photoURL || "",
-          school,
-          about,
-          legalAcknowledgement: { version: LEGAL_VERSION, termsAccepted: true, privacyRead: true, ageRange, guardianPermission },
-          goal: ui("olympiadPreparation"),
-          streakDays: 0,
-          maxStreakDays: 0,
-          tasksSolved: 0,
-          solvedProblems: [],
-          studyTimeMinutes: 0,
-          subjectProgress: {
-            mathematics: 0,
-            physics: 0,
-            informatics: 0,
-            chemistry: 0,
-            biology: 0,
-          },
-        }),
-      });
-      if (!profileResponse.ok) {
-        // Do not leave a new account without its registration acknowledgement.
-        try { await deleteUser(user); } catch { /* Support can resolve a failed cleanup. */ }
-        throw new Error(roles('saveError'));
-      }
+      if (!userCredential.session) { setSuccess(t("checkEmail")); return; }
 
       setSuccess(t("success"));
       router.push(role === 'teacher' ? '/teacher' : '/dashboard');

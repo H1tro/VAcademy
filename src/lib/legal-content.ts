@@ -45,8 +45,8 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         ],
         [
           [
-            "При регистрации: email, выбранное имя, учётные данные Firebase Authentication, указанная возрастная группа и отметки о принятии условий и разрешении родителя для несовершеннолетнего. Пароль обрабатывается Firebase Authentication и не записывается в профиль VAcademy.",
-            "At registration: email, chosen name, Firebase Authentication credentials, the age range you declare, and records of terms acceptance and parental permission for a minor. Firebase Authentication processes your password; it is not stored in the VAcademy profile."
+            "При регистрации: email, выбранное имя, учётные данные Supabase Auth, указанная возрастная группа и отметки о принятии условий и разрешении родителя для несовершеннолетнего. Пароль обрабатывается Supabase Auth и не записывается в профиль VAcademy.",
+            "At registration: email, chosen name, Supabase Auth credentials, the age range you declare, and records of terms acceptance and parental permission for a minor. Supabase Auth processes your password; it is not stored in the VAcademy profile."
           ],
           [
             "В профиле: фотография или её URL, школа или организация, класс, описание, цели, ники Codeforces и LeetCode, если вы их указываете. Учебные данные: ответы, пояснения, изображения решений, решённые задачи, баллы, прогресс, просмотренные видео и созданные учителем подборки.",
@@ -112,12 +112,12 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         ],
         [
           [
-            "Google Firebase Authentication обеспечивает вход; Firestore хранит профили, результаты, обращения и задания. Vercel обеспечивает размещение сайта и хранение загруженных файлов. Groq обрабатывает вопросы к AI. Resend отправляет служебные письма, включая подтверждение удаления аккаунта. Telegram используется для бота и уведомлений поддержки.",
-            "Google Firebase Authentication provides sign-in; Firestore stores profiles, results, support requests, and assignments. Vercel hosts the site and uploaded files. Groq processes AI questions. Resend sends service emails, including account-deletion confirmation. Telegram is used for the support bot and notifications."
+            "Supabase Auth обеспечивает вход; база Supabase хранит профили, результаты, обращения и задания. Vercel обеспечивает размещение сайта и хранение загруженных файлов. Groq обрабатывает вопросы к AI. Resend отправляет служебные письма, включая подтверждение удаления аккаунта. Telegram используется для бота и уведомлений поддержки.",
+            "Supabase Auth provides sign-in; the Supabase database stores profiles, results, support requests, and assignments. Vercel hosts the site and uploaded files. Groq processes AI questions. Resend sends service emails, including account-deletion confirmation. Telegram is used for the support bot and notifications."
           ],
           [
-            "Подключение Supabase используется для функций работы с его базой данных и сессиями. Пример списка задач показывает записи, доступные текущей сессии по правилам доступа базы. Существующие аккаунты и учебные результаты продолжают храниться в Firebase; автоматического переноса в Supabase нет.",
-            "The Supabase integration supports features using its database and sessions. The task-list example displays records accessible to the current session under database access rules. Existing accounts and learning results remain in Firebase; they are not automatically migrated to Supabase."
+            "Supabase используется для регистрации, входа и хранения данных приложения. Пример списка задач показывает записи, доступные по правилам базы. Данные предыдущей версии сайта автоматически не переносятся; запросы о прежних аккаунтах направляйте оператору.",
+            "Supabase provides registration, sign-in and application data storage. The task-list example displays records permitted by database access rules. Data from the previous site version is not automatically migrated; contact the operator about previous accounts."
           ],
           [
             "При привязке Codeforces сайт обращается к его API, используя указанный вами публичный ник, чтобы проверить решения. Google Fonts получает запросы при загрузке шрифтов. Изображения по внешнему URL загружаются у их поставщика. YouTube-плеер подключается после отдельного нажатия кнопки загрузки видео.",
@@ -179,8 +179,8 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
             "Profiles and learning results are kept to operate your account until deletion is requested or the information is no longer needed. Support requests, teacher materials, and service records may need separate deletion by the operator. Automated deletion-confirmation links expire after 24 hours; link expiry does not itself clean up every server record."
           ],
           [
-            "Удаление можно запросить в разделе «Профиль → Безопасность» или по email оператора. Текущий автоматический путь удаляет профиль и записи решений; удаление Firebase Authentication зависит от настройки и успешного ответа сервиса. Записи Codeforces, задания, обращения, файлы, сообщения Telegram и резервные копии не гарантированно очищаются этим автоматическим действием и должны быть включены в полный запрос оператору.",
-            "Request deletion in Profile → Security or by emailing the operator. The current automated flow removes the profile and solution records; deletion from Firebase Authentication depends on configuration and the provider response. Codeforces records, assignments, support requests, files, Telegram messages, and backups are not guaranteed to be cleared by that automated action and should be included in a complete request to the operator."
+            "Удаление можно запросить в разделе «Профиль → Безопасность» или по email оператора. Автоматический путь удаляет аккаунт Supabase, профиль, решения, записи Codeforces, задания преподавателя и заявки на роль. Связанные с аккаунтом обращения удаляются из базы; анонимные обращения, файлы, сообщения Telegram, данные предыдущей версии и резервные копии не гарантированно очищаются этим автоматическим действием и должны быть включены в полный запрос оператору.",
+            "Request deletion in Profile → Security or by emailing the operator. The automated flow deletes the Supabase account, profile, solutions, Codeforces records, teacher assignments and role applications. Account-linked support requests are removed from the database; anonymous requests, files, Telegram messages, previous-version data and backups are not guaranteed to be cleared by that automated action and should be included in a complete request to the operator."
           ],
           [
             "Оператор должен проверять необходимость оставшихся данных и удалять их, когда цель обработки прекращена, кроме сведений, которые требуется сохранить по закону или для разрешения конкретного спора. У поставщиков могут действовать отдельные сроки удаления журналов и резервных копий. Данные браузера можно очистить самостоятельно; удаление аккаунта не очищает их автоматически.",
@@ -429,12 +429,12 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         ],
         [
           [
-            "Firebase Authentication использует браузерное хранилище, например IndexedDB или local storage, для поддержания входа. Конкретные ключи и сроки зависят от SDK и режима сессии. Выход из аккаунта прекращает текущую сессию; очистка только cookie языка не выполняет выход.",
-            "Firebase Authentication uses browser storage, such as IndexedDB or local storage, to maintain sign-in. Specific keys and lifetimes depend on the SDK and session mode. Signing out ends the current session; clearing only the language cookie does not sign you out."
+            "Supabase Auth использует cookie для поддержания входа. Конкретные ключи и сроки зависят от SDK и режима сессии. Выход из аккаунта прекращает текущую сессию; очистка только cookie языка не выполняет выход.",
+            "Supabase Auth uses cookies to maintain sign-in. Specific keys and lifetimes depend on the SDK and session mode. Signing out ends the current session; clearing only the language cookie does not sign you out."
           ],
           [
-            "Функции Supabase используют cookie сессии, обычно с префиксом sb-, если вы вошли через Supabase. Они могут содержать токены доступа и обновления и вспомогательные данные входа. Конкретные ключи и сроки зависят от SDK и настроек сессии; кнопка очистки предпочтений ниже их не удаляет. Основная форма входа VAcademy по-прежнему использует Firebase.",
-            "Supabase features use session cookies, typically prefixed with sb-, if you sign in through Supabase. They may contain access and refresh tokens and sign-in support data. Specific keys and lifetimes depend on the SDK and session settings; the preferences button below does not remove them. VAcademy's main sign-in form still uses Firebase."
+            "Функции Supabase используют cookie сессии, обычно с префиксом sb-, если вы вошли через Supabase. Они могут содержать токены доступа и обновления и вспомогательные данные входа. Конкретные ключи и сроки зависят от SDK и настроек сессии; кнопка очистки предпочтений ниже их не удаляет.",
+            "Supabase features use session cookies, typically prefixed with sb-, if you sign in through Supabase. They may contain access and refresh tokens and sign-in support data. Specific keys and lifetimes depend on the SDK and session settings; the preferences button below does not remove them."
           ]
         ]
       ],
@@ -493,8 +493,8 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
         ],
         [
           [
-            "Вы можете менять язык и меню, выйти из аккаунта, удалить данные сайта в настройках браузера или очистить предпочтения кнопкой ниже. Она удаляет настройки языка и меню и последний результат практики; данные аккаунта на сервере и сессия Firebase не удаляются.",
-            "You can change language and sidebar preferences, sign out, remove site data in your browser settings, or clear preferences using the button below. It removes language and sidebar settings and the latest practice result; it does not delete server account data or the Firebase session."
+            "Вы можете менять язык и меню, выйти из аккаунта, удалить данные сайта в настройках браузера или очистить предпочтения кнопкой ниже. Она удаляет настройки языка и меню и последний результат практики; данные аккаунта на сервере и сессия Supabase не удаляются.",
+            "You can change language and sidebar preferences, sign out, remove site data in your browser settings, or clear preferences using the button below. It removes language and sidebar settings and the latest practice result; it does not delete server account data or the Supabase session."
           ],
           [
             "Блокировка браузерного хранилища может препятствовать входу и сохранению предпочтений. Разрешение YouTube-плеера действует только для текущего открытого видео: после закрытия и повторного открытия снова требуется нажатие. Дополнительные запросы о данных направляйте оператору.",
@@ -507,7 +507,6 @@ export const legalDocuments: Record<LegalDocumentId, LegalDocument> = {
 };
 
 export const providerPolicies = [
-  {name: "Firebase / Google", url: "https://firebase.google.com/support/privacy"},
   {name: "Supabase", url: "https://supabase.com/privacy"},
   {name: "Vercel", url: "https://vercel.com/legal/privacy-notice"},
   {name: "Groq", url: "https://groq.com/privacy-policy"},

@@ -5,8 +5,8 @@ import { authFetch } from '@/lib/auth-fetch';
 import Link from 'next/link';
 import { useTranslations as useUITranslations } from "next-intl";
 import { useEffect, useState } from "react"
-import { onAuthStateChanged } from "firebase/auth"
-import { auth, firebaseConfigured } from "@/lib/firebase"
+import { onAuthStateChanged } from "@/lib/auth-client"
+import { auth, authConfigured } from "@/lib/auth-client"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,7 +40,7 @@ export default function AdminPage() {
   const [success, setSuccess] = useState("")
 
   useEffect(() => {
-    if (!firebaseConfigured) return;
+    if (!authConfigured) return;
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       setUser(u)
       if (!u) setLoading(false)

@@ -2,8 +2,8 @@
 
 import { authFetch } from '@/lib/auth-fetch';
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, type User } from "firebase/auth";
-import { auth, firebaseConfigured } from "@/lib/firebase";
+import { onAuthStateChanged, type User } from "@/lib/auth-client";
+import { auth, authConfigured } from "@/lib/auth-client";
 
 interface UseAuthResult {
   user: User | null;
@@ -12,14 +12,14 @@ interface UseAuthResult {
   role: 'student' | 'teacher' | null;
 }
 
-/** Subscribes to Firebase auth; safe for client components. */
+/** Subscribes to Supabase auth; safe for client components. */
 export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<'student' | 'teacher' | null>(null);
 
   useEffect(() => {
-    if (!firebaseConfigured) { setLoading(false); return; }
+    if (!authConfigured) { setLoading(false); return; }
     let version = 0;
     const unsubscribe = onAuthStateChanged(auth, (u) => {
       const current = ++version;

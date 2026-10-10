@@ -1,6 +1,7 @@
+import { requestUser } from "@/lib/server-auth"
 import { NextResponse } from "next/server"
-import { getDb } from "@/lib/firebase-server"
-import { FieldValue } from "firebase-admin/firestore"
+import { getDb } from "@/lib/database"
+import { FieldValue } from "@/lib/database"
 import { Resend } from "resend"
 import crypto from "crypto"
 
@@ -17,6 +18,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "uid and email required" }, { status: 400 })
     }
 
+    if (await requestUser(req) !== uid) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    const { createAdminClient } = await import("@/utils/supabase/admin")
+    const { data: { user: account }, error: accountError } = await createAdminClient().auth.admin.getUserById(uid)
+    if (accountError || account?.email !== email) return NextResponse.json({ error: "Email does not match account" }, { status: 403 })
     const db = getDb()
     const userSnap = await db.doc(`users/${uid}`).get()
     if (!userSnap.exists) {
@@ -42,8 +47,8 @@ export async function POST(req: Request) {
     const confirmUrl = `${baseUrl}/delete-account?token=${token}&uid=${uid}`
 
     const resend = new Resend(apiKey)
-    await resend.emails.send({
-      from: "VAcademy <onboarding@resend.dev>",
+    const { error: sendError } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || "VAcademy <onboarding@resend.dev>",
       to: email,
       subject: "Подтверждение удаления аккаунта VAcademy",
       html: `
@@ -64,6 +69,7 @@ export async function POST(req: Request) {
       `,
     })
 
+    if (sendError) { await db.doc(`deletion_tokens/${token}`).delete(); throw new Error("Deletion email could not be sent") }
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Request deletion error:", error)

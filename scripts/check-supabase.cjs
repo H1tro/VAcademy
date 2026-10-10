@@ -38,6 +38,6 @@ const { updateSession } = require('../src/utils/supabase/middleware.ts');
   assert.equal(response.headers.get('Pragma'), 'no-cache');
   assert.match(response.headers.get('x-middleware-request-cookie'), /sb-session=refreshed/);
   assert.equal(request.cookies.get('next-intl-locale').value, 'en');
-  assert.equal(response.headers.get('location'), null, 'Firebase users must not be redirected');
+  assert.equal(response.headers.get('location'), null, 'Session refresh must not redirect public pages');
   console.log('Supabase checks passed: Auth refresh, request/response cookies, repeated writes, cache headers, locale and missing-env fallback.');
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => { Module._load = original; });

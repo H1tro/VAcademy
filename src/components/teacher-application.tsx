@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, type FormEvent } from 'react';
-import type { User } from 'firebase/auth';
+import type { User } from '@/lib/auth-client';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

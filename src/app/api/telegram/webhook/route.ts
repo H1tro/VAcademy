@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import { waitUntil } from "@vercel/functions"
 import { LRUCache } from "lru-cache"
-import { getDb } from "@/lib/firebase-server"
-import { FieldValue } from "firebase-admin/firestore"
+import { getDb } from "@/lib/database"
+import { FieldValue } from "@/lib/database"
 import {
   BOT_STEPS,
   BOT_SUBJECTS,

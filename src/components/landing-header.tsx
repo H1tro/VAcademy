@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { auth, firebaseConfigured } from "@/lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { auth, authConfigured } from "@/lib/auth-client";
+import { onAuthStateChanged, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -27,7 +27,7 @@ export function LandingHeader() {
   const t = useTranslations("landing.header");
 
   useEffect(() => {
-    if (!firebaseConfigured) { setLoading(false); return; }
+    if (!authConfigured) { setLoading(false); return; }
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);

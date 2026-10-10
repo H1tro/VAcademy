@@ -3,8 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { signOut } from "@/lib/auth-client";
+import { auth } from "@/lib/auth-client";
 
 import { cn } from "@/lib/utils";
 import { VLogo } from "@/components/v-logo";

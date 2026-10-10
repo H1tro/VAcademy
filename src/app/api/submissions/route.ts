@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/firebase-server';
-import { FieldValue } from 'firebase-admin/firestore';
+import { getDb } from '@/lib/database';
+import { FieldValue } from '@/lib/database';
 import { problemsData, DIFFICULTY_POINTS } from '@/lib/problems-data';
 import { checkAnswer } from '@/lib/practice-problems';
 import { requestUser } from '@/lib/server-auth';

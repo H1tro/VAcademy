@@ -32,7 +32,7 @@ export default function CodeforcesPage() {
     if (!uid) return
     setLoading(true)
     try {
-      const res = await fetch(`/api/codeforces/tasks?uid=${uid}`)
+      const res = await authFetch(`/api/codeforces/tasks?uid=${uid}`)
       if (res.ok) {
         const data = await res.json()
         setTasks(data)
@@ -57,7 +57,7 @@ export default function CodeforcesPage() {
     setChecking(true)
     setError("")
     try {
-      const res = await fetch("/api/codeforces/check", {
+      const res = await authFetch("/api/codeforces/check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid }),
@@ -87,7 +87,7 @@ export default function CodeforcesPage() {
     setAdding(true)
     setError("")
     try {
-      const probe = await fetch(`/api/codeforces/problem?id=${encodeURIComponent(inputId.trim())}`)
+      const probe = await authFetch(`/api/codeforces/problem?id=${encodeURIComponent(inputId.trim())}`)
       if (!probe.ok) {
         const d = await probe.json()
         setError(d.error || ui("problemNotFound"))
@@ -95,7 +95,7 @@ export default function CodeforcesPage() {
       }
       const info = await probe.json()
 
-      const res = await fetch("/api/codeforces/tasks", {
+      const res = await authFetch("/api/codeforces/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ uid, ...info }),
@@ -115,7 +115,7 @@ export default function CodeforcesPage() {
   }
 
   const handleDelete = async (id: string) => {
-    await fetch(`/api/codeforces/tasks?id=${id}`, { method: "DELETE" })
+    await authFetch(`/api/codeforces/tasks?id=${id}`, { method: "DELETE" })
     setTasks((prev) => prev.filter((t) => t.id !== id))
   }
 

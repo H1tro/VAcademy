@@ -12,7 +12,11 @@
     "check:legal": "node scripts/check-legal.cjs",
     "check:supabase": "node scripts/check-supabase.cjs",
     "tg:webhook": "node scripts/set-telegram-webhook.js",
-    "tg:polling": "node scripts/bot-polling.js"
+    "tg:polling": "node scripts/bot-polling.js",
+    "check:database": "node scripts/check-database.cjs",
+    "check:access": "node scripts/check-teacher-access.cjs",
+    "check:submissions": "node scripts/check-submissions.cjs",
+    "check:auth": "node scripts/check-auth.cjs"
   },
   "dependencies": {
     "@dietrichgebert/ponytail": "^4.8.4",
@@ -47,8 +51,6 @@
     "date-fns": "^3.6.0",
     "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.1",
-    "firebase-admin": "^14.2.0",
     "lru-cache": "^11.5.2",
     "lucide-react": "^0.475.0",
     "next": "^15.5.19",
@@ -67,6 +69,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^20",
     "@types/react": "^19.2.1",
     "@types/react-dom": "^19.2.1",
